@@ -1,4 +1,4 @@
-const getDB=require('./db.js'), pify=require('pify');
+const getDB=require('./db.js'), pify=require('pify'), getMerchant=require('./merchants.js').getMerchant;
 
 exports.createOrder =function createOrder(merchantid, merchantOrderId, money, preferredPay, cb_url, callback) {
     if (typeof preferredPay=='function') {
