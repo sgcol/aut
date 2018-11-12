@@ -1,0 +1,40 @@
+{
+  "name": "auto-trade",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "async": "^2.6.1",
+    "body-parser": "^1.18.3",
+    "clone": "^2.1.2",
+    "colors": "^1.3.2",
+    "compression": "^1.7.3",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.16.3",
+    "filter-object": "^3.0.0",
+    "gy-easy-mongo": "^0.3.9",
+    "gy-merge": "^1.2.0",
+    "gy-module-loader": "^1.0.2",
+    "httpf": "0.0.8",
+    "jimp": "^0.5.6",
+    "md5": "^2.2.1",
+    "pify": "^4.0.1",
+    "pm2": "^3.2.2",
+    "qrcode-reader": "^1.0.4",
+    "random-string": "^0.2.0",
+    "request": "^2.88.0",
+    "sort-object": "^3.0.2",
+    "stream-to-array": "^2.3.0",
+    "yargs": "^12.0.2"
+  },
+  "devDependencies": {
+    "debugout": "^1.0.0",
+    "gulp": "^3.9.1",
+    "gulp-ejs": "^3.2.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

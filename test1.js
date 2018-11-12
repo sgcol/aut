@@ -1,0 +1,1 @@
+console.log(process.env.NODE_APP_INSTANCE);
