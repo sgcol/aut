@@ -20,6 +20,7 @@ exports.verifySign=	function verifySign(req, res, next) {
 	delete _p.sign;
 	if (!_p.merchantid) return res.send({err:'没有商户号'});
 	getMerchant(_p.merchantid, function(err, mer) {
+		if (err) return res.send({err:err});
 		var wanted=md5(mer.key+qs.stringify(sortObj(_p)));
 		if (sign!=wanted) {
 			var e={err:'签名错误'};
