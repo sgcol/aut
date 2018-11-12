@@ -11,7 +11,7 @@ exports.providers=external_provider;
 
 const filter = require('filter-object');
 function order(orderid, money,mer, callback) {
-    if (!mer.providers) return callback('商户没有配置渠道');
+    if (!mer.providers) return callback('联系对接小伙伴，他忘记给商户配置渠道了');
     async.map(filter(external_provider, Object.keys(mer.providers)), function(prd, cb) {
         prd.bestPair(money, function(err, gap, coinType){
             if (err) return cb(null, {gap:Number.MAX_VALUE, coinType:''});

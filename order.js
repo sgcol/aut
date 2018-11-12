@@ -11,7 +11,7 @@ exports.createOrder =function createOrder(merchantid, merchantOrderId, money, pr
 }
 exports.confirmOrder =function confirmOrder(orderid, money, callback) {
     getDB((err, db)=>{
-        db.bills.findOneAndUpdate({_id:ordrid}, {$set:{status:'providerCompleted', paidmoney:money, lasttime:new Date()}}, function(err, r) {
+        db.bills.findOneAndUpdate({_id:orderid}, {$set:{status:'providerCompleted', paidmoney:money, lasttime:new Date()}}, function(err, r) {
             if (err) return callback(err);
             notifyMerchant(r.value);
         });    
