@@ -1,9 +1,11 @@
 var external_provider ={};
-const path=require('path'), async=require('async')
+const updateOrder=require('./order.js').updateOrder, path=require('path'), async=require('async');
 var tt = require('gy-module-loader')(path.join(__dirname, 'provider/*.pd.js'), function () {
     var keys = Object.keys(tt);
     for (var i = 0; i < keys.length; i++) {
-        external_provider[path.basename(keys[i], '.pd.js')] = tt[keys[i]];
+        var prd=tt[keys[i]];
+        external_provider[path.basename(keys[i], '.pd.js')] = prd;
+        if (prd.name) external_provider[prd.name]=prd;
     }
 });
 
@@ -23,8 +25,15 @@ function order(orderid, money,mer, callback) {
             if (r[i].coinType) break;
         }
         if (!r[i].coinType) return callback('没有可用的交易提供方');
+        updateOrder(orderid, {provider:r[i].prd.name, providerOrderId:orderid});
         r[i].prd.order(orderid, money, mer, r[i].coinType, callback);
     });
 }
 
 exports.order=order;
+
+function sellOrder(orderid, money, providername, callback) {
+    var prd=external_provider[providername];
+    if (!prd) return callback('no such provider');
+    prd.sell(orderid, money, callback);
+}

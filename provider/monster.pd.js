@@ -15,11 +15,12 @@ const url = require('url')
 , md5 = require('md5')
 , getDB=require('../db.js')
 , confirmOrder =require('../order.js').confirmOrder
+, updateOrder =require('../order.js').updateOrder
 , pify =require('pify')
 , argv=require('yargs').argv;
 
 const _baseURL=url.parse('http://testapi.monstermarket.cn');
-const ownerId='MHT2018110532254740945085284791', appId='mst236153cd622f3fbb', key='049af9e9d7aa11968ed945d73c4b171f';
+const ownerId='MHT2018110532254740945085284791', password='123456', appId='mst236153cd622f3fbb', key='049af9e9d7aa11968ed945d73c4b171f';
 const imgbase='http://teststatic.monstermarket.cn';
 
 const monsterrKey='Qztbet4J8uznaBeP';
@@ -131,6 +132,22 @@ function bestBuy(money, coinType, callback) {
 		return callback('暂时没有通道');	
 	})
 }
+function bestSell(money ,coinType, callback) {
+	getAllProducts((err)=>{
+		var coin=byCoins[coinType];
+		if (!coin) return callback('no such coin');
+		if (coin.B.length==0) return callback('no data yet');
+		for (var i=0; i<coin.B.length; i++) {
+			var p=coin.B[i];
+			if (occupied.has(p)) continue;
+			var coinNum=money/p.unitPrice;
+			if (p.minOrderQuantity>coinNum || p.leftQuantity<coinNum || p.maxOrderQuantity<coinNum || p.payMethodList.indexOf('2')<0) continue;
+			occupied.add(p);
+			return callback(null, p);
+		}
+		return callback('暂时没有通道');	
+	})
+}
 function queryProducts(isBuy, callback) {
 	var desturl=clone(_baseURL);
 	desturl.pathname='/market/coin/v1/c2c/products';
@@ -161,13 +178,13 @@ function putorder(orderid, product, money, ownerId, callback) {
 	var desturl=clone(_baseURL);
 	desturl.pathname='/market/coin/v1/c2c/submit/order';
 	console.log('order with', makeObj({
-		ownerId:ownerId, payMethod:'2', buyQuantity:money/product.unitPrice, productId:product.productId, password:'****'
+		ownerId:ownerId, payMethod:'2', buyQuantity:money/product.unitPrice, productId:product.productId, password:password
 		, returnBackUrl:url.format({protocol:'http', host:argv.host, pathname:'/pvd/monster/afterbuy'})
-	}))
+	}));
 	request.post({uri:url.format(desturl), json:makeObj({
 		ownerId:ownerId,
 		returnBackUrl:url.format({protocol:'http', host:argv.host, pathname:'/pvd/monster/afterbuy'}),
-		payMethod:'2', buyQuantity:money/product.unitPrice, productId:product.productId, password:'****'
+		payMethod:'2', buyQuantity:money/product.unitPrice, productId:product.productId, password:password
 	})}, function(err, header, body) {
 		console.log('order ret', body);
 		if (err) return callback(err)
@@ -177,6 +194,7 @@ function putorder(orderid, product, money, ownerId, callback) {
 		makeProductsSorted();
 		occupied.add(product);
 		pify(getDB)().then((db)=>{
+			updateOrder(orderid, {status:'待支付', lasttime:new Date(), providerOrderId:ret.orderId});
 			return db.monster.insert({orderid:orderid, exOrderId:ret.orderId, product:product, money:money, time:new Date()});
 		}).then(()=>{
 			callback(null, body);
@@ -197,6 +215,29 @@ function afterPutOrder(monsterOrderId, ownerId, callback) {
 	})
 }
 
+function confirmSell(monsterOrderId, ownerId, callback) {
+	var desturl=clone(_baseURL);
+	desturl.pathname='/market/coin/v1/c2c/confirm/order';
+	console.log(desturl.pathname, makeObj({ownerId:ownerId, orderId:monsterOrderId}));
+	request.post({uri:url.format(desturl), json:makeObj({ownerId:ownerId, orderId:monsterOrderId})}, function(err, header, body) {
+		console.log('confirm/order ret', body);
+		if (err) return callback(err);
+		if (body.error) return callback(body.message);
+		return callback(null, body);
+	})	
+}
+
+function sell(orderid, money, callback) {
+	bestSell(money, 'USDT', (err, p)=> {
+		if (err) return callback(err);
+		if (p) {
+			putorder(orderid, p, money, ownerId, (err, order)=>{
+				if (err) return callback(err);
+				// confirmSell(order.orderId, ownerId, (err, header, body)=>{console.log(body)})
+			})
+		}
+	})
+}
 exports.order=function order(orderid, money, merchantdata, coinType, callback) {
 	var product, exOrder;
 	pify(bestBuy)(money, coinType).then((bestBuy)=> {
@@ -217,20 +258,34 @@ exports.order=function order(orderid, money, merchantdata, coinType, callback) {
 		callback(e);
 	})
 }
+exports.sell=sell;
 exports.bestPair=bestPair;
 exports.router=router;
+exports.name='小怪兽';
 
 if (module==require.main) {
 	// test mode
 	console.log('start', new Date().getTime());
-	bestBuy(8000, 'USDT', function(err, bestBuy) {
-		if (err) return err;
-		if (bestBuy) {
-			console.log('choose product', bestBuy.productId);
-			putorder('111', bestBuy, 8000, ownerId, function(err, order) {
-				if (err) return console.log(err);
-				afterPutOrder(order.orderId, ownerId, console.log);
-			});   
-		}
-	});
+	// bestBuy(8000, 'USDT', function(err, bestBuy) {
+	// 	if (err) return err;
+	// 	if (bestBuy) {
+	// 		console.log('choose product', bestBuy.productId);
+	// 		putorder('111', bestBuy, 8000, ownerId, function(err, order) {
+	// 			if (err) return console.log(err);
+	// 			afterPutOrder(order.orderId, ownerId, console.log);
+	// 		});   
+	// 	}
+	// });
+	// bestSell(10000, 'USDT', (err, p)=> {
+	// 	if (err) return console.log(err);
+	// 	if (p) {
+	// 		console.log('choose product', p.productId);
+	// 		putorder('222', p, 10000, ownerId, (err, order)=>{
+	// 			if (err) return console.log(err);
+	// 			confirmSell(order.orderId, ownerId, (err, header, body)=>{console.log(body)})
+	// 		})
+	// 	}
+	// })
+
+	confirmSell('C2CORD20181112153640618671368700', ownerId, (err, header, body)=>{console.log(body)})
 }

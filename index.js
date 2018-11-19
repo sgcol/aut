@@ -9,6 +9,7 @@ const server = require('http').createServer()
 , cookieParser = require('cookie-parser')
 , qs = require('querystring')
 , sortObj=require('sort-object')
+, filter = require('filter-object')
 , merge = require('gy-merge')
 , fs = require('fs')
 // , subdirs = require('subdirs')
@@ -20,8 +21,12 @@ const server = require('http').createServer()
 , ObjectID = require('mongodb').ObjectID
 , httpf = require('httpf')
 , pify =require('pify')
-, createOrder =require('./order.js').createOrder
 , paysys=require('./providerManager.js')
+, _orderFunc=require('./order.js')
+, createOrder =_orderFunc.createOrder
+, confirmOrder =_orderFunc.confirmOrder
+, notifyMerchant =_orderFunc.notifyMerchant
+, getOrderDetail =_orderFunc.getOrderDetail
 , util=require('util')
 , argv = require('yargs')
 	.default('port', 80)
@@ -89,6 +94,7 @@ function main(err, broadcastNeighbors, dbp) {
 	app.use(cookieParser());
 	app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 	app.use(express.static(path.join(__dirname, 'pub'), { index: 'index.html' }));
+	app.set('views', path.join(__dirname, 'pub/views'));
 	app.set('view engine', 'ejs');
 
 	var external_provider = require('./providerManager.js').providers;
@@ -178,15 +184,80 @@ function main(err, broadcastNeighbors, dbp) {
 			});
 		});
 	}));
-	app.all('/account/me', verifyAuth, httpf({}, function() {
-		return this.req.auth;
+	app.all('/admin/confirmOrder', verifyAuth, verifyManager, httpf({orderid:'string', callback:true}, function(orderid, callback) {
+		confirmOrder(orderid, callback);
 	}));
-	app.all('/order', verifySign, httpf({orderid:'string', money:'number', merchantid:'string', cb_url:'string', time:'string', callback:true}, function(orderid, money, merchantid, cb_url, time, callback) {
-		createOrder(merchantid, orderid, money, 'alipay', cb_url, function(err, order) {
+	app.all('/admin/listOrders', verifyAuth, httpf({from:'?date', to:'?date', count:'?number', pageno:'?number', callback:true}, function(from, to, count, pageno, callback) {
+		var times=[];
+		if (from) times.push({$gte:from});
+		if (to) times.push({$lte:to});
+		var query={};
+		if (times.length) query.time={$and:times};
+		if (this.req.auth.acl!='admin' && this.req.auth.acl!='manager') {
+			query.merchantid=this.req.auth.merchantid;
+		}
+		var cursor=db.bills.find(query).sort({time:-1});
+		if (count) cursor=cursor.limit(count);
+		if (pageno) {
+			cursor.skip(pageno*count);
+		}
+		cursor.toArray()
+		.then((r)=>{
+			var merids=new Set();
+			for (var i=0; i<r.length; i++) {
+				var o=r[i];
+				merids.add(o.merchantid);
+			}
+			var idarr=[];
+			merids.forEach((v)=>{idarr.push(v)});
+			db.users.find({merchantid:{$in:idarr}}).toArray().then((idmap)=>{
+				var map={};
+				for (var i=0; i<idmap.length; i++) {
+					map[idmap[i].merchantid]=idmap[i].name;
+				}
+				for (var i=0; i<r.length; i++) {
+					var o=r[i];
+					o.mername=map[o.merchantid];
+				}
+				cursor.count(false, (err, c)=>{
+					if (err) return callback(err);
+					r.total=c;
+					callback(null, r);
+				});
+			})
+			.catch((e)=>{
+				callback(e);
+			});
+		})
+		.catch((e)=>{
+			callback(e);
+		})
+	}));
+	app.all('/admin/notifyMerchant', verifyAuth, httpf({orderid:'string', callback:true}, function(orderid, callback) {
+		db.bills.find({_id:ObjectID(orderid)}).toArray(function(err, r) {
+			if (err) return callback(err);
+			if (r.length==0) return callback('没有这个订单');
+			if (r[0].status!='通知失败') return callback('通知失败之后才可以重发');
+			notifyMerchant(r[0]);
+			callback();
+		});
+	}));
+	app.all('/account/me', verifyAuth, httpf({}, function() {
+		return filter(this.req.auth, ['acl', 'name', 'merchantid', 'debugMode']);
+	}));
+	app.all('/order', verifySign, httpf({orderid:'string', money:'number', merchantid:'string', cb_url:'string', time:'string', no_return:true}, function(orderid, money, merchantid, cb_url, time) {
+		var res=this.res;
+		createOrder(merchantid, orderid, money, 'alipay', cb_url, function(err, sysOrderId) {
+			if (err) return res.render('error.ejs', {err:err});
+			return res.render('order.ejs', {orderid:sysOrderId, money:money, merchantid:merchantid});
+		});
+	}));
+	app.all('/doOrder', httpf({orderid:'string', callback:true}, function(sysOrderId, callback) {
+		getOrderDetail(sysOrderId, function(err, merchantid, money, cb_url) {
 			if (err) return callback(err);
 			// find a provider & create a provider order
 			pify(getMerchant)(merchantid).then(function(mer) {
-				return pify(paysys.order)(orderid, money, mer);
+				return pify(paysys.order)(sysOrderId, money, mer);
 			}).then((payurl)=>{
 				return s2a(request({uri:payurl}));
 			})
@@ -242,7 +313,7 @@ function main(err, broadcastNeighbors, dbp) {
 			});
 		});		
 	})
-	app.all('/admin/listAccount', verifyAuth, verifyAdmin, httpf({identity:'any', callback:true}, function(identity, callback) {
+	app.all('/admin/listAccount', verifyAuth, verifyManager, httpf({identity:'any', callback:true}, function(identity, callback) {
 		if (Array.isArray(identity)) identity={$in:identity};
 		db.users.find({acl:identity}).toArray(callback);
 	}));
@@ -259,7 +330,8 @@ function main(err, broadcastNeighbors, dbp) {
 			o.acl=o.acl||o.identity;
 			o.name=o.name||o._id;
 			res.cookie('a',rstr, { maxAge: 900000});
-			callback(null, {to:'/dashboard.html', token:rstr});
+			if (o.acl=='admin'||o.acl=='manager') return callback(null, {to:'/dashboard.html', token:rstr});
+			else return callback(null, {to:'/merentry.html', token:rstr});
 		})
 	}));
 	app.all('/admin/addAccount', verifyAuth, verifyAdmin, httpf({name:'string', account:'string', password:'string', identity:'string', callback:true}, function(name, account, password, identity, callback) {
@@ -271,6 +343,7 @@ function main(err, broadcastNeighbors, dbp) {
 				o.key=randomstring({length:24});
 				o.merchantid=randomstring(16)+account;
 				o.debugMode=true;
+				o.share=0.985;
 			}
 			db.users.insert(o, {w:1}, function(err) {
 				callback(err);
@@ -310,20 +383,82 @@ function main(err, broadcastNeighbors, dbp) {
 			})
 		});		
 	}))
-	app.all('/admin/createMerchant', verifyAuth, verifyAdmin, httpf({merchantid:'string', key:'string', debugMode:'boolean', callback:true}, function(merchantid, key, debugMode, callback) {
-		var mer=merchants[merchantid];
-		if (mer) return callback('id重复');
-		broadcastNeighbors({type:'admin:updateMerchant', data:{key:key, debugMode:debugMode, merchantid:merchantid}});
-		getMerchant(merchantid, function(err, mer) {
-			if (err) return callback(err);
-			if (key!==null) mer.key=key;
-			if (debugMode!==null) mer.debugMode=debugMode;
-			db.merchants.update({_id:merchantid}, {$set:{key:mer.key, debugMode:mer.debugMode}}, {upsert:true}, function(err) {
-				callback(err);
-			});
-		});		
-	}))
+	// app.all('/admin/createMerchant', verifyAuth, verifyManager, httpf({merchantid:'string', key:'string', debugMode:'boolean', callback:true}, function(merchantid, key, debugMode, callback) {
+	// 	var mer=merchants[merchantid];
+	// 	if (mer) return callback('id重复');
+	// 	broadcastNeighbors({type:'admin:updateMerchant', data:{key:key, debugMode:debugMode, merchantid:merchantid}});
+	// 	getMerchant(merchantid, function(err, mer) {
+	// 		if (err) return callback(err);
+	// 		if (key!==null) mer.key=key;
+	// 		if (debugMode!==null) mer.debugMode=debugMode;
+	// 		db.merchants.update({_id:merchantid}, {$set:{key:mer.key, debugMode:mer.debugMode}}, {upsert:true}, function(err) {
+	// 			callback(err);
+	// 		});
+	// 	});		
+	// }))
+	app.all('/admin/statistics', verifyAuth, verifyManager, httpf({callback:true}, function(callback) {
+		async.parallel({
+			merchants:function statMerchants(cb) {
+				db.users.count({acl:'merchant'}, cb)
+			},
+			bills:function statBills(cb) {
+				var t=new Date();
+				t.setDate(t.getDate()-t.getDay());
+				t.setHours(0, 0, 0, 0);
+				db.bills.count({time:{$gte:t}}, cb)
+			},
+			moneys:function statMoney(cb) {
+				var t=new Date();
+				t.setDate(t.getDate()-t.getDay());
+				t.setHours(0, 0, 0, 0);
+				db.bills.aggregate([{$match:{time:{$gte:t}, paidmoney:{$gt:-1}}}, {$group:{_id:null, sum:{$sum:'$money'}}}], function(err, r) {
+					if (err) return cb(null, 0);
+					cb(null, r[0]?r[0].sum:0);
+				})
+			}
+		}, callback);
+	}));
+	app.all('/merchant/balance', verifyAuth, httpf({merchantid:'?string', callback:true}, function(merchantid, callback) {
+		if (this.req.auth.acl=='admin' || this.req.auth.acl=='manager') {
+			//check merchantid
+			if (!merchantid) return callback('no merchantid specified');
+		}
+		if (this.req.auth.acl=='merchant') merchantid=this.req.auth.merchantid;
+		// if agent, more condition
+		async.parallel({
+			total:(cb) =>{
+				db.bills.aggregate([{$match:{paidmoney:{$gt:-1}, merchantid:merchantid}}, {$group:{_id:null, sum:{$sum:{$multiply:['$paidmoney', '$share']}}}}], function(err, r) {
+					if (err) return cb(err);
+					if (r.length==0) return cb(null, 0);
+					cb(null, r[0].sum);
+				})
+			},
+			arrivaled:(cb)=>{
+				cb(null, 0);
+			}
+		}, callback);
+	}));
+	app.all('/admin/providers', verifyAuth, httpf(function() {
+		var pnames=new Set();
+		for (var i in external_provider) {
+			var p=external_provider[i];
+			if (p.name) pnames.add(p.name);
+		}
+		var ret=[];
+		pnames.forEach((n)=>{ret.push(n)});
+		return ret;
+	}));
 
+	/////////////////some server rendered pages
+	app.all('/fromuserlist.html', verifyAuth, (req, res) =>{
+		res.render('fromuserlist', {acl:req.auth.acl});
+	})
+	/////////////////must be last one
+	app.use(function(req, res, next){
+		res.status(404);
+		res.render('404', {});
+	});
+	  
 	app.listen(argv.port, function() {
 		console.log(('server is running @ '+argv.port).green);
 	})

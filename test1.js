@@ -1,1 +1,2 @@
-console.log(process.env.NODE_APP_INSTANCE);
+var o=require('./order.js');
+console.log(o);

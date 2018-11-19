@@ -21,6 +21,30 @@
 </style>
 </head>
 <body>
+  <!-- dialog  -->
+  <div class="modal fade" id="editMerchant" tabindex="-1" role="dialog" aria-labelledby="editMerchant" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
+        <div class="modal-header">
+          <h5 class="card-title" id="exampleModalLabel">设置</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form>
+          <div class="card-body">
+            <div class="form-group">
+              <label for="setpass">重设密码</label>
+              <input type="text" class="form-control" id="setpass" placeholder="新密码">
+            </div>
+            <button type="button" class="btn btn-gradient-primary mr-2">Submit</button>
+            <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+    
   <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
     <%- include partials/_navbar.html %>
@@ -50,7 +74,7 @@
                       <p class="card-description">
                         <a class="text-muted" href="javascript:showAddacc();">点击此处添加</a>
                       </p>
-                      <div class="col-12 grid-margin" style="display:none" id="addUser">
+                      <div class="col-12 grid-margin fade" id="addUser" aria-hidden="true" style="display: none">
                           <div class="card">
                             <div class="card-body">
                               <form class="form-inline" id="addacc" action="#">
@@ -139,6 +163,8 @@
       if (item.type!='hidden') item.value='';
       $(item).removeClass('wrong');
     }
+    if ($('#addUser').hasClass('show')) $('#addUser').removeClass('show');
+    else $('#addUser').addClass('show');
     $('#addUser').toggle();
   }
 </script>

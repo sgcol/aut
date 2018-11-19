@@ -21,6 +21,41 @@
 </style>
 </head>
 <body>
+  <!-- dialog  -->
+  <div class="modal fade" id="editMerchant" tabindex="-1" role="dialog" aria-labelledby="editMerchant" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
+        <div class="modal-header">
+          <h5 class="card-title" id="exampleModalLabel">设置</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form>
+          <div class="card-body">
+            <div class="form-group">
+              <label for="setpass">重设密码</label>
+              <input type="text" class="form-control" id="setpass" placeholder="新密码">
+            </div>  
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-prepend"><span for="fee" class="input-group-text">手续费</span></div>
+                <input type="text" class="form-control" id="fee" placeholder="1.5%">
+              </div>
+            </div>
+            <div class="form-group">
+              <p class="card-description">请勾选提供商(otc平台)</p>
+              <div class="form-group" id="providers">
+              </div>
+              <button type="button" class="btn btn-gradient-primary mr-2">Submit</button>
+              <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+    
   <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
     <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
@@ -208,15 +243,22 @@
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> <a class="nav-link" href="admin.html">管理员账号</a></li>
           <li class="nav-item"> <a class="nav-link" href="merchant.html">商户</a></li>
-          <li class="nav-item"> <a class="nav-link" href="pages/ui-features/typography.html">代理</a></li>
+          <li class="nav-item"> <a class="nav-link" href="agent.html">代理</a></li>
         </ul>
       </div>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="pages/icons/mdi.html">
+      <a class="nav-link" data-toggle="collapse" href="#ui-details" aria-expanded="false" aria-controls="ui-details">
         <span class="menu-title">明细</span>
+        <i class="menu-arrow"></i>
         <i class="mdi mdi-chart-bar menu-icon"></i>
       </a>
+      <div class="collapse" id="ui-details">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="fromuserlist.html">充值订单</a></li>
+          <li class="nav-item"> <a class="nav-link" href="tomerchantlist.html">清帐订单</a></li>
+        </ul>
+      </div>
     </li>
     <li class="nav-item">
       <a class="nav-link" href="pages/forms/basic_elements.html">
@@ -386,5 +428,23 @@
       accIntf('/admin/updateMerchant', {merchantid:obj.attr('merchantid'), debugMode:obj.is(':checked')});
     });
   }
+  var providers=$('#providers');
+  $('#editMerchant').on('shown.bs.modal', function (e) {
+    accIntf('/admin/providers', (err, ret) =>{
+      if (err) return showerr(err);
+      providers.empty();
+      var allp=ret.message;
+      for (var i=0; i<allp.length; i++) {
+        providers.append(`
+        <div class="form-check form-check">
+          <label class="form-check-label">
+            <input type="checkbox" class="form-check-input" checked="">
+            ${allp[i]}
+          <i class="input-helper"></i></label>
+        </div>
+        `)
+      }
+    })
+  });
 </script>
 </html>

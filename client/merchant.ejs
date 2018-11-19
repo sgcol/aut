@@ -21,6 +21,41 @@
 </style>
 </head>
 <body>
+  <!-- dialog  -->
+  <div class="modal fade" id="editMerchant" tabindex="-1" role="dialog" aria-labelledby="editMerchant" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
+        <div class="modal-header">
+          <h5 class="card-title" id="exampleModalLabel">设置</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form>
+          <div class="card-body">
+            <div class="form-group">
+              <label for="setpass">重设密码</label>
+              <input type="text" class="form-control" id="setpass" placeholder="新密码">
+            </div>  
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-prepend"><span for="fee" class="input-group-text">手续费</span></div>
+                <input type="text" class="form-control" id="fee" placeholder="1.5%">
+              </div>
+            </div>
+            <div class="form-group">
+              <p class="card-description">请勾选提供商(otc平台)</p>
+              <div class="form-group" id="providers">
+              </div>
+              <button type="button" class="btn btn-gradient-primary mr-2">Submit</button>
+              <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+    
   <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
     <%- include partials/_navbar.html %>
@@ -153,5 +188,23 @@
       accIntf('/admin/updateMerchant', {merchantid:obj.attr('merchantid'), debugMode:obj.is(':checked')});
     });
   }
+  var providers=$('#providers');
+  $('#editMerchant').on('shown.bs.modal', function (e) {
+    accIntf('/admin/providers', (err, ret) =>{
+      if (err) return showerr(err);
+      providers.empty();
+      var allp=ret.message;
+      for (var i=0; i<allp.length; i++) {
+        providers.append(`
+        <div class="form-check form-check">
+          <label class="form-check-label">
+            <input type="checkbox" class="form-check-input" checked="">
+            ${allp[i]}
+          <i class="input-helper"></i></label>
+        </div>
+        `)
+      }
+    })
+  });
 </script>
 </html>

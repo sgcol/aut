@@ -59,6 +59,7 @@
     $(function() {
         accIntf('/account/me', function(err, me) {
           if (err) return;
+          window.me=me;
           $('.username').text(me.name||'');
           $('.acl').text(me.acl||'访客');
         })

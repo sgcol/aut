@@ -19076,6 +19076,11 @@ code {
   height: 42px;
   padding: 0;
 }
+.btn.btn-icon-sm {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+}
 
 .btn.btn-icon-text .btn-icon-prepend {
   margin-right: .5rem;

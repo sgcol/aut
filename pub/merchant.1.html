@@ -34,8 +34,15 @@
         <form>
           <div class="card-body">
             <div class="form-group">
-              <label for="setpass">重设密码</label>
-              <input type="text" class="form-control" id="setpass" placeholder="新密码">
+              <div class="input-group">
+                <div class="input-group-prepend"><span for="fee" class="input-group-text">手续费</span></div>
+                <input type="text" class="form-control" id="fee" placeholder="1.5%">
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="card-description">请勾选提供商(otc平台)</p>
+            <div class="form-group" id="providers">
             </div>
             <button type="button" class="btn btn-gradient-primary mr-2">Submit</button>
             <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
@@ -232,7 +239,7 @@
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> <a class="nav-link" href="admin.html">管理员账号</a></li>
           <li class="nav-item"> <a class="nav-link" href="merchant.html">商户</a></li>
-          <li class="nav-item"> <a class="nav-link" href="agent.html">代理</a></li>
+          <li class="nav-item"> <a class="nav-link" href="pages/ui-features/typography.html">代理</a></li>
         </ul>
       </div>
     </li>
@@ -292,12 +299,12 @@
         <div class="content-wrapper">
           <div class="page-header">
             <h3 class="page-title">
-              管理员
+              商户
             </h3>
             <nav aria-label="breadcrumb">
               <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="#">账号</a></li>
-                <li class="breadcrumb-item active" aria-current="page">管理员账号</li>
+                <li class="breadcrumb-item active" aria-current="page">商户账号</li>
               </ol>
             </nav>
           </div>
@@ -305,11 +312,11 @@
               <div class="col-lg-12 grid-margin stretch-card">
                   <div class="card">
                     <div class="card-body">
-                      <h4 class="card-title">管理员</h4>
+                      <h4 class="card-title">商户</h4>
                       <p class="card-description">
                         <a class="text-muted" href="javascript:showAddacc();">点击此处添加</a>
                       </p>
-                      <div class="col-12 grid-margin fade" id="addUser" aria-hidden="true" style="display: none">
+                      <div class="col-12 grid-margin" style="display:none" id="addUser">
                           <div class="card">
                             <div class="card-body">
                               <form class="form-inline" id="addacc" action="#">
@@ -324,7 +331,7 @@
                                 </div>
                                 <label class="sr-only" for="inlineFormInputName2">Password</label>
                                 <input type="text" class="form-control mb-2 mr-sm-2" id="inlineFormInputName2" name="password" placeholder="密码">
-                                <input type="hidden" name="identity" value="manager">
+                                <input type="hidden" name="identity" value="merchant">
                                 <button class="btn btn-gradient-primary mb-2" type="submit">Submit</button>
                                 <button type="button" class="btn btn-light mb-2" style="margin-left:10px" onclick="javascript:$('#addUser').hide()">Cancel</button>
                               </form>
@@ -346,6 +353,9 @@
                             <th>
                               权限
                             </th>
+                            <th>key</th>
+                            <th>merchantid</th>
+                            <th>调试</th>
                             <th>
                               操作
                             </th>
@@ -396,6 +406,9 @@
   <!-- End custom js for this page-->
 </body>
 <script>
+  function randstring(len) {
+    return Math.random().toString(36).substring(len||7);
+  }
   function showAddacc() {
     var f=$('#addacc input');
     for (var i=0; i<f.length; i++) {
@@ -403,9 +416,31 @@
       if (item.type!='hidden') item.value='';
       $(item).removeClass('wrong');
     }
-    if ($('#addUser').hasClass('show')) $('#addUser').removeClass('show');
-    else $('#addUser').addClass('show');
     $('#addUser').toggle();
   }
+  function onListChanged() {
+    $(':checkbox').click((e)=>{
+      var obj=$(e.target);
+      accIntf('/admin/updateMerchant', {merchantid:obj.attr('merchantid'), debugMode:obj.is(':checked')});
+    });
+  }
+  var providers=$('#providers');
+  $('#editMerchant').on('shown.bs.modal', function (e) {
+    accIntf('/admin/providers', (err, ret) =>{
+      if (err) return showerr(err);
+      providers.empty();
+      var allp=ret.message;
+      for (var i=0; i<allp.length; i++) {
+        providers.append(`
+        <div class="form-check form-check">
+          <label class="form-check-label">
+            <input type="checkbox" class="form-check-input" checked="">
+            ${allp[i]}
+          <i class="input-helper"></i></label>
+        </div>
+        `)
+      }
+    })
+  });
 </script>
 </html>

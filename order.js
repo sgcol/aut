@@ -1,28 +1,68 @@
-const getDB=require('./db.js'), pify=require('pify'), getMerchant=require('./merchants.js').getMerchant;
+const getDB=require('./db.js'), pify=require('pify'), getMerchant=require('./merchants.js').getMerchant,ObjectID = require('mongodb').ObjectID
+    ,request=require('request'), notifySellSystem=require('./sellOrder.js').notifySellSystem;
 
-exports.createOrder =function createOrder(merchantid, merchantOrderId, money, preferredPay, cb_url, callback) {
+function createOrder(merchantid, merchantOrderId, money, preferredPay, cb_url, callback) {
     if (typeof preferredPay=='function') {
         callback=preferredPay;
         preferredPay=null;
     }
     getDB((err, db)=>{
-        db.bills.insert({merchantOrderId:merchantOrderId, merchantid:merchantid, money:money, paidmoney:-1, time:new Date(), lasttime:new Date(), lasterr:'', preferredPay:preferredPay, cb_url:cb_url, status:'created'}, {w:1}, callback);
+        db.bills.find({merchantid:merchantid, merchantOrderId:merchantOrderId}).toArray((err, r)=>{
+            if (err) return callback(err);
+            if (r.length>0) return callback('orderid重复');
+            pify(getMerchant)(merchantid).then((mer)=>{
+                return db.bills.insert({merchantOrderId:merchantOrderId, merchantid:merchantid, provider:'', providerOrderId:'', share:mer.share, money:money, paidmoney:-1, time:new Date(), lasttime:new Date(), lasterr:'', preferredPay:preferredPay, cb_url:cb_url, status:'created'}, {w:1});
+            })
+            .then((r)=>{
+                callback(null, r.insertedIds[0].toHexString());            
+            }).catch((e)=>{
+                callback(e);
+            })
+        })
     })
 }
-exports.confirmOrder =function confirmOrder(orderid, money, callback) {
-    getDB((err, db)=>{
-        db.bills.findOneAndUpdate({_id:orderid}, {$set:{status:'providerCompleted', paidmoney:money, lasttime:new Date()}}, function(err, r) {
+function getOrderDetail(orderid, callback) {
+    getDB((err, db) =>{
+        if (err) return callback(err);
+        db.bills.find({_id:ObjectID(orderid)}).toArray((err, r)=>{
             if (err) return callback(err);
-            notifyMerchant(r.value);
-        });    
+            if (r.length==0) return callback('no such order');
+            callback(null, r[0].merchantid, r[0].money, r[0].cb_url);
+        })
+    });
+}
+function confirmOrder(orderid, money, callback) {
+    if (typeof money=='function') {
+        callback=money;
+        money=null;
+    }
+    getDB((err, db)=>{
+        db.bills.find({_id:ObjectID(orderid), paidmoney:-1}).toArray(function(err, r) {
+            if (err) return callback(err);
+            if (r.length==0) return callback('no such orderid');
+            if (!money) money=r[0].money;
+            r[0].paidmoney=money;
+            var upd={status:'已支付', paidmoney:money, lasttime:new Date()};
+            db.bills.update({_id:ObjectID(orderid)}, {$set:upd}, {w:1}, function(err, r) {
+                if (err) return callback(err);
+                notifyMerchant(r[0]);
+                callback();
+            })
+            var delta=(r[0].paidmoney*(r[0].share||0.985)).toFixed(2);
+            async.parallel([
+                db.users.update.bind(db.users, {merchantid:r[0].merchantid}, {$inc:{total:delta}}, {w:1}),
+                db.stat.update.bind(db.stat, {_id:r[0].merchantid}, {$inc:{incoming:r[0].paidmoney, profit:r[0].paidmoney-delta}}, {upsert:true, w:1})
+            ], (err)=>{
+                notifySellSystem(r[0]);
+            })
+        });
     })
 }
 function notifyMerchant(orderdata) {
     getDB((err, db)=>{
         pify(getMerchant)(orderdata.merchantid).then((mer)=>{
-            return pify(request)({uri:orderdata.cb_url, form:merSign({orderid:orderdata.merchantOrderId, money:paidmoney})});
-        })
-        .then((header, body)=>{
+            return pify(request)({uri:orderdata.cb_url, form:merSign({orderid:orderdata.merchantOrderId, money:orderdata.paidmoney})});
+        }).then((header, body)=>{
             return new Promise((resolve, reject)=>{
                 try {
                     var ret=JSON.parse(body);
@@ -32,22 +72,23 @@ function notifyMerchant(orderdata) {
                 if (body.err) return reject(e);
                 resolve(ret);
             });
-        })
-        .then(()=>{
+        }).then(()=>{
             retryNotifyList.delete(orderdata._id);
             db.bills.update({_id:orderdata._id}, {$set:{status:'complete', lasttime:new Date()}});
         }).catch((e)=>{
             // put into retry list
-            if (retryNotifyList.has(orderdata._id)) {
-                retryNotifyList[orderdata._id]=orderdata;
-                retryNotifyList[orderdata._id].retrytimes=1;
-                db.bills.update({_id:orderdata._id}, {$set:{lasttime:new Date(), status:'notify merchant failed, retrying...', lasterr:e.message}});
+            var rn=retryNotifyList.get(orderdata._id);
+            if (!rn) {
+                rn=orderdata;
+                rn.retrytimes=1;
+                retryNotifyList.set(orderdata._id, rn);
+                db.bills.update({_id:orderdata._id}, {$set:{lasttime:new Date(), status:'通知商户', lasterr:e.message}});
             }
             else {
-                retryNotifyList[orderdata._id].retrytimes++;
-                if (retryNotifyList[orderdata._id].retrytimes>5) {
+                rn.retrytimes++;
+                if (rn.retrytimes>5) {
                     retryNotifyList.delete(orderdata._id);
-                    db.bills.update({_id:orderdata._id}, {$set:{lasttime:new Date(), status:'notify merchant failed', lasterr:e.message}});
+                    db.bills.update({_id:orderdata._id}, {$set:{lasttime:new Date(), status:'通知失败', lasterr:e.message}});
                 }
             }
         });    
@@ -59,3 +100,21 @@ var retryNotifyList=new Map();
         retryNotifyList.forEach(notifyMerchant);
     }, 60*1000);
 })();
+
+function updateOrder(orderid, upd, callback) {
+    if (!callback) callback=function() {};
+    if (typeof upd!='object') return callback('param error');
+    getDB((err, db)=>{
+        db.bills.update({_id:ObjectID(orderid)}, {$set:upd}, function(err, r) {
+            callback(err, r);
+        });
+    });
+}
+
+module.exports={
+    updateOrder:updateOrder,
+    createOrder:createOrder,
+    getOrderDetail:getOrderDetail,
+    confirmOrder:confirmOrder,
+    notifyMerchant:notifyMerchant
+}

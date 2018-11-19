@@ -31,7 +31,7 @@ function getlist() {
                 </td>
             <%}%>
             <td>
-            <button type="button" class="btn btn-outline-primary btn-icon"><i class="mdi mdi-key-change"></i></button>
+            <button type="button" class="btn btn-outline-primary btn-icon" data-toggle="modal" data-target="#editMerchant" data-merchantid="<%= item._id%>"><i class="mdi mdi-key-change"></i></button>
             <button type="button" class="btn btn-outline-secondary btn-icon" onclick="javascript:remove('<%= item._id%>')"><i class="mdi mdi-delete-forever"></i></button>
             </td>
         <% })%>`, {r:r.message, filename:filename}));
