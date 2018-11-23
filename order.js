@@ -49,6 +49,7 @@ function cancelOrder(orderid, callback) {
             if (err) return callback(err);
             if (r.length==0) return callback('no such order');
             notifySellSystem(r[0]);
+            callback();
         })
     });
 }
