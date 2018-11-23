@@ -1,5 +1,5 @@
 const getDB=require('./db.js'), pify=require('pify'), getMerchant=require('./merchants.js').getMerchant,ObjectID = require('mongodb').ObjectID
-    ,request=require('request'), notifySellSystem=require('./sellOrder.js').notifySellSystem;
+    ,request=require('request'), notifySellSystem=require('./sellOrder.js').notifySellSystem, async=require('async');
 
 function createOrder(merchantid, merchantOrderId, money, preferredPay, cb_url, callback) {
     if (typeof preferredPay=='function') {

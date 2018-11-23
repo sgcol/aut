@@ -75,14 +75,10 @@ function init(err, db) {
 			if (err) return callback(err);
 			if (r.length==0) return callback('no such orderid');
 			var p=byCoins.id[r[0].product.productId];
+			if (status=='cancel') cancelOrder(r[0].orderid, ()=>{callback()});
+			else confirmOrder(r[0].orderid, ()=>{callback()})
 			if (p.buySell=='S') {
 				if (p) occupied.delete(p);
-				confirmOrder(r[0].orderid, function(err) {
-					callback();
-				});	
-			} else {
-				if (status=='cancel') cancelOrder(r[0].orderid, ()=>{callback()});
-				else confirmOrder(r[0].orderid, ()=>{callback()})
 			}
 		})
     }))
