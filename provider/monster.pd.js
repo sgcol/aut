@@ -77,8 +77,8 @@ function init(err, db) {
 			var p=byCoins.id[r[0].product.productId];
 			if (status=='cancel') cancelOrder(r[0].orderid, ()=>{callback()});
 			else confirmOrder(r[0].orderid, ()=>{callback()})
-			if (p.buySell=='S') {
-				if (p) occupied.delete(p);
+			if (p && p.buySell=='S') {
+				occupied.delete(p);
 			}
 		})
     }))
