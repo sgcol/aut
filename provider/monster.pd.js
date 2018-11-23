@@ -16,6 +16,7 @@ const url = require('url')
 , getDB=require('../db.js')
 , confirmOrder =require('../order.js').confirmOrder
 , updateOrder =require('../order.js').updateOrder
+, cancelOrder =require('../order.js').cancelOrder
 , pify =require('pify')
 , argv=require('yargs').argv;
 
@@ -69,14 +70,20 @@ function init(err, db) {
 	}
 	db=db;
     router.all('/afterbuy', monsterVerifySign, httpf({orderid:'string', money:'number', status:'string', time:'string', callback:true}, function(orderid, money, status, time, callback) {
+		console.log(orderid, money, status, time);
 		db.monster.find({exOrderId:orderid}).toArray((err, r)=>{
 			if (err) return callback(err);
 			if (r.length==0) return callback('no such orderid');
 			var p=byCoins.id[r[0].product.productId];
-			if (p) occupied.delete(p);
-			confirmOrder(r[0].orderid, function(err) {
-				callback();
-			});
+			if (p.buySell=='S') {
+				if (p) occupied.delete(p);
+				confirmOrder(r[0].orderid, function(err) {
+					callback();
+				});	
+			} else {
+				if (status=='cancel') cancelOrder(r[0].orderid, ()=>{callback()});
+				else confirmOrder(r[0].orderid, ()=>{callback()})
+			}
 		})
     }))
     router.all('/aftersell', monsterVerifySign, httpf({orderid:'string', money:'number', status:'string', time:'string', callback:true}, function(orderid, money, status, time, callback) {
@@ -171,7 +178,7 @@ function makeObj(o) {
 	return signObj(o);
 }
 function signObj(o) {
-	o.sign=md5(qs.stringify({appId:o.appId, nonceStr:o.nonceStr, ownerId:o.ownerId, timestamp:o.timestamp, key:key}));
+	o.sign=md5(qs.stringify({appId:o.appId||appId, nonceStr:o.nonceStr, ownerId:o.ownerId, timestamp:o.timestamp, key:key}));
 	return o;
 }
 function putorder(orderid, product, money, ownerId, callback) {
@@ -194,7 +201,7 @@ function putorder(orderid, product, money, ownerId, callback) {
 		makeProductsSorted();
 		occupied.add(product);
 		pify(getDB)().then((db)=>{
-			updateOrder(orderid, {status:'待支付', lasttime:new Date(), providerOrderId:ret.orderId});
+			if (product.buySell=='S') updateOrder(orderid, {status:'待支付', coin:'USDT', lasttime:new Date(), providerOrderId:ret.orderId});
 			return db.monster.insert({orderid:orderid, exOrderId:ret.orderId, product:product, money:money, time:new Date()});
 		}).then(()=>{
 			callback(null, body);
@@ -227,15 +234,10 @@ function confirmSell(monsterOrderId, ownerId, callback) {
 	})	
 }
 
-function sell(orderid, money, callback) {
-	bestSell(money, 'USDT', (err, p)=> {
+function sell(orderid, coin, money, callback) {
+	putorder(orderid, p, money, ownerId, (err, order)=>{
 		if (err) return callback(err);
-		if (p) {
-			putorder(orderid, p, money, ownerId, (err, order)=>{
-				if (err) return callback(err);
-				// confirmSell(order.orderId, ownerId, (err, header, body)=>{console.log(body)})
-			})
-		}
+		// confirmSell(order.orderId, ownerId, (err, header, body)=>{console.log(body)})
 	})
 }
 exports.order=function order(orderid, money, merchantdata, coinType, callback) {
@@ -258,6 +260,28 @@ exports.order=function order(orderid, money, merchantdata, coinType, callback) {
 		callback(e);
 	})
 }
+function getBalance(coin, callback){
+	if (typeof coin=='function') {
+		callback=coin;
+		coin='USDT';
+	}
+	var desturl=clone(_baseURL);
+	desturl.pathname='/egQuery/queryUserCoinQuantity';
+	var o=makeObj({coinId:coin||'USDT', appId:appId});
+	o.appSign=o.sign.toUpperCase();
+	delete o.sign;
+	console.log(o);
+	request.post({uri:url.format(desturl), json:o}, (err, header, body)=>{
+		if (err) return err;
+		var r=body.resultList;
+		for (var i=0; i<r.length; i++) {
+			if (r[i].quantityStatus=='0') return callback(null, r[i].coinQuantity);
+		}
+		return callback('找不到账户');
+	})
+}
+exports.bestSell=bestSell;
+exports.getBalance=getBalance;
 exports.sell=sell;
 exports.bestPair=bestPair;
 exports.router=router;
@@ -287,5 +311,6 @@ if (module==require.main) {
 	// 	}
 	// })
 
-	confirmSell('C2CORD20181112153640618671368700', ownerId, (err, header, body)=>{console.log(body)})
+	// confirmSell('C2CORD20181112153640618671368700', ownerId, (err, header, body)=>{console.log(body)})
+	getBalance(console.log);
 }

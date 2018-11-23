@@ -247,6 +247,7 @@ function main(err, broadcastNeighbors, dbp) {
 	}));
 	app.all('/order', verifySign, httpf({orderid:'string', money:'number', merchantid:'string', cb_url:'string', time:'string', no_return:true}, function(orderid, money, merchantid, cb_url, time) {
 		var res=this.res;
+		argv.host=argv.host||this.req.headers.host;
 		createOrder(merchantid, orderid, money, 'alipay', cb_url, function(err, sysOrderId) {
 			if (err) return res.render('error.ejs', {err:err});
 			return res.render('order.ejs', {orderid:sysOrderId, money:money, merchantid:merchantid});
@@ -435,6 +436,9 @@ function main(err, broadcastNeighbors, dbp) {
 			},
 			arrivaled:(cb)=>{
 				cb(null, 0);
+			},
+			orders:(cb)=>{
+				db.bills.count({}, cb);
 			}
 		}, callback);
 	}));

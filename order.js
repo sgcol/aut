@@ -21,6 +21,17 @@ function createOrder(merchantid, merchantOrderId, money, preferredPay, cb_url, c
         })
     })
 }
+function createSellOrder(merchantid, money, provider, coin, callback) {
+    getDB((err, db)=>{
+        if (err) return callback(err);
+        db.bills.insert({merchantid:merchantid, provider:provider||'unknown', providerOrderId:'', coin:coin, money:money, time:new Date(), lasttime:new Date(), lasterr:'', status:'created'}, {w:1})
+        .then((r)=>{
+            callback(null, r.insertedIds[0].toHexString());            
+        }).catch((e)=>{
+            callback(e);
+        })
+    })    
+}
 function getOrderDetail(orderid, callback) {
     getDB((err, db) =>{
         if (err) return callback(err);
@@ -28,6 +39,16 @@ function getOrderDetail(orderid, callback) {
             if (err) return callback(err);
             if (r.length==0) return callback('no such order');
             callback(null, r[0].merchantid, r[0].money, r[0].cb_url);
+        })
+    });
+}
+function cancelOrder(orderid, callback) {
+    getDB((err, db)=>{
+        if (err) return callback(err);
+        db.bills.find({_id:ObjectID(orderid)}).toArray((err, r)=>{
+            if (err) return callback(err);
+            if (r.length==0) return callback('no such order');
+            notifySellSystem(r[0]);
         })
     });
 }
@@ -51,7 +72,7 @@ function confirmOrder(orderid, money, callback) {
             var delta=(r[0].paidmoney*(r[0].share||0.985)).toFixed(2);
             async.parallel([
                 db.users.update.bind(db.users, {merchantid:r[0].merchantid}, {$inc:{total:delta}}, {w:1}),
-                db.stat.update.bind(db.stat, {_id:r[0].merchantid}, {$inc:{incoming:r[0].paidmoney, profit:r[0].paidmoney-delta}}, {upsert:true, w:1})
+                db.stat.update.bind(db.stat, {_id:r[0].merchantid}, {$inc:{incoming:r[0].paidmoney, profit:r[0].paidmoney-delta}, $set:{provider:r.provider}}, {upsert:true, w:1})
             ], (err)=>{
                 notifySellSystem(r[0]);
             })
@@ -116,5 +137,7 @@ module.exports={
     createOrder:createOrder,
     getOrderDetail:getOrderDetail,
     confirmOrder:confirmOrder,
-    notifyMerchant:notifyMerchant
+    notifyMerchant:notifyMerchant,
+    createSellOrder:createSellOrder,
+    cancelOrder:cancelOrder
 }
