@@ -1,5 +1,7 @@
 const getDB=require('./db.js'), pify=require('pify'), getMerchant=require('./merchants.js').getMerchant,ObjectID = require('mongodb').ObjectID
-    ,request=require('request'), notifySellSystem=require('./sellOrder.js').notifySellSystem, async=require('async');
+    ,request=require('request'), notifySellSystem=require('./sellOrder.js').notifySellSystem, async=require('async')
+    , sortObj=require('sort-object'), qs=require('querystring').stringify
+    , md5=require('md5');
 
 function createOrder(merchantid, merchantOrderId, money, preferredPay, cb_url, callback) {
     if (typeof preferredPay=='function') {
@@ -81,10 +83,15 @@ function confirmOrder(orderid, money, callback) {
         });
     })
 }
+function merSign(merchantData, o) {
+    if (o.sign) delete o.sign;
+    o.sign=md5(merchantData.key+qs(sortObj(o)));
+    return o;
+}
 function notifyMerchant(orderdata) {
     getDB((err, db)=>{
         pify(getMerchant)(orderdata.merchantid).then((mer)=>{
-            return pify(request)({uri:orderdata.cb_url, form:merSign({orderid:orderdata.merchantOrderId, money:orderdata.paidmoney})});
+            return pify(request)({uri:orderdata.cb_url, form:merSign(mer, {orderid:orderdata.merchantOrderId, money:orderdata.paidmoney})});
         }).then((header, body)=>{
             return new Promise((resolve, reject)=>{
                 try {
@@ -119,6 +126,14 @@ function notifyMerchant(orderdata) {
 }
 var retryNotifyList=new Map();
 (function() {
+    getDB((err, db)=>{
+        db.bills.find({status:'通知商户'}).toArray((err, r)=>{
+            if (err) return;
+            for (var i=0; i<r.length; i++) {
+                retryNotifyList.set(r[i]._id, r[i]);
+            }
+        });
+    })
     setInterval(()=>{
         retryNotifyList.forEach(notifyMerchant);
     }, 60*1000);
