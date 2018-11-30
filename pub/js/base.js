@@ -62,7 +62,7 @@
           window.me=me;
           $('.username').text(me.name||'');
           $('.acl').text(me.acl||'访客');
-          typeof window.initpage && window.initpage();
+          typeof window.initpage=='function' && window.initpage();
         })
     });
 
