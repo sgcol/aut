@@ -20,9 +20,15 @@ const url = require('url')
 , pify =require('pify')
 , argv=require('yargs').argv;
 
-const _baseURL=url.parse('http://testapi.monstermarket.cn');
-const ownerId='MHT2018110532254740945085284791', password='123456', appId='mst236153cd622f3fbb', key='049af9e9d7aa11968ed945d73c4b171f';
-const imgbase='http://teststatic.monstermarket.cn';
+if (process.env.NODE_ENV=='production') {
+	const _baseURL=url.parse('https://api.monster.one');
+	const ownerId='MHT20181128155434309970729525704', password='123456', appId='mst5d11d890389fb57b', key='ad0c7232858a2aef2945d27b27477357';
+	const imgbase='https://static.monster.one';
+} else {
+	const _baseURL=url.parse('http://testapi.monstermarket.cn');
+	const ownerId='MHT2018110532254740945085284791', password='123456', appId='mst236153cd622f3fbb', key='049af9e9d7aa11968ed945d73c4b171f';
+	const imgbase='http://teststatic.monstermarket.cn';
+}
 
 const monsterrKey='Qztbet4J8uznaBeP';
 monsterVerifySign =function(req, res, next) {
