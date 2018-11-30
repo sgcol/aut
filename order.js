@@ -24,7 +24,7 @@ function createOrder(merchantid, merchantOrderId, money, preferredPay, cb_url, c
 function createSellOrder(merchantid, money, provider, coin, callback) {
     getDB((err, db)=>{
         if (err) return callback(err);
-        db.bills.insert({merchantid:merchantid, provider:provider||'unknown', providerOrderId:'', coin:coin, money:money, time:new Date(), lasttime:new Date(), lasterr:'', status:'created'}, {w:1})
+        db.bills.insert({type:'sell', merchantid:merchantid, provider:provider||'unknown', providerOrderId:'', coin:coin, money:money, time:new Date(), lasttime:new Date(), lasterr:'', status:'created'}, {w:1})
         .then((r)=>{
             callback(null, r.insertedIds[0].toHexString());            
         }).catch((e)=>{
@@ -45,10 +45,11 @@ function getOrderDetail(orderid, callback) {
 function cancelOrder(orderid, callback) {
     getDB((err, db)=>{
         if (err) return callback(err);
-        db.bills.find({_id:ObjectID(orderid)}).toArray((err, r)=>{
+        db.bills.find({_id:ObjectID(orderid), status:{$ne:'canceled'}}).toArray((err, r)=>{
             if (err) return callback(err);
             if (r.length==0) return callback('no such order');
-            notifySellSystem(r[0]);
+            db.bills.update({_id:ObjectID(orderid)}, {$set:{status:'canceled'}});
+            if (r[0].type=='sell') notifySellSystem(r[0]);
             callback();
         })
     });
@@ -65,7 +66,7 @@ function confirmOrder(orderid, money, callback) {
             if (!money) money=r[0].money;
             r[0].paidmoney=money;
             var upd={status:'已支付', paidmoney:money, lasttime:new Date()};
-            db.bills.update({_id:ObjectID(orderid)}, {$set:upd}, {w:1}, function(err, r) {
+            db.bills.update({_id:ObjectID(orderid)}, {$set:upd}, {w:1}, function(err) {
                 if (err) return callback(err);
                 notifyMerchant(r[0]);
                 callback();

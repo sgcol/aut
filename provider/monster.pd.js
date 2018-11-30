@@ -135,20 +135,23 @@ function bestBuy(money, coinType, callback) {
 		return callback('暂时没有通道');	
 	})
 }
-function bestSell(money ,coinType, callback) {
+function bestSell(coinType, callback) {
 	getAllProducts((err)=>{
 		var coin=byCoins[coinType];
 		if (!coin) return callback('no such coin');
 		if (coin.B.length==0) return callback('no data yet');
+		var allp=[];
 		for (var i=0; i<coin.B.length; i++) {
 			var p=coin.B[i];
-			if (occupied.has(p)) continue;
-			var coinNum=money/p.unitPrice;
-			if (p.minOrderQuantity>coinNum || p.leftQuantity<coinNum || p.maxOrderQuantity<coinNum || p.payMethodList.indexOf('2')<0) continue;
-			occupied.add(p);
-			return callback(null, p);
+			// if (occupied.has(p)) continue;
+			// var coinNum=money/p.unitPrice;
+			// if (p.minOrderQuantity>coinNum || p.leftQuantity<coinNum || p.maxOrderQuantity<coinNum || p.payMethodList.indexOf('2')<0) continue;
+			p.left=p.leftQuantity*p.unitPrice;
+			p.leftCoins=p.leftQuantity;	
+			allp.push(p);
 		}
-		return callback('暂时没有通道');	
+		allp.sort((a, b)=>{return b.unitPrice-a.unitPrice});
+		return callback(null, allp);
 	})
 }
 function queryProducts(isBuy, callback) {
@@ -230,8 +233,8 @@ function confirmSell(monsterOrderId, ownerId, callback) {
 	})	
 }
 
-function sell(orderid, coin, money, callback) {
-	putorder(orderid, p, money, ownerId, (err, order)=>{
+function sell(orderid, coin, money, product, callback) {
+	putorder(orderid, product, money, ownerId, (err, order)=>{
 		if (err) return callback(err);
 		// confirmSell(order.orderId, ownerId, (err, header, body)=>{console.log(body)})
 	})

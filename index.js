@@ -21,8 +21,8 @@ const server = require('http').createServer()
 , ObjectID = require('mongodb').ObjectID
 , httpf = require('httpf')
 , pify =require('pify')
-, paysys=require('./providerManager.js')
 , _orderFunc=require('./order.js')
+, paysys=require('./providerManager.js')
 , createOrder =_orderFunc.createOrder
 , confirmOrder =_orderFunc.confirmOrder
 , notifyMerchant =_orderFunc.notifyMerchant
@@ -187,7 +187,10 @@ function main(err, broadcastNeighbors, dbp) {
 	app.all('/admin/confirmOrder', verifyAuth, verifyManager, httpf({orderid:'string', callback:true}, function(orderid, callback) {
 		confirmOrder(orderid, callback);
 	}));
-	app.all('/admin/listOrders', verifyAuth, httpf({from:'?date', to:'?date', count:'?number', pageno:'?number', callback:true}, function(from, to, count, pageno, callback) {
+	app.all('/admin/clearBalance', verifyAuth, verifyManager, httpf({merchantid:'?string', callback:true}, function(merchantid, callback) {
+		require('./sellOrder.js').checkPlatformBalance(merchantid, callback);
+	}))
+	app.all('/admin/listOrders', verifyAuth, httpf({from:'?date', to:'?date', count:'?number', pageno:'?number', type:'?string', callback:true}, function(from, to, count, pageno, type, callback) {
 		var times=[];
 		if (from) times.push({$gte:from});
 		if (to) times.push({$lte:to});
@@ -196,6 +199,8 @@ function main(err, broadcastNeighbors, dbp) {
 		if (this.req.auth.acl!='admin' && this.req.auth.acl!='manager') {
 			query.merchantid=this.req.auth.merchantid;
 		}
+		if (type=='sell') query.type=type;
+		else query.type=null;
 		var cursor=db.bills.find(query).sort({time:-1});
 		if (count) cursor=cursor.limit(count);
 		if (pageno) {
@@ -456,6 +461,9 @@ function main(err, broadcastNeighbors, dbp) {
 	/////////////////some server rendered pages
 	app.all('/fromuserlist.html', verifyAuth, (req, res) =>{
 		res.render('fromuserlist', {acl:req.auth.acl});
+	})
+	app.all('/tomerchantlist.html', verifyAuth, (req, res)=>{
+		res.render('tomerchantlist', {acl:req.auth.acl});
 	})
 	/////////////////must be last one
 	app.use(function(req, res, next){

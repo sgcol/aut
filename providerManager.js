@@ -9,7 +9,9 @@ var tt = require('gy-module-loader')(path.join(__dirname, 'provider/*.pd.js'), f
     }
 });
 
-exports.providers=external_provider;
+exports.getProvider=function(pid) {
+    return external_provider[pid];
+}
 
 const filter = require('filter-object');
 function order(orderid, money,mer, callback) {
@@ -25,7 +27,7 @@ function order(orderid, money,mer, callback) {
             if (r[i].coinType) break;
         }
         if (!r[i].coinType) return callback('没有可用的交易提供方');
-        updateOrder(orderid, {provider:r[i].prd.name, providerOrderId:orderid});
+        updateOrder(orderid, {provider:r[i].prd.name, providerOrderId:orderid, coin:r[i].coinType});
         r[i].prd.order(orderid, money, mer, r[i].coinType, callback);
     });
 }

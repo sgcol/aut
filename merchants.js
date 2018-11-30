@@ -16,11 +16,11 @@ function getMerchant(id, callback) {
 }
 exports.verifySign=	function verifySign(req, res, next) {
 	var _p=merge(req.query, req.body), sign=_p.sign;
-	if (!sign) return res.send({err:'没有签名sign'});
+	if (!sign) return res.render('error', {err:'没有签名sign'});
 	delete _p.sign;
-	if (!_p.merchantid) return res.send({err:'没有商户号'});
+	if (!_p.merchantid) return res.render('error', {err:'没有商户号'});
 	getMerchant(_p.merchantid, function(err, mer) {
-		if (err) return res.send({err:err});
+		if (err) return res.render('error', {err:err});
 		var wanted=md5(mer.key+qs.stringify(sortObj(_p)));
 		if (sign!=wanted) {
 			var e={err:'签名错误'};
@@ -28,7 +28,7 @@ exports.verifySign=	function verifySign(req, res, next) {
 				e.wanted=wanted;
 				e.str=mer.key+qs.stringify(sortObj(_p));
 			}
-			return res.send(e);
+			return res.render('error', e);
 		}
 		next();
 	})

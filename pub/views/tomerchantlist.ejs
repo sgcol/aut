@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+<style>
+  .wrong {
+    border-bottom-color: red;
+  }
+</style>
+</head>
+<body>
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <%- include ../partials/_navbar.html %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <% if (acl=="admin"||acl=="manager") { %>
+        <%- include ../partials/_sidebar.html %>
+      <% } else { %>
+        <%- include ../partials/_sidebar2.html %>
+      <% } %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              清帐订单
+            </h3>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">明细</a></li>
+                <li class="breadcrumb-item active" aria-current="page">清帐订单</li>
+                <% if (acl=='admin' || acl=='manager') { %>
+                  <li class="breadcrumb-item active"><a href="#">手动清帐</a></li>
+                <% } %>
+              </ol>
+            </nav>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">清帐订单</h4>
+                    <div class="table-responsive">
+                      <table class="table" id="orderlist">
+                        <thead>
+                          <tr>
+                            <th>
+                              商户
+                            </th>
+                            <th>
+                              提供商
+                            </th>
+                            <th>
+                              提供商单号
+                            </th>
+                            <th>
+                              金额
+                            </th>
+                            <th>
+                              创建时间
+                            </th>
+                            <th>
+                              状态
+                            </th>
+                            <th>
+                              改变时间
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                      </table>
+                      <div style="float:right; margin-right:50px">
+                      <button class="btn btn-outline-secondary btn-rounded btn-icon tooltipfy" title="首页"><i class="mdi mdi-page-first"></i></button>
+                      <button class="btn btn-outline-secondary btn-rounded btn-icon tooltipfy" title="上一页"><i class="mdi mdi-skip-previous"></i></button>
+                      <button class="btn btn-outline-secondary btn-rounded btn-icon tooltipfy" title="下一页"><i class="mdi mdi-skip-next"></i></button>
+                      <button class="btn btn-outline-secondary btn-rounded btn-icon tooltipfy" title="末页"><i class="mdi mdi-page-last"></i></button>
+                      </div>
+                    </div>  
+                  </div>
+                </div>
+              </div>
+          </div>
+          <div class="row"></div>
+          <div class="row"></div>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <%- include ../partials/_footer.html %>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/dashboard.js"></script>
+  <script src="js/base.js"></script>
+  <!-- End custom js for this page-->
+</body>
+<script>
+function timestring(t) {
+  return new Date(t).toLocaleDateString()+' '+ new Date(t).toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");;
+}
+function formatBigNumber(s) {
+  return (''+s).replace(/(?=(?!^)(?:\d{4})+(?:\.|$))(\d{4}(\.\d+$)?)/g,',$1');
+}
+function statusHtmlfy(s) {
+  if (!s) s='未知';
+  if (s=='created') return `<label class="badge badge-gradient-info">创建</label>`;
+  if (s=='completed') return `<label class="badge badge-gradient-success">完成</label>`
+  if (s.indexOf('failed')>=0 ||s.indexOf('失败')>=0) return `<label class="badge badge-gradient-danger">${s}</label>`
+  return `<label class="badge badge-gradient-warning">${s}</label>`
+}
+function forceconfirm(orderid) {
+  accIntf('/admin/confirmOrder', {orderid:orderid}, (err)=>{
+    if (err) return showerr(err);
+    refreshOrderList()
+  });
+}
+function sendNotify(orderid) {
+  accIntf('/admin/notifyMerchant', {orderid:orderid}, (err)=>{
+    if (err) return showerr(err);
+    refreshOrderList()
+  });
+}
+function refreshOrderList() {
+  accIntf('/admin/listOrders', {pageno:currentpage, count:20, type:'sell'}, function(err, data) {
+    var p=$('#orderlist tbody');
+    p.empty();
+    if (err) p.append('<tr><td colspan="9999">'+errstr(err)+'</td></tr>');
+    var list=data.message;
+    recordCount=list.total;
+    for (var i=0; i<list.length; i++) {
+      var o=list[i];
+      var htmlstr=`<tr><td>${o.mername}<td>${o.provider||''}<td>${o.providerOrderId||''}<td>${o.money}<td>${timestring(o.time)}<td>${statusHtmlfy(o.status)}<td>${timestring(o.lasttime)}`;
+      htmlstr+='</tr>'
+      p.append(htmlstr);
+    }
+    // $('.tooltipfy').tooltip();
+  })
+}
+var currentpage=0, recordCount=0;
+function prevPage() {
+  currentpage--;
+  if (currentpage>=0) return refreshOrderList();
+  currentpage=0;
+}
+function nextPage() {
+  currentpage++;
+  if ((currentpage*20)<recordCount) return refreshOrderList();
+  currentpage=Math.floor(recordCount/20);
+}
+function firstPage() {
+  currentpage=0;
+  refreshOrderList();
+}
+function lastPage() {
+  currentpage=Math.floor(recordCount/20);
+  refreshOrderList();
+}
+$(()=>{
+  refreshOrderList();
+});
+  
+</script>
+</html>

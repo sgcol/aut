@@ -30,6 +30,11 @@
                 <h2>抱歉</h2>
                 <h3 class="font-weight-light">我们无法完成您的请求</h3>
                 <h4 class="font-weight-light"><%= err%></h4>
+                <% if (locals.wanted) { %>
+                  <h5 class="font-weight-light">调试用信息</h5>
+                  <p class="text-white">希望的sign <%= locals.wanted%></p>
+                  <p class="text-white">加密串 <%= locals.str%></p>
+                <% } %>
               </div>
             </div>
             <div class="row mt-5">
