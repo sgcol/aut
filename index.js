@@ -130,6 +130,19 @@ function main(err, broadcastNeighbors, dbp) {
 		req.auth=auth;
 		next();
 	}
+	function noAuthToLogin(req, res, next) {
+		if (!req.cookies || !req.cookies.a) return res.redirect('login.html');
+		var auth=authedClients[req.cookies.a];
+		if (!auth) return res.redirect('login.html');
+		var now=new Date();
+		if (auth.validUntil<now) {
+			delete authedClients[req.cookies.a]
+			return res.redirect('login.html');
+		}
+		auth.validUntil=new Date(now.getTime()+auth_timeout);
+		req.auth=auth;
+		next();		
+	}
 	function verifyAdmin(req, res, next) {
 		if (!req.auth) return res.send({err:'no auth'});
 		if (req.auth.acl=='admin') return next();
@@ -460,10 +473,10 @@ function main(err, broadcastNeighbors, dbp) {
 	}));
 
 	/////////////////some server rendered pages
-	app.all('/fromuserlist.html', verifyAuth, (req, res) =>{
+	app.all('/fromuserlist.html', noAuthToLogin, (req, res) =>{
 		res.render('fromuserlist', {acl:req.auth.acl});
 	})
-	app.all('/tomerchantlist.html', verifyAuth, (req, res)=>{
+	app.all('/tomerchantlist.html', noAuthToLogin, (req, res)=>{
 		res.render('tomerchantlist', {acl:req.auth.acl});
 	})
 	/////////////////must be last one
