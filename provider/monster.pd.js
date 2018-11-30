@@ -186,16 +186,16 @@ function signObj(o) {
 	o.sign=md5(qs.stringify({appId:o.appId||appId, nonceStr:o.nonceStr, ownerId:o.ownerId, timestamp:o.timestamp, key:key}));
 	return o;
 }
-function putorder(orderid, product, money, ownerId, callback) {
+function putorder(orderid, product, money, ownerId, host, callback) {
 	var desturl=clone(_baseURL);
 	desturl.pathname='/market/coin/v1/c2c/submit/order';
 	console.log('order with', makeObj({
 		ownerId:ownerId, payMethod:'2', buyQuantity:money/product.unitPrice, productId:product.productId, password:password
-		, returnBackUrl:url.format({protocol:'http', host:argv.host, pathname:'/pvd/monster/afterbuy'})
+		, returnBackUrl:url.format({protocol:'http', host:host, pathname:'/pvd/monster/afterbuy'})
 	}));
 	request.post({uri:url.format(desturl), json:makeObj({
 		ownerId:ownerId,
-		returnBackUrl:url.format({protocol:'http', host:argv.host, pathname:'/pvd/monster/afterbuy'}),
+		returnBackUrl:url.format({protocol:'http', host:host, pathname:'/pvd/monster/afterbuy'}),
 		payMethod:'2', buyQuantity:money/product.unitPrice, productId:product.productId, password:password
 	})}, function(err, header, body) {
 		console.log('order ret', body);
@@ -245,11 +245,11 @@ function sell(orderid, coin, money, product, callback) {
 		// confirmSell(order.orderId, ownerId, (err, header, body)=>{console.log(body)})
 	})
 }
-exports.order=function order(orderid, money, merchantdata, coinType, callback) {
+exports.order=function order(orderid, money, merchantdata, coinType, host, callback) {
 	var product, exOrder;
 	pify(bestBuy)(money, coinType).then((bestBuy)=> {
 		product=bestBuy;
-		return pify(putorder)(orderid, product, money, merchantdata.providers['monster'].ownerId);
+		return pify(putorder)(orderid, product, money, merchantdata.providers['monster'].ownerId, host);
 	}).then((order)=>{
 		exOrder=order;
 		return pify(afterPutOrder)(order.orderId, merchantdata.providers['monster'].ownerId);

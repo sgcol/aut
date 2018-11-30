@@ -252,18 +252,18 @@ function main(err, broadcastNeighbors, dbp) {
 	}));
 	app.all('/order', verifySign, httpf({orderid:'string', money:'number', merchantid:'string', cb_url:'string', time:'string', no_return:true}, function(orderid, money, merchantid, cb_url, time) {
 		var res=this.res;
-		argv.host=argv.host||this.req.headers.host;
 		createOrder(merchantid, orderid, money, 'alipay', cb_url, function(err, sysOrderId) {
 			if (err) return res.render('error.ejs', {err:err});
 			return res.render('order.ejs', {orderid:sysOrderId, money:money, merchantid:merchantid});
 		});
 	}));
 	app.all('/doOrder', httpf({orderid:'string', callback:true}, function(sysOrderId, callback) {
+		var host=argv.host||this.req.headers.host;
 		getOrderDetail(sysOrderId, function(err, merchantid, money, cb_url) {
 			if (err) return callback(err);
 			// find a provider & create a provider order
 			pify(getMerchant)(merchantid).then(function(mer) {
-				return pify(paysys.order)(sysOrderId, money, mer);
+				return pify(paysys.order)(sysOrderId, money, mer, host);
 			}).then((payurl)=>{
 				return s2a(request({uri:payurl}));
 			})
