@@ -238,14 +238,15 @@ function confirmSell(monsterOrderId, ownerId, callback) {
 		return callback(null, body);
 	})	
 }
-
+var host;
 function sell(orderid, coin, money, product, callback) {
-	putorder(orderid, product, money, ownerId, (err, order)=>{
+	putorder(orderid, product, money, ownerId, host, (err, order)=>{
 		if (err) return callback(err);
 		// confirmSell(order.orderId, ownerId, (err, header, body)=>{console.log(body)})
 	})
 }
-exports.order=function order(orderid, money, merchantdata, coinType, host, callback) {
+exports.order=function order(orderid, money, merchantdata, coinType, _host, callback) {
+	host=_host;
 	var product, exOrder;
 	pify(bestBuy)(money, coinType).then((bestBuy)=> {
 		product=bestBuy;
