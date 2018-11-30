@@ -252,8 +252,8 @@ exports.order=function order(orderid, money, merchantdata, coinType, callback) {
 		return pify(putorder)(orderid, product, money, merchantdata.providers['monster'].ownerId);
 	}).then((order)=>{
 		exOrder=order;
-	// 	return pify(afterPutOrder)(order.orderId, merchantdata.providers['monster'].ownerId);
-	// }).then(()=>{
+		return pify(afterPutOrder)(order.orderId, merchantdata.providers['monster'].ownerId);
+	}).then(()=>{
 		var payInfo=exOrder.payInfo.find((ele)=>{return ele.payMethodType=='2'});
 		if (!payInfo) return callback('小怪兽没有正确配置数据');
 		callback(null, url.resolve(imgbase,payInfo.receiveAddress));
