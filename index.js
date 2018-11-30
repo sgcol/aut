@@ -97,7 +97,7 @@ function main(err, broadcastNeighbors, dbp) {
 	app.set('views', path.join(__dirname, 'pub/views'));
 	app.set('view engine', 'ejs');
 
-	var external_provider = require('./providerManager.js').providers;
+	var getProviders = require('./providerManager.js').getProvider;
 	if (argv.debugout) {
 		app.use(function (req, res, next) {
 			debugout('access', req.url);
@@ -110,7 +110,7 @@ function main(err, broadcastNeighbors, dbp) {
 	});
 	app.use('/pvd/:provider', function (req, res, next) {
 		debugout('provider', req.provider);
-		if (external_provider[req.provider]) return external_provider[req.provider].router.call(null, req, res, function () { res.status(404).send({err:'no such function ' + req.url, detail:arguments}); });
+		if (external_provider[req.provider]) return getProviders(req.provider).router.call(null, req, res, function () { res.status(404).send({err:'no such function ' + req.url, detail:arguments}); });
 		res.end('pf ' + req.provider + ' not defined');
 	});
 			
@@ -449,6 +449,7 @@ function main(err, broadcastNeighbors, dbp) {
 	}));
 	app.all('/admin/providers', verifyAuth, httpf(function() {
 		var pnames=new Set();
+		var external_provider=getProviders();
 		for (var i in external_provider) {
 			var p=external_provider[i];
 			if (p.name) pnames.add(p.name);

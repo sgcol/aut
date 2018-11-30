@@ -10,6 +10,7 @@ var tt = require('gy-module-loader')(path.join(__dirname, 'provider/*.pd.js'), f
 });
 
 exports.getProvider=function(pid) {
+    if (pid==null) return external_provider;
     return external_provider[pid];
 }
 
