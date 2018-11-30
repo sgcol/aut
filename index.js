@@ -110,7 +110,7 @@ function main(err, broadcastNeighbors, dbp) {
 	});
 	app.use('/pvd/:provider', function (req, res, next) {
 		debugout('provider', req.provider);
-		if (external_provider[req.provider]) return getProviders(req.provider).router.call(null, req, res, function () { res.status(404).send({err:'no such function ' + req.url, detail:arguments}); });
+		if (getProviders(req.provider)) return getProviders(req.provider).router.call(null, req, res, function () { res.status(404).send({err:'no such function ' + req.url, detail:arguments}); });
 		res.end('pf ' + req.provider + ' not defined');
 	});
 			
