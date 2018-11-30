@@ -539,14 +539,14 @@ function refreshOrderList() {
     $('.tooltipfy').tooltip();
   })
 }
-$(()=>{
+window.initpage=()=>{
   accIntf('/admin/statistics', function(err, data) {
     $('#weeklyIncome').text(formatBigNumber(data.moneys));
     $('#weeklyOrders').text(formatBigNumber(data.bills));
     $('#merchantCount').text(formatBigNumber(data.merchants));
   });
   refreshOrderList();
-});
+};
   
 </script>
 </html>

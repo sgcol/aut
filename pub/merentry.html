@@ -396,14 +396,14 @@ function refreshOrderList() {
     p.append(`<tr><td colspan="999999"><a href="./fromuserlist.html" style="float:right;margin-right:45px">more</a></td><tr>`)
   })
 }
-$(()=>{
+window.initpage=()=>{
   accIntf('/merchant/balance', function(err, data) {
     $('#totalIncome').text(formatBigNumber(data.total));
     $('#arrivaled').text(formatBigNumber(data.arrivaled));
     $('#totalOrders').text(formatBigNumber(data.orders||0));
   });
   refreshOrderList();
-});
+}
   
 </script>
 </html>
