@@ -77,7 +77,7 @@ function checkPlatformBalance(specMerchant, backCall) {
                         p.bestSell(coin, _cb);
                     }
                 ], (err, r)=>{
-                    if (err) return;
+                    if (err) return (backCall &&backCall(err));
                     var leftCoins=r[0], buyers=r[1];
                     var usedBuyer=0;
                     balanceByCoins.forEach((balanceByMerchants, merchantid)=>{
