@@ -62,7 +62,8 @@ exports.notifySellSystem=function notifyMe(order) {
 const MIN_OF_BALANCE=0.00000001;
 var checking=false;
 function checkPlatformBalance(specMerchant, backCall) {
-    if (checking) return;
+    if (!backCall) backCall=function() {};
+    if (checking) return backCall('正在清帐');
     var createSellOrder=require('./order.js').createSellOrder;
     checking=true;
     getDB((err, db)=>{
@@ -77,7 +78,7 @@ function checkPlatformBalance(specMerchant, backCall) {
                         p.bestSell(coin, _cb);
                     }
                 ], (err, r)=>{
-                    if (err) return (backCall &&backCall(err));
+                    if (err) return cb(err);
                     var leftCoins=r[0], buyers=r[1];
                     var usedBuyer=0;
                     balanceByCoins.forEach((balanceByMerchants, merchantid)=>{
@@ -111,11 +112,12 @@ function checkPlatformBalance(specMerchant, backCall) {
                         }
                         usedBuyer=i;
                     });
+                    cb();
                 })
              }, callback);
         }, function() {
             checking=false;
-            backCall &&backCall();
+            backCall();
         })    
     })
 }
