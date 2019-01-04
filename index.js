@@ -42,7 +42,7 @@ const server = require('http').createServer()
 require('colors');
 
 const bitcoincli=(function initBitcoinCli() {
-	if (!argv.conf) argv.conf=path.join(os.homedir(), '.bitcoin/bitcoin.cfg');
+	if (!argv.conf) argv.conf=path.join(os.homedir(), '.bitcoin/bitcoin.conf');
 	try {
 		config.read(argv.conf);
 		var bitcoincfg=config.getAll();
