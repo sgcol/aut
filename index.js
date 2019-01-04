@@ -190,26 +190,26 @@ function main(err, broadcastNeighbors, dbp) {
 	if (bitcoincli) {
 		app.all('/getAddress', verifyOTC, httpf({callback:true}, function(callback) {
 			bitcoincli.getNewAddress('').then((res)=>{
-				callback(null, res);
+				callback(null, {address:res});
 			}).catch(e=>{
 				return callback(e);
 			})
 		}));
 		app.all('/getreceivedbyaddress', verifyOTC, httpf({address:'string', minconf:'?number', callback:true}, function(address, minconf, callback) {
-			bitcoincli.getReceivedByAddress(adderss, minconf).then(res=>{
+			bitcoincli.getReceivedByAddress(address, minconf||undefined).then(res=>{
 				return callback(null, {address:res});
 			}).catch(e=>{
 				return callback(e);
 			})
 		}))
 		app.all('/listTransactions', verifyOTC, httpf({count:'?number', from:'?number', callback:true}, function(count, from, callback) {
-			bitcoincli.listTransactions('*', count, from).then(res=>{
-				return callback(null, res);
+			bitcoincli.listTransactions('*', count||undefined, from||undefined).then(res=>{
+				return callback(null, httpf.json(res));
 			}).catch(e=>{
 				return callback(e);
 			});
 		}));
-		app.all('/sendToAddress', verifyOTC, httpf({toaddress:'string', amount:'string', callback:true}, sendto));
+		app.all('/sendToAddress', verifyOTC, httpf({toaddress:'string', amount:'number', callback:true}, sendto));
 	}
 
 	var db=dbp[0];
