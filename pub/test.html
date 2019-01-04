@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <button id="test">click me</button>
+</body>
+<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+<script>
+    $('#test').click(function(e) {
+        console.log('a');
+    }).click(function() {
+        console.log('b');
+        $('#test').off('click');
+    })
+</script>
+</html>

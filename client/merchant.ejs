@@ -30,24 +30,36 @@
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
+          <p class="card-description">
+            以下所有内容不填不作修改
+          </p>
         </div>
         <form>
           <div class="card-body">
             <div class="form-group">
-              <label for="setpass">重设密码</label>
-              <input type="text" class="form-control" id="setpass" placeholder="新密码">
-            </div>  
+              <label for="password">重设密码</label>
+              <input type="text" class="form-control" id="password" placeholder="新密码">
+              <label for="key">重设key</label>
+              <input type="text" class="form-control" id="key" placeholder="点按后面的按钮生成新key">
+              <span class="input-group-append">
+                <button class="btn btn-gradient-primary" type="button" onclick="javascript:$('#key').val(randstring(24))">生成</button>
+              </span>
+            </div>
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-prepend"><span for="fee" class="input-group-text">手续费</span></div>
                 <input type="text" class="form-control" id="fee" placeholder="1.5%">
               </div>
+              <div class="input-group">
+                <div class="input-group-prepend"><span for="parent" class="input-group-text">上级</span></div>
+                <input type="text" class="form-control" id="parent" placeholder="上级代理id">
+              </div>
             </div>
             <div class="form-group">
-              <p class="card-description">请勾选提供商(otc平台)</p>
+              <!-- <p class="card-description">请勾选提供商(otc平台)</p>
               <div class="form-group" id="providers">
-              </div>
-              <button type="button" class="btn btn-gradient-primary mr-2">Submit</button>
+              </div> -->
+              <button type="button" id="adjustMerchant" class="btn btn-gradient-primary mr-2">Submit</button>
               <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
             </div>
           </div>
@@ -171,7 +183,11 @@
 </body>
 <script>
   function randstring(len) {
-    return Math.random().toString(36).substring(len||7);
+    var s='', len=len||7;
+    while (s.length<len) {
+      s+=Math.random().toString(36).substring(2)
+    }
+    return s.substring(0, len);
   }
   function showAddacc() {
     var f=$('#addacc input');
@@ -185,12 +201,13 @@
   function onListChanged() {
     $(':checkbox').click((e)=>{
       var obj=$(e.target);
-      accIntf('/admin/updateMerchant', {merchantid:obj.attr('merchantid'), debugMode:obj.is(':checked')});
+      accIntf('/admin/updateAccount', {id:obj.attr('id'), debugMode:obj.is(':checked')});
     });
   }
   var providers=$('#providers');
+  
   $('#editMerchant').on('shown.bs.modal', function (e) {
-    accIntf('/admin/providers', (err, ret) =>{
+    providers && accIntf('/admin/providers', (err, ret) =>{
       if (err) return showerr(err);
       providers.empty();
       var allp=ret.message;
@@ -205,6 +222,29 @@
         `)
       }
     })
-  });
+    var id=$(e.relatedTarget).data('id');
+    var idx=acclist.find((ele)=>{return ele._id==id});
+    var merchant=acclist[idx];
+    if (merchant) {
+      $('#fee').attr("placeholder", ''+(1-merchant.share)*100+'%');
+      $('#parent').attr('placeholder', merchant.parent);
+    }
+    $('#adjustMerchant').off('click').click(function(e) {
+      var params={};
+      $('#editMerchant form [id]').each(function(idx, ele) {
+        if (ele.id=='fee') {
+          var s=$(ele).val().trim(), v=parseFloat(s);
+          if (isNaN(v)) continue;
+          if (s[s.length-1]=='%') {
+            // this is a percentage
+            params.share=1-(v/100);
+          } else params.share=1-v;
+        } else params[ele.id]=$(ele).val();
+      });
+      params.merchantid=merchant.merchantid;
+      accIntf('/admin/updateAccount', params);
+    })
+});
+  
 </script>
 </html>

@@ -1,7 +1,7 @@
 const getDB=require('./db.js'), pify=require('pify'), getMerchant=require('./merchants.js').getMerchant,ObjectID = require('mongodb').ObjectID
     ,request=require('request'), notifySellSystem=require('./sellOrder.js').notifySellSystem, async=require('async')
     , sortObj=require('sort-object'), qs=require('querystring').stringify
-    , md5=require('md5');
+    , md5=require('md5'), getUser=require('./users.js').get;
 
 function createOrder(merchantid, merchantOrderId, money, preferredPay, cb_url, callback) {
     if (typeof preferredPay=='function') {
@@ -73,13 +73,49 @@ function confirmOrder(orderid, money, callback) {
                 notifyMerchant(r[0]);
                 callback();
             })
-            var delta=(r[0].paidmoney*(r[0].share||0.985)).toFixed(2);
-            async.parallel([
-                db.users.update.bind(db.users, {merchantid:r[0].merchantid}, {$inc:{total:delta}}, {w:1}),
-                db.stat.update.bind(db.stat, {_id:r[0].merchantid}, {$inc:{incoming:r[0].paidmoney, profit:r[0].paidmoney-delta}, $set:{provider:r.provider}}, {upsert:true, w:1})
-            ], (err)=>{
-                notifySellSystem(r[0]);
+            var shares=[];
+            // shares.push((money*(r[0].share||0.985)).toFixed(2));
+            function getParent(user, cb) {
+                db.users.find({_id:user.parent}).toArray((err, r) =>{
+                    if (err) return cb(err);
+                    if (r.length==0) return cb('no such user');
+                    cb(null, r[0]);
+                })
+            }
+            var findkey={};
+            if (r[0].userid) findkey.id=r[0].userid;
+            else if (r[0].merchantid) findkey.merchantid=r[0].merchantid;
+            db.users.find(findkey).toArray()
+            .then((merchants)=>{
+                return new Promise((resolve, reject)=>{
+                    (function getShare(user, cb) {
+                        shares.push({m:Number((money*(user.share||0)).toFixed(2)), user:user});
+                        if (!user.parent) return cb();
+                        getParent(user, function(err, parent) {
+                            if (err || !parent) return cb();
+                            getShare(parent, cb);
+                        })
+                    })(merchants[0], resolve);
+                });
             })
+            .then(()=>{
+                updateWithLog(shares[0].user, shares[0].m, '充值收入', orderid);
+                // db.users.update({_id:shares[0].id}, {$inc:{total:shares[0].m}});
+                for (var i=1; i<shares.length; i++) {
+                    // db.users.update({_id:shares[i].id}, {$inc:{total:(shares[i].m-shares[i-1].m)}})
+                    updateWithLog(shares[i].user, shares[i].m-shares[i-1].m, '充值分账', orderid);
+                }
+                updateWithLog('system', money-shares[shares.length-1].m, '充值利润', orderid);
+            })
+            .catch((e)=>{
+        
+            });
+            // async.parallel([
+            //     db.users.update.bind(db.users, {merchantid:r[0].merchantid}, {$inc:{total:delta}}, {w:1}),
+            //     db.stat.update.bind(db.stat, {_id:r[0].merchantid}, {$inc:{incoming:r[0].paidmoney, profit:r[0].paidmoney-delta}, $set:{provider:r.provider}}, {upsert:true, w:1})
+            // ], (err)=>{
+            //     notifySellSystem(r[0]);
+            // })
         });
     })
 }
@@ -149,6 +185,30 @@ function updateOrder(orderid, upd, callback) {
     });
 }
 
+function balancelog(user, delta, desc) {
+    (function check(cb) {
+        if (typeof user=='object') return cb(null, user);
+        // get from db
+        db.users.find({_id:user}).toArray((err, r)=>{
+            if (err) return cb(err);
+            if (r.length==0) return cb('no such user');
+            cb(err, r[0]);
+        })
+    })((err, userdata) =>{
+        db.balance.insert({user:userdata._id, before:userdata.total||0, delta:delta, desc:desc});
+    });
+}
+function updateWithLog(user, delta, desc, orderid) {
+    (function check(cb) {
+        if (typeof user=='object') return cb(null, user);
+        // get from db
+        getUser(user, cb);
+    })((err, userdata) =>{
+        db.balance.insert({user:userdata._id, total:userdata.total, delta:delta, desc:desc, orderid:orderid, _t:new Date()});
+        db.users.update({_id:userdata._id}, {$inc:{total:delta}}, {upsert:true});
+        userdata.total+=delta;
+    });    
+}
 module.exports={
     updateOrder:updateOrder,
     createOrder:createOrder,

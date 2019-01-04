@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "async": "^2.6.1",
+    "bitcoin-core": "^2.0.0",
     "body-parser": "^1.18.3",
     "clone": "^2.1.2",
     "colors": "^1.3.2",
@@ -18,6 +19,7 @@
     "httpf": "0.0.8",
     "jimp": "^0.5.6",
     "md5": "^2.2.1",
+    "node-confenv": "^1.2.0",
     "object-path": "^0.11.4",
     "pify": "^4.0.1",
     "pm2": "^3.2.2",

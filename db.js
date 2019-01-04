@@ -13,7 +13,6 @@ var q=async.queue(function (extern_callback, queue_callback) {
         {bills:{index:['status', 'time', 'type' ]}},
         'knownCard',
         {users:{index:['acl', 'merchantid']}},
-        'merchants',
         {monster:{index:['exOrderId'], capped:true, size:100*1024, max:100000}},
         'stat',
         'balance'

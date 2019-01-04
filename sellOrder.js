@@ -81,10 +81,10 @@ function checkPlatformBalance(specMerchant, backCall) {
                     if (err) return cb(err);
                     var leftCoins=r[0], buyers=r[1];
                     var usedBuyer=0;
-                    balanceByCoins.forEach((balanceByMerchants, merchantid)=>{
-                        if (leftCoins==0) return;
-                        if (specMerchant && specMerchant!=merchantid) return;   //如果指定merchant，那么只处理指定的
-                        if (balanceByMerchants<MIN_OF_BALANCE) return;
+                    async.eachOf(balanceByCoins, (balanceByMerchants, merchantid, cb2)=>{
+                        if (leftCoins==0) return cb2();
+                        if (specMerchant && specMerchant!=merchantid) return cb2();   //如果指定merchant，那么只处理指定的
+                        if (balanceByMerchants<MIN_OF_BALANCE) return cb2();
                         for (var i=usedBuyer; i<buyers.length; i++) {
                             let buyer=buyers[i];
                             if (buyer.leftCoins==0) continue;
@@ -111,8 +111,7 @@ function checkPlatformBalance(specMerchant, backCall) {
                             db.balance.update({_id:'default'}, {$set:chg});   
                         }
                         usedBuyer=i;
-                    });
-                    cb();
+                    }, cb);
                 })
              }, callback);
         }, function() {

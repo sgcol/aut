@@ -1,6 +1,7 @@
 const server = require('http').createServer()
 , url = require('url')
 , path = require('path')
+, os =require('os')
 , request = require('request')
 , express = require('express')
 , app = express()
@@ -28,6 +29,8 @@ const server = require('http').createServer()
 , notifyMerchant =_orderFunc.notifyMerchant
 , getOrderDetail =_orderFunc.getOrderDetail
 , util=require('util')
+, BitcoreClient = require('bitcoin-core')
+, config = require('./Conf.js')
 , argv = require('yargs')
 	.default('port', 80)
 	.boolean('debugout')
@@ -37,6 +40,23 @@ const server = require('http').createServer()
 , debugout=require('debugout')(argv.debugout);
 
 require('colors');
+
+const bitcoincli=(function initBitcoinCli() {
+	if (!argv.conf) argv.conf=path.join(os.homedir(), '.bitcoin/bitcoin.cfg');
+	try {
+		config.read(argv.conf);
+		var bitcoincfg=config.getAll();
+		return new BitcoreClient({
+			username:bitcoincfg.rpcuser,
+			password:bitcoincfg.rpcpassword,
+			port:bitcoincfg.rpcport,
+			network:bitcoincfg.testnet?'testnet':'mainnet'
+		});
+	} catch(e) {
+		console.log(e.message.red, 'can not create bitcoincli');
+		return null;
+	}
+})();
 
 const auth_timeout=argv.authtimeout;
 
@@ -110,10 +130,86 @@ function main(err, broadcastNeighbors, dbp) {
 	});
 	app.use('/pvd/:provider', function (req, res, next) {
 		debugout('provider', req.provider);
-		if (getProviders(req.provider)) return getProviders(req.provider).router.call(null, req, res, function () { res.status(404).send({err:'no such function ' + req.url, detail:arguments}); });
+		if (getProviders(req.provider)) return getProviders(req.provider).router.call(null, req, res, function (err) { 
+			if (err) {
+				if (err instanceof Error) {
+					var o={message:err.message};
+					if (argv.debugout) o.stack=err.stack;
+					err=o;
+				}
+				return res.status(500).send({err:err});
+			}
+			return res.status(404).send({err:'no such function ' + req.url, detail:arguments}); 
+		});
 		res.end('pf ' + req.provider + ' not defined');
 	});
-			
+	const MIN_COIN=0.00000001;
+	function sendto(toaddress, amount, callback) {
+		bitcoincli.command('omni_getallbalancesforid', 31).then(res=>{
+			var left=amount, idx=0;
+			var trades=[];
+			while(left>MIN_COIN) {
+				if (left>res[idx].balance) {
+					trades.push({address:res[idx].address, amount:res[idx].balance});
+					left-=res[idx].balance;
+				} else {
+					left=0;
+					trades.push({address:res[idx].address, amount:left});
+					break;
+				}
+				idx++;
+				if (idx>=res.length) break;
+			}
+			if (left>MIN_COIN) return callback('not enough usdt to send');
+			async.each(trades, function(t, cb) {
+				bitcoincli.command('omni_send', t.address, toaddress, 31, amount, REDEEMADDR).then(res=>{cb()})
+			}, function(e) {
+				callback(e);
+			})
+		}).catch(e=>{
+			callback(e);
+		})
+	}
+	const OTCKey='$mVd!w9R%Wr4NDSJr8';
+	function verifyOTC(req, res, next) {
+		var _p=merge(req.query, req.body), sign=_p.sign;
+		if (!sign) return res.send({err:'没有签名sign'});
+		delete _p.sign;
+		var wanted=md5(qs.stringify(sortObj(_p))+OTCKey);
+		if (sign!=wanted) {
+			var e={err:'签名错误'};
+			if (argv.debugout) {
+				e.wanted=wanted;
+				e.str=qs.stringify(sortObj(_p))+OTCKey;
+			}
+			return res.send(e);
+		}
+		next();
+	}
+	if (bitcoincli) {
+		app.all('/getAddress', verifyOTC, httpf({callback:true}, function(callback) {
+			bitcoincli.getNewAddress('').then((res)=>{
+				callback(null, res);
+			}).catch(e=>{
+				return callback(e);
+			})
+		}));
+		app.all('/getreceivedbyaddress', verifyOTC, httpf({address:'string', minconf:'?number', callback:true}, function(address, minconf, callback) {
+			bitcoincli.getReceivedByAddress(adderss, minconf).then(res=>{
+				return callback(null, {address:res});
+			}).catch(e=>{
+				return callback(e);
+			})
+		}))
+		app.all('/listTransactions', verifyOTC, httpf({count:'?number', from:'?number', callback:true}, function(count, from, callback) {
+			bitcoincli.listTransactions('*', count, from).then(res=>{
+				return callback(null, res);
+			}).catch(e=>{
+				return callback(e);
+			});
+		}));
+		app.all('/sendToAddress', verifyOTC, httpf({toaddress:'string', amount:'string', callback:true}, sendto));
+	}
 
 	var db=dbp[0];
 	var authedClients={};
@@ -130,19 +226,7 @@ function main(err, broadcastNeighbors, dbp) {
 		req.auth=auth;
 		next();
 	}
-	function noAuthToLogin(req, res, next) {
-		if (!req.cookies || !req.cookies.a) return res.redirect('login.html');
-		var auth=authedClients[req.cookies.a];
-		if (!auth) return res.redirect('login.html');
-		var now=new Date();
-		if (auth.validUntil<now) {
-			delete authedClients[req.cookies.a]
-			return res.redirect('login.html');
-		}
-		auth.validUntil=new Date(now.getTime()+auth_timeout);
-		req.auth=auth;
-		next();		
-	}
+	const noAuthToLogin=verifyAuth;
 	function verifyAdmin(req, res, next) {
 		if (!req.auth) return res.send({err:'no auth'});
 		if (req.auth.acl=='admin') return next();
@@ -173,28 +257,54 @@ function main(err, broadcastNeighbors, dbp) {
 			if (pack.data.del) delete merchants[pack.data.merchantid];
 			else getMerchant(pack.data.merchantid, function(err, mer) {
 				if (err) return;
-				if (pack.data.key!==null) mer.key=pack.data.key;
-				if (pack.data.debugMode!==null) mer.debugMode=pack.data.debugMode;					
+				merge(mer, pack.data);
 			});
 			break;
 		}
 	});
-	app.all('/admin/updateMerchant', verifyAuth, httpf({merchantid:'string', key:'?string', debugMode:'?boolean', del:'?boolean', callback:true}, function(merchantid, key, debugMode, del,callback) {
-		broadcastNeighbors({type:'admin:updateMerchant', data:{key:key, debugMode:debugMode, merchantid:merchantid, del:del}});
-		if (del) {
-			delete merchants[pack.data.merchantid];
-			db.merchants.remove({_id:merchantid}, function(err) {
-				callback(err);
+	app.all('/admin/updateAccount', verifyAuth, httpf({id:'?string', merchantid:'?string', /*key:'?string', debugMode:'?boolean', del:'?boolean', */callback:true}, function(id, merchantid,/*key, debugMode, del,*/callback) {
+		var params=merge(this.req.query, this.req.body);
+		delete params.id;
+		delete params.merchantid;
+		// if (params.setpass) {
+		// 	if (typeof params.setpass!='string' || params.setpass.length<6) return callback('setpass 必须是超过6位的字符串');
+		// 	params.password=setpass;
+		// 	delete params.setpass;
+		// }
+		// if (params.fee) {
+		// 	if (params.fee>1) return callback('fee必须小于1');
+		// 	params.share=1-fee;
+		// 	delete params.fee;
+		// }
+		for (var i in params) {
+			if (params[i]==null) delete params[i];
+		}
+
+		var useid={};
+		if (id) useid._id=id;
+		else if (merchantid) useid.merchantid=merchantid;
+		else return callback('id merchantid必须指定一个');
+		if (merchantid) {
+			broadcastNeighbors({type:'admin:updateMerchant', data:params});
+		}
+		if (params.del) {
+			db.users.remove(useid, function(err) {
+				if (err) return callback(err);
+				if (merchantid) delete merchants[merchantid];
+				callback();
 			});
 			return;
 		}
-		getMerchant(merchantid, function(err, mer) {
+		db.users.update(useid, {$set:params}, function(err) {
 			if (err) return callback(err);
-			if (key!==null) mer.key=key;
-			if (debugMode!==null) mer.debugMode=debugMode;
-			db.users.update({merchantid:merchantid}, {$set:{key:mer.key, debugMode:mer.debugMode}}, function(err) {
-				callback(err);
-			});
+			if (merchantid) {
+				return getMerchant(merchantid, function(err, mer) {
+					if (err) return callback(err);
+					merge(mer, params);
+					callback();
+				});	
+			}
+			callback();
 		});
 	}));
 	app.all('/admin/confirmOrder', verifyAuth, verifyManager, httpf({orderid:'string', callback:true}, function(orderid, callback) {
@@ -202,7 +312,7 @@ function main(err, broadcastNeighbors, dbp) {
 	}));
 	app.all('/admin/clearBalance', verifyAuth, verifyManager, httpf({merchantid:'?string', callback:true}, function(merchantid, callback) {
 		require('./sellOrder.js').checkPlatformBalance(merchantid, callback);
-	}))
+	}));
 	app.all('/admin/listOrders', verifyAuth, httpf({from:'?date', to:'?date', count:'?number', pageno:'?number', type:'?string', callback:true}, function(from, to, count, pageno, type, callback) {
 		var times=[];
 		if (from) times.push({$gte:from});
