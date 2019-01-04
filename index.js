@@ -199,13 +199,14 @@ function main(err, broadcastNeighbors, dbp) {
 			if (!minconf) var p=bitcoincli.getReceivedByAddress(address);
 			else var p=bitcoincli.getReceivedByAddress(address, minconf)
 			p.then(res=>{
-				return callback(null, {address:res});
+				return callback(null, {received:res});
 			}).catch(e=>{
 				return callback(e);
 			})
 		}))
 		app.all('/listTransactions', verifyOTC, httpf({count:'?number', from:'?number', callback:true}, function(count, from, callback) {
-			bitcoincli.listTransactions('*', count||undefined, from||undefined).then(res=>{
+			var p;
+			bitcoincli.listTransactions({account:'*', count:count, from:from}).then(res=>{
 				return callback(null, httpf.json(res));
 			}).catch(e=>{
 				return callback(e);
