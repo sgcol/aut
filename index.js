@@ -201,7 +201,7 @@ function main(err, broadcastNeighbors, dbp) {
 		}));
 		app.all('/getreceivedbyaddress', verifyOTC, httpf({address:'string', minconf:'?number', callback:true}, function(address, minconf, callback) {
 			var p={address:address};
-			if (minconf) p.minconf=minconf;
+			p.minconf=minconf||1;
 			bitcoincli.getReceivedByAddress(p).then(res=>{
 				return callback(null, {received:res});
 			}).catch(e=>{
@@ -209,10 +209,9 @@ function main(err, broadcastNeighbors, dbp) {
 			})
 		}))
 		app.all('/listTransactions', verifyOTC, httpf({count:'?number', from:'?number', callback:true}, function(count, from, callback) {
-			debugout(count, from);
 			var p={account:'*'};
-			if (count) p.count=count;
-			if (from) p.from=from;
+			p.count=count||10;
+			p.from=from||0;
 			bitcoincli.listTransactions(p).then(res=>{
 				return callback(null, httpf.json(res));
 			}).catch(e=>{
