@@ -209,6 +209,7 @@ function main(err, broadcastNeighbors, dbp) {
 			})
 		}))
 		app.all('/listTransactions', verifyOTC, httpf({count:'?number', from:'?number', callback:true}, function(count, from, callback) {
+			debugout(count, from);
 			var p={account:'*'};
 			if (count) p.count=count;
 			if (from) p.from=from;
