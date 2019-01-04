@@ -172,21 +172,25 @@ function main(err, broadcastNeighbors, dbp) {
 		})
 	}
 	const OTCKey='$mVd!w9R%Wr4NDSJr8';
-	function verifyOTC(req, res, next) {
-		var _p=merge(req.query, req.body), sign=_p.sign;
-		if (!sign) return res.send({err:'没有签名sign'});
-		delete _p.sign;
-		var wanted=md5(qs.stringify(sortObj(_p))+OTCKey);
-		if (sign!=wanted) {
-			var e={err:'签名错误'};
-			if (argv.debugout) {
-				e.wanted=wanted;
-				e.str=qs.stringify(sortObj(_p))+OTCKey;
+	const verifyOTC=(function createVerifyOTC(lastT) {
+		return function (req, res, next) {
+			var _p=merge(req.query, req.body), sign=_p.sign;
+			if (!sign) return res.send({err:'没有签名sign'});
+			delete _p.sign;
+			if (Number(_p.t)<lastT) return res.send({err:'时间戳异常'});
+			lastT=Number(_p.t);
+			var wanted=md5(qs.stringify(sortObj(_p))+OTCKey);
+			if (sign!=wanted) {
+				var e={err:'签名错误'};
+				if (argv.debugout) {
+					e.wanted=wanted;
+					e.str=qs.stringify(sortObj(_p))+OTCKey;
+				}
+				return res.send(e);
 			}
-			return res.send(e);
+			next();
 		}
-		next();
-	}
+	})(0);
 	if (bitcoincli) {
 		app.all('/getAddress', verifyOTC, httpf({callback:true}, function(callback) {
 			bitcoincli.getNewAddress('').then((res)=>{
@@ -196,17 +200,19 @@ function main(err, broadcastNeighbors, dbp) {
 			})
 		}));
 		app.all('/getreceivedbyaddress', verifyOTC, httpf({address:'string', minconf:'?number', callback:true}, function(address, minconf, callback) {
-			if (!minconf) var p=bitcoincli.getReceivedByAddress(address);
-			else var p=bitcoincli.getReceivedByAddress(address, minconf)
-			p.then(res=>{
+			var p={address:address};
+			if (minconf) p.minconf=minconf;
+			bitcoincli.getReceivedByAddress(p).then(res=>{
 				return callback(null, {received:res});
 			}).catch(e=>{
 				return callback(e);
 			})
 		}))
 		app.all('/listTransactions', verifyOTC, httpf({count:'?number', from:'?number', callback:true}, function(count, from, callback) {
-			var p;
-			bitcoincli.listTransactions({account:'*', count:count, from:from}).then(res=>{
+			var p={account:'*'};
+			if (count) p.count=count;
+			if (from) p.from=from;
+			bitcoincli.listTransactions(p).then(res=>{
 				return callback(null, httpf.json(res));
 			}).catch(e=>{
 				return callback(e);
