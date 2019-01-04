@@ -177,6 +177,7 @@ function main(err, broadcastNeighbors, dbp) {
 			var _p=merge(req.query, req.body), sign=_p.sign;
 			if (!sign) return res.send({err:'没有签名sign'});
 			delete _p.sign;
+			if (_p.t==null) return res.send({err:'没有时间戳'});
 			if (Number(_p.t)<lastT) return res.send({err:'时间戳异常'});
 			lastT=Number(_p.t);
 			var wanted=md5(qs.stringify(sortObj(_p))+OTCKey);
