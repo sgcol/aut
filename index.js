@@ -196,7 +196,9 @@ function main(err, broadcastNeighbors, dbp) {
 			})
 		}));
 		app.all('/getreceivedbyaddress', verifyOTC, httpf({address:'string', minconf:'?number', callback:true}, function(address, minconf, callback) {
-			bitcoincli.getReceivedByAddress(address, minconf||undefined).then(res=>{
+			if (!minconf) var p=bitcoincli.getReceivedByAddress(address);
+			else var p=bitcoincli.getReceivedByAddress(address, minconf)
+			p.then(res=>{
 				return callback(null, {address:res});
 			}).catch(e=>{
 				return callback(e);
