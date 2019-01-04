@@ -208,7 +208,7 @@ function main(err, broadcastNeighbors, dbp) {
 			})
 		}))
 		app.all('/listTransactions', verifyOTC, httpf({txid:'?string', count:'?number', skip:'?number', startblock:'?number', endblock:'?number', callback:true}, function(txid, count, skip, startblock, endblock, callback) {
-			bitcoincli.command('omni_listtransactions',txid||'*', count||10, start||0, startblock||0, endblock||999999999).then(res=>{
+			bitcoincli.command('omni_listtransactions',txid||'*', count||10, skip||0, startblock||0, endblock||999999999).then(res=>{
 				return callback(null, httpf.json(res));
 			}).catch(e=>{
 				return callback(e);
