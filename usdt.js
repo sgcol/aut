@@ -84,7 +84,7 @@ function collectallusdt() {
     })
 }
 function sendwithoutretry(fromaddr, toaddr, amount, feeaddr, opdesc, cb) {
-    bitcoincli.command('omni_funded_send', fromaddress, toaddress, 31, amount, feeaddress)
+    bitcoincli.command('omni_funded_send', fromaddress, toaddress, 31, ''+amount, feeaddress)
     .then(txid=>{
         return cb && cb(null, txid);
     })
@@ -99,7 +99,7 @@ function sendwithoutretry(fromaddr, toaddr, amount, feeaddr, opdesc, cb) {
     })
 }
 function send(fromaddress, toaddress, amount, feeaddress, opdesc, cb) {
-    bitcoincli.command('omni_funded_send', fromaddress, toaddress, 31, amount, feeaddress)
+    bitcoincli.command('omni_funded_send', fromaddress, toaddress, 31, ''+amount, feeaddress)
     .then(txid=>{
         return cb && cb(null, txid);
     })
@@ -183,7 +183,7 @@ if (module==require.main) {
         getallusdtaddr(propertyid, (err, allusdt)=>{
             console.log('all omni', allusdt);
             console.log(allusdt[0].addr, sysaddr, propertyid, 0.001, sysaddr);
-            bitcoincli.command('omni_funded_send', allusdt[0].addr, sysaddr, propertyid, 0.001, sysaddr).then(res=>{
+            bitcoincli.command('omni_funded_send', allusdt[0].addr, sysaddr, propertyid, '0.001', sysaddr).then(res=>{
                 console.log('no fee btc', res, typeof res);
             }).catch(e=>{
                 console.log('no fee btc err', e, typeof e);
