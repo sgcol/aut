@@ -191,8 +191,15 @@ if (module==require.main) {
                 console.log('no fee btc', res, typeof res);
             }).catch(e=>{
                 console.log('no fee btc err', e, typeof e);
-            });            
-        });
-        
+                //如果fromaddr里没有BTC，那么转0.00000546给他，这是usdt转账时必须的，
+                if (e.code==-212) {
+                    bitcoincli.sendFrom('system', allusdt[0].addr, ''+0.00000546).then(res=>{
+                        console.log('recover addr', allusdt[0].addr, 'from system');
+                    }).catch(e=>{
+                        console.log('recover addr failed', e);
+                    });
+                }
+            });
+        });        
     });
 }
