@@ -20,6 +20,8 @@ const url = require('url')
 , pify =require('pify')
 , argv=require('yargs').argv;
 
+const USDT=require('../usdt.js');
+
 if (process.env.NODE_ENV=='production') {
 	var _baseURL=url.parse('https://api.monster.one');
 	var ownerId='MHT20181128155434309970729525704', password='123456', appId='mst5d11d890389fb57b', key='ad0c7232858a2aef2945d27b27477357';
@@ -289,20 +291,8 @@ function getBalance(coin, callback){
 		callback=coin;
 		coin='USDT';
 	}
-	var desturl=clone(_baseURL);
-	desturl.pathname='/egQuery/queryUserCoinQuantity';
-	var o=makeObj({coinId:coin||'USDT', appId:appId});
-	o.appSign=o.sign.toUpperCase();
-	delete o.sign;
-	console.log(o);
-	request.post({uri:url.format(desturl), json:o}, (err, header, body)=>{
-		if (err) return err;
-		var r=body.resultList;
-		for (var i=0; i<r.length; i++) {
-			if (r[i].quantityStatus=='0') return callback(null, r[i].coinQuantity);
-		}
-		return callback('找不到账户');
-	})
+	if (coin!='USDT') return callback(coin+' is not supported');
+	USDT.getspendable(callback);
 }
 exports.bestSell=bestSell;
 exports.getBalance=getBalance;

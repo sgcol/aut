@@ -29,8 +29,7 @@ const server = require('http').createServer()
 , notifyMerchant =_orderFunc.notifyMerchant
 , getOrderDetail =_orderFunc.getOrderDetail
 , util=require('util')
-, BitcoreClient = require('bitcoin-core')
-, config = require('./Conf.js')
+, USDT =require('./usdt.js')
 , md5 = require('md5')
 , argv = require('yargs')
 	.default('port', 80)
@@ -41,23 +40,6 @@ const server = require('http').createServer()
 , debugout=require('debugout')(argv.debugout);
 
 require('colors');
-
-const bitcoincli=(function initBitcoinCli() {
-	if (!argv.conf) argv.conf=path.join(os.homedir(), '.bitcoin/bitcoin.conf');
-	try {
-		config.read(argv.conf);
-		var bitcoincfg=config.getAll();
-		return new BitcoreClient({
-			username:bitcoincfg.rpcuser,
-			password:bitcoincfg.rpcpassword,
-			port:bitcoincfg.rpcport,
-			network:bitcoincfg.testnet?'testnet':'mainnet'
-		});
-	} catch(e) {
-		console.log(e.message.red, 'can not create bitcoincli');
-		return null;
-	}
-})();
 
 const auth_timeout=argv.authtimeout;
 
@@ -144,33 +126,6 @@ function main(err, broadcastNeighbors, dbp) {
 		});
 		res.end('pf ' + req.provider + ' not defined');
 	});
-	const MIN_COIN=0.00000001;
-	function sendto(toaddress, amount, callback) {
-		bitcoincli.command('omni_getallbalancesforid', 31).then(res=>{
-			var left=amount, idx=0;
-			var trades=[];
-			while(left>MIN_COIN) {
-				if (left>res[idx].balance) {
-					trades.push({address:res[idx].address, amount:res[idx].balance});
-					left-=res[idx].balance;
-				} else {
-					left=0;
-					trades.push({address:res[idx].address, amount:left});
-					break;
-				}
-				idx++;
-				if (idx>=res.length) break;
-			}
-			if (left>MIN_COIN) return callback('not enough usdt to send');
-			async.each(trades, function(t, cb) {
-				bitcoincli.command('omni_send', t.address, toaddress, 31, amount, REDEEMADDR).then(res=>{cb()})
-			}, function(e) {
-				callback(e);
-			})
-		}).catch(e=>{
-			callback(e);
-		})
-	}
 	const OTCKey='$mVd!w9R%Wr4NDSJr8';
 	const verifyOTC=(function createVerifyOTC(lastT) {
 		return function (req, res, next) {
@@ -192,30 +147,21 @@ function main(err, broadcastNeighbors, dbp) {
 			next();
 		}
 	})(0);
-	if (bitcoincli) {
-		app.all('/getAddress', verifyOTC, httpf({callback:true}, function(callback) {
-			bitcoincli.getNewAddress('').then((res)=>{
-				callback(null, {address:res});
-			}).catch(e=>{
-				return callback(e);
-			})
-		}));
-		app.all('/getreceivedbyaddress', verifyOTC, httpf({address:'string', minconf:'?number', callback:true}, function(address, minconf, callback) {
-			bitcoincli.getReceivedByAddress(address, minconf||1).then(res=>{
-				return callback(null, {received:res});
-			}).catch(e=>{
-				return callback(e);
-			})
-		}))
-		app.all('/listTransactions', verifyOTC, httpf({txid:'?string', count:'?number', skip:'?number', startblock:'?number', endblock:'?number', callback:true}, function(txid, count, skip, startblock, endblock, callback) {
-			bitcoincli.command('omni_listtransactions',txid||'*', count||10, skip||0, startblock||0, endblock||999999999).then(res=>{
-				return callback(null, httpf.json(res));
-			}).catch(e=>{
-				return callback(e);
-			});
-		}));
-		app.all('/sendToAddress', verifyOTC, httpf({toaddress:'string', amount:'number', callback:true}, sendto));
+	if (USDT.bitcoincli) {
+		app.all('/getAddress', verifyOTC, httpf({account:'string', callback:true}, USDT.getaddress));
+		app.all('/getreceivedbyaddress', verifyOTC, httpf({address:'string', minconf:'?number', callback:true}, USDT.getreceivedbyaddress))
+		app.all('/listTransactions', verifyOTC, httpf({txid:'?string', count:'?number', skip:'?number', startblock:'?number', endblock:'?number', callback:true}, USDT.listtransactions));
+		app.all('/sendToAddress', verifyOTC, httpf({toaddress:'string', amount:'number', callback:true}, USDT.sendto));
 	}
+
+	app.param('merchantid', (req, res, next, merchantid)=>{
+		req.body.merchantid=merchantid;
+		next();
+	});
+	app.all('/merchant/:merchantid/onCreateOrder', httpf({merchantid:'string', transactionid:'string', paymethod:'?string', money:'?number', amount:'?number', callback:true}, 
+	function(merchantid, transactionid, paymethod, money, amount, callback) {
+		callback(null, {url:'alipay.com'});
+	}));
 
 	var db=dbp[0];
 	var authedClients={};

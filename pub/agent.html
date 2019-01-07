@@ -22,7 +22,7 @@
 </head>
 <body>
   <!-- dialog  -->
-  <div class="modal fade" id="editMerchant" tabindex="-1" role="dialog" aria-labelledby="editMerchant" aria-hidden="true">
+  <div class="modal fade" id="editAgent" tabindex="-1" role="dialog" aria-labelledby="editAgent" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
         <div class="modal-header">
@@ -30,15 +30,37 @@
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
+          <p class="card-description">
+            以下所有内容不填不作修改
+          </p>
         </div>
         <form>
           <div class="card-body">
             <div class="form-group">
-              <label for="setpass">重设密码</label>
-              <input type="text" class="form-control" id="setpass" placeholder="新密码">
+              <label for="password">重设密码</label>
+              <input type="text" class="form-control" id="password" placeholder="新密码">
             </div>
-            <button type="button" class="btn btn-gradient-primary mr-2">Submit</button>
-            <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-prepend"><span for="fee" class="input-group-text">手续费</span></div>
+                <input type="text" class="form-control" id="fee" placeholder="1.5%">
+              </div>
+              <div class="input-group">
+                <div class="input-group-prepend"><span for="parent" class="input-group-text">上级</span></div>
+                <input type="text" class="form-control" id="parent" placeholder="上级代理id">
+              </div>
+              <div class="input-group">
+                <div class="input-group-prepend"><span for="subordinates" class="input-group-text">下级</span></div>
+                <input type="text" class="form-control" id="subordinates" placeholder="下级代理id">
+              </div>
+            </div>
+            <div class="form-group">
+              <!-- <p class="card-description">请勾选提供商(otc平台)</p>
+              <div class="form-group" id="providers">
+              </div> -->
+              <button type="button" id="adjustAgent" class="btn btn-gradient-primary mr-2">Submit</button>
+              <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+            </div>
           </div>
         </form>
       </div>
@@ -269,12 +291,12 @@
         <div class="content-wrapper">
           <div class="page-header">
             <h3 class="page-title">
-              管理员
+              代理
             </h3>
             <nav aria-label="breadcrumb">
               <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="#">账号</a></li>
-                <li class="breadcrumb-item active" aria-current="page">管理员账号</li>
+                <li class="breadcrumb-item active" aria-current="page">代理账号</li>
               </ol>
             </nav>
           </div>
@@ -282,11 +304,11 @@
               <div class="col-lg-12 grid-margin stretch-card">
                   <div class="card">
                     <div class="card-body">
-                      <h4 class="card-title">管理员</h4>
+                      <h4 class="card-title">代理</h4>
                       <p class="card-description">
                         <a class="text-muted" href="javascript:showAddacc();">点击此处添加</a>
                       </p>
-                      <div class="col-12 grid-margin fade" id="addUser" aria-hidden="true" style="display: none">
+                      <div class="col-12 grid-margin" style="display:none" id="addUser">
                           <div class="card">
                             <div class="card-body">
                               <form class="form-inline" id="addacc" action="#">
@@ -301,7 +323,7 @@
                                 </div>
                                 <label class="sr-only" for="inlineFormInputName2">Password</label>
                                 <input type="text" class="form-control mb-2 mr-sm-2" id="inlineFormInputName2" name="password" placeholder="密码">
-                                <input type="hidden" name="identity" value="manager">
+                                <input type="hidden" name="identity" value="agent">
                                 <button class="btn btn-gradient-primary mb-2" type="submit">Submit</button>
                                 <button type="button" class="btn btn-light mb-2" style="margin-left:10px" onclick="javascript:$('#addUser').hide()">Cancel</button>
                               </form>
@@ -375,6 +397,13 @@
   <!-- End custom js for this page-->
 </body>
 <script>
+  function randstring(len) {
+    var s='', len=len||7;
+    while (s.length<len) {
+      s+=Math.random().toString(36).substring(2)
+    }
+    return s.substring(0, len);
+  }
   function showAddacc() {
     var f=$('#addacc input');
     for (var i=0; i<f.length; i++) {
@@ -382,9 +411,33 @@
       if (item.type!='hidden') item.value='';
       $(item).removeClass('wrong');
     }
-    if ($('#addUser').hasClass('show')) $('#addUser').removeClass('show');
-    else $('#addUser').addClass('show');
     $('#addUser').toggle();
   }
+  $('#editAgent').on('shown.bs.modal', function (e) {
+    var agentid=$(e.relatedTarget).data('id');
+    var idx=acclist.find((ele)=>{return ele.agentid==agentid});
+    var agent=acclist[idx];
+    if (agent) {
+      $('#fee').attr("placeholder", ''+(1-agent.share)*100+'%');
+      $('#parent').attr('placeholder', agent.parent);
+      $('#subordinates').attr('placeholder', agent.subordinates.join(','))
+    }
+    $('#adjustAgent').off('click').click(function(e) {
+      var params={};
+      $('#editAgent form [id]').each(function(idx, ele) {
+        if (ele.id=='fee') {
+          var s=$(ele).val().trim(), v=parseFloat(s);
+          if (isNaN(v)) continue;
+          if (s[s.length-1]=='%') {
+            // this is a percentage
+            params.share=1-(v/100);
+          } else params.share=1-v;
+        } else params[ele.id]=$(ele).val();
+      });
+      params.id=agentid;
+      accIntf('/admin/updateAccount', params);
+    })
+});
+  
 </script>
 </html>
