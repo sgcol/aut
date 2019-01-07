@@ -162,7 +162,13 @@ module.exports={
             bitcoincli.command('omni_getallbalancesforaddress', sysaddr).then(balances=>{
                 var usdtbalance=balances.find(b=>{return b.propertyid==31});
                 callback(null, Number(usdtbalance.balance));
-            }).catch(e=>{callback(e)})
+            }).catch(e=>{
+                if (e.code==-8) {
+                    // this address without any omni-based token, no usdt, no omni, etc
+                    return callback(null, 0);
+                }
+                callback(e);
+            })
         })
     }
 }    
@@ -176,15 +182,11 @@ if (module==require.main) {
         var propertyid=1;
         getallusdtaddr(propertyid, (err, allusdt)=>{
             console.log('all omni', allusdt);
-            bitcoincli.command('omni_funded_send', 'nonexistsaddr', sysaddr, propertyid, 0.001, sysaddr).then(res=>{
-                console.log('a address with no coin', res, typeof res);
-            }).catch(e=>{
-                console.log('a address with no coin', e, typeof e);
-            });
+            console.log(allusdt[0].addr, sysaddr, propertyid, 0.001, sysaddr);
             bitcoincli.command('omni_funded_send', allusdt[0].addr, sysaddr, propertyid, 0.001, sysaddr).then(res=>{
                 console.log('no fee btc', res, typeof res);
             }).catch(e=>{
-                console.log('no fee btc', e, typeof e);
+                console.log('no fee btc err', e, typeof e);
             });            
         });
         
