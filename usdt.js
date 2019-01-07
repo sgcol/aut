@@ -172,7 +172,7 @@ if (module==require.main) {
     // test code
     getsystemaddr((err, sysaddr)=>{
         console.log('systemaddress', sysaddr);
-        getspendable(console.log.bind(console, 'sysaddrbalance'));
+        module.exports.getspendable(console.log.bind(console, 'sysaddrbalance'));
         var propertyid=1;
         getallusdtaddr(propertyid, (err, allusdt)=>{
             console.log('all omni', allusdt);
