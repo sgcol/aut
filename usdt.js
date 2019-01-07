@@ -90,22 +90,27 @@ function sendwithoutretry(fromaddr, toaddr, amount, feeaddr, opdesc, cb) {
     })
     .catch(e=>{
         //如果fromaddr里没有BTC，那么转0.00000546给他，这是usdt转账时必须的，
-        getsystemaddr((err, sysaddr)=>{
-            if (err) return;
-            bitcoincli.sendFrom(sysaddr, fromaddress, 0.00000546);
-        });
+        if (e.code==-212) {
+            getsystemaddr((err, sysaddr)=>{
+                if (err) return;
+                bitcoincli.sendFrom(sysaddr, fromaddress, 0.00000546);
+            });    
+        }
         allfails.push({op:opdesc, err:e, from:fromaddress, to:toaddress, fee:feeaddress, t:new Date()});
         return cb && cb(e);
     })
 }
-function send(fromaddress, toaddress, amount, feeaddress, opdesc, cb) {
-    bitcoincli.command('omni_funded_send', fromaddress, toaddress, 31, ''+amount, feeaddress)
-    .then(txid=>{
-        return cb && cb(null, txid);
-    })
-    .catch(e=>{
-        allfails.push({op:opdesc, err:e, from:fromaddress, to:toaddress, fee:feeaddress, t:new Date(), f:send.bind(null, fromaddress, toaddress, amount, feeaddress, opdesc)});
-        return cb && cb(e);
+function sendout(toaddress, amount, feeaddress, opdesc, cb) {
+    getsystemaddr((err, sysaddr)=>{
+        if (err) return callback(err);
+        bitcoincli.command('omni_funded_send', sysaddr, toaddress, 31, ''+amount, sysaddr)
+        .then(txid=>{
+            return cb && cb(null, txid);
+        })
+        .catch(e=>{
+            allfails.push({op:opdesc, err:e, from:sysaddr, to:toaddress, fee:sysaddr, t:new Date(), f:sendout.bind(null, toaddress, amount, typeof opdesc=='object'?{retry:opdesc.retry+1, orignal:opdesc.orignal}:{retry:1, orignal:opdesc})});
+            return cb && cb(e);
+        });
     });
 }
 var allfails=[];
@@ -148,10 +153,7 @@ module.exports={
         });
     },
     sendto(toaddress, amount, callback) {
-        getsystemaddr((err, sysaddr)=>{
-            if (err) return callback(err);
-            send(sysaddr, toaddress, amount, sysaddr, '出账', callback);
-        })
+        sendout(toaddress, amount, '出账',callback);
     },
     listallfails(callback) {
         return callback(null, allfails);
@@ -161,7 +163,8 @@ module.exports={
             if (err) return callback(err);
             bitcoincli.command('omni_getallbalancesforaddress', sysaddr).then(balances=>{
                 var usdtbalance=balances.find(b=>{return b.propertyid==31});
-                callback(null, Number(usdtbalance.balance));
+                if (usdtbalance) return callback(null, Number(usdtbalance.balance));
+                callback(null, 0);
             }).catch(e=>{
                 if (e.code==-8) {
                     // this address without any omni-based token, no usdt, no omni, etc
