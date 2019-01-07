@@ -51,7 +51,7 @@ function getallusdtaddr(propertyid, cb) {
         var addrWithUsdt=[];
         for (var i=0; i<res.length; i++) {
             var item=res[i];
-            var usdt=item.balance.find(b=>{
+            var usdt=item.balances.find(b=>{
                 return b.propertyid==propertyid;
             });
             if (usdt) {
