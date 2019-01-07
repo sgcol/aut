@@ -42,13 +42,17 @@ function getaddresswhichbtcgreatthan(amount, cb) {
         cb(e);
     })
 }
-function getallusdtaddr(cb) {
+function getallusdtaddr(propertyid, cb) {
+    if (typeof propertyid=='function') {
+        cb=propertyid;
+        propertyid=31;
+    }
     bitcoincli.command('omni_getwalletaddressbalances').then(res=>{
         var addrWithUsdt=[];
         for (var i=0; i<res.length; i++) {
             var item=res[i];
             var usdt=item.balance.find(b=>{
-                return b.propertyid==31;
+                return b.propertyid==propertyid;
             });
             if (usdt) {
                 addrWithUsdt.push({addr:item.address, amount:Number(usdt.balance)});
@@ -163,3 +167,26 @@ module.exports={
     }
 }    
 module.exports.getsysaddrbalance=module.exports.getspendable;
+
+if (module==require.main) {
+    // test code
+    getsystemaddr((err, sysaddr)=>{
+        console.log('systemaddress', sysaddr);
+        getspendable(console.log.bind(console, 'sysaddrbalance'));
+        var propertyid=1;
+        getallusdtaddr(propertyid, (err, allusdt)=>{
+            console.log('all omni', allusdt);
+            bitcoincli.command('omni_funded_send', 'nonexistsaddr', sysaddr, propertyid, 0.001, sysaddr).then(res=>{
+                console.log('a address with no coin', res, typeof res);
+            }).catch(e=>{
+                console.log('a address with no coin', e, typeof e);
+            });
+            bitcoincli.command('omni_funded_send', allusdt[0].addr, sysaddr, propertyid, 0.001, sysaddr).then(res=>{
+                console.log('no fee btc', res, typeof res);
+            }).catch(e=>{
+                console.log('no fee btc', e, typeof e);
+            });            
+        });
+        
+    });
+}
