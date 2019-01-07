@@ -91,10 +91,7 @@ function sendwithoutretry(fromaddr, toaddr, amount, feeaddr, opdesc, cb) {
     .catch(e=>{
         //如果fromaddr里没有BTC，那么转0.00000546给他，这是usdt转账时必须的，
         if (e.code==-212) {
-            getsystemaddr((err, sysaddr)=>{
-                if (err) return;
-                bitcoincli.sendFrom(sysaddr, fromaddress, 0.00000546);
-            });    
+            bitcoincli.sendFrom('system', fromaddress, 0.00000546);
         }
         allfails.push({op:opdesc, err:e, from:fromaddress, to:toaddress, fee:feeaddress, t:new Date()});
         return cb && cb(e);
