@@ -276,10 +276,10 @@ function getBalance(coin, callback){
 	var o=makeObj({coinId:coin||'USDT', appId:appId});
 	o.appSign=o.sign.toUpperCase();
 	delete o.sign;
-	console.log(o);
 	request.post({uri:url.format(desturl), json:o}, (err, header, body)=>{
 		if (err) return err;
 		var r=body.resultList;
+		if (!r) return callback('接口错误');
 		for (var i=0; i<r.length; i++) {
 			if (r[i].quantityStatus=='0') return callback(null, r[i].coinQuantity);
 		}

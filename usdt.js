@@ -5,8 +5,14 @@ const BitcoreClient = require('bitcoin-core')
 , path =require('path')
 , os =require('os')
 , async =require('async')
+, notifier =require('./sysnotifier.js')
 , argv = require('yargs')
 
+if (process.env.NODE_ENV=='production') {
+    var TOKENID=31; //usdt
+} else {
+    var TOKENID=1; //omni
+}
 const bitcoincli=(function initBitcoinCli() {
 	if (!argv.conf) argv.conf=path.join(os.homedir(), '.bitcoin/bitcoin.conf');
 	try {
@@ -45,7 +51,7 @@ function getaddresswhichbtcgreatthan(amount, cb) {
 function getallusdtaddr(propertyid, cb) {
     if (typeof propertyid=='function') {
         cb=propertyid;
-        propertyid=31;
+        propertyid=TOKENID;
     }
     bitcoincli.command('omni_getwalletaddressbalances').then(res=>{
         var addrWithUsdt=[];
@@ -84,18 +90,19 @@ function collectallusdt() {
     })
 }
 function sendwithoutretry(fromaddr, toaddr, amount, feeaddr, opdesc, cb) {
-    bitcoincli.command('omni_funded_send', fromaddress, toaddress, 31, ''+amount, feeaddress)
+    bitcoincli.command('omni_funded_send', fromaddress, toaddress, TOKENID, ''+amount, feeaddress)
     .then(txid=>{
         return cb && cb(null, txid);
     })
     .catch(e=>{
         //如果fromaddr里没有BTC，那么转0.00000546给他，这是usdt转账时必须的，
         if (e.code==-212) {
-            bitcoincli.sendFrom('system', fromaddress, ''+0.00000546).then(res=>{
-                console.log('recover addr', fromaddress, 'from system');
-            }).catch(e=>{
-                console.log('recover addr failed', e);
-            });
+            bitcoincli.sendFrom('system', fromaddress, ''+0.00000546)
+        }else if (e.code==-6) {
+            getsystemaddr((err, sysaddr)=>{
+                if (err) return;
+                notifier.add('缺少btc',  `系统地址${sysaddr}没有btc，请充入至少0.1btc`, 1, 'manager');
+            })
         }
         allfails.push({op:opdesc, err:e, from:fromaddress, to:toaddress, fee:feeaddress, t:new Date()});
         return cb && cb(e);
@@ -104,11 +111,17 @@ function sendwithoutretry(fromaddr, toaddr, amount, feeaddr, opdesc, cb) {
 function sendout(toaddress, amount, feeaddress, opdesc, cb) {
     getsystemaddr((err, sysaddr)=>{
         if (err) return callback(err);
-        bitcoincli.command('omni_funded_send', sysaddr, toaddress, 31, ''+amount, sysaddr)
+        bitcoincli.command('omni_funded_send', sysaddr, toaddress, TOKENID, ''+amount, sysaddr)
         .then(txid=>{
             return cb && cb(null, txid);
         })
         .catch(e=>{
+            if (e.code==-6) {
+                getsystemaddr((err, sysaddr)=>{
+                    if (err) return;
+                    notifier.add(`缺少btc`, `系统地址${sysaddr}没有btc，请充入至少0.1btc`, 1, 'manager');
+                })
+            }
             allfails.push({op:opdesc, err:e, from:sysaddr, to:toaddress, fee:sysaddr, t:new Date(), f:sendout.bind(null, toaddress, amount, typeof opdesc=='object'?{retry:opdesc.retry+1, orignal:opdesc.orignal}:{retry:1, orignal:opdesc})});
             return cb && cb(e);
         });
@@ -163,7 +176,7 @@ module.exports={
         getsystemaddr((err, sysaddr)=>{
             if (err) return callback(err);
             bitcoincli.command('omni_getallbalancesforaddress', sysaddr).then(balances=>{
-                var usdtbalance=balances.find(b=>{return b.propertyid==31});
+                var usdtbalance=balances.find(b=>{return b.propertyid==TOKENID});
                 if (usdtbalance) return callback(null, Number(usdtbalance.balance));
                 callback(null, 0);
             }).catch(e=>{
@@ -173,6 +186,25 @@ module.exports={
                 }
                 callback(e);
             })
+        })
+    },
+    getsysaddrbtc(callback) {
+        async.parallel([
+            getsystemaddr, 
+            cb=>{
+                bitcoincli.listUnspent().then(ret=>{
+                    cb(null, ret);
+                })
+                .catch(e=>{cb(e)});
+            }
+        ], (err, ret)=>{
+            if (err) return callback(err);
+            var sysaddr=ret[0], allUnspents=ret[1];
+            var sysaddrstock=allUnspents.find(item=>{
+                return item.address==sysaddr;
+            });
+            if (sysaddrstock) return callback(null, sysaddrstock.amount);
+            return callback(null, 0);
         })
     }
 }    

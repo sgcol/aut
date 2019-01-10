@@ -56,6 +56,21 @@
         alert(errstr(e));
     }
 
+    function bell(frequency,type){
+        var context=new AudioContext()
+        var o=null
+        var g=null
+        o=context.createOscillator()
+        g=context.createGain()
+        o.type=type
+        o.connect(g)
+        o.frequency.value=frequency
+        g.connect(context.destination)
+        o.start(0)
+        g.gain.exponentialRampToValueAtTime(0.00001,context.currentTime+1)
+    }
+    window.bell=bell;
+    
     $(function() {
         accIntf('/account/me', function(err, me) {
           if (err) return;
@@ -63,7 +78,48 @@
           $('.username').text(me.name||'');
           $('.acl').text(me.acl||'访客');
           typeof window.initpage=='function' && window.initpage();
-        })
+        });
+        var oldNotifications={};
+        function receiveNotifications() {
+            accIntf('/sysnotification', function(err, notifications) {
+                if (err) return;
+                var container=$('.notifications');
+                container.empty();
+                if (notifications.length==0) return $('#hasNewNotification').hide();
+                $('#hasNewNotification').show();
+                var notificationschanged=false;
+                for (var i=0; i<notifications.length; i++) {
+                    if (!oldNotifications[notifications[i]._id]) notificationschanged=true;
+                    var item=$(`
+                        <a class="dropdown-item preview-item">
+                        <div class="preview-thumbnail">
+                        <div class="preview-icon bg-success">
+                            <i class="mdi mdi-currency-btc"></i>
+                        </div>
+                        </div>
+                        <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
+                        <h6 class="preview-subject font-weight-normal mb-1">${notifications[i].title}</h6>
+                        <p class="text-gray ellipsis mb-0">
+                            ${notifications[i].desc}
+                        </p>
+                        </div>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    `);
+                    container.append(item);  
+                }
+                oldNotifications={}
+                for (var i=0; i<notifications.length; i++) {
+                    oldNotifications[notifications[i]._id]=true;
+                }
+                if (notificationschanged) {
+                    //beep
+                    example4(830.6, 'sine');
+                }
+            })
+        }
+        receiveNotifications();
+        setInterval(receiveNotifications, 1*30*1000);
     });
 
 })(jQuery)

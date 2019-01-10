@@ -229,9 +229,9 @@ function putorder(orderid, product, money, ownerId, host, callback) {
 			if (product.sellOrBuy=='S') updateOrder(orderid, {status:'待支付', coin:'USDT', lasttime:new Date(), providerOrderId:ret.orderId});
 			return db.monster.insert({orderid:orderid, exOrderId:ret.orderId, product:product, money:money, time:new Date()});
 		}).then(()=>{
-			callback(null, body);
+			callback(null, ret);
 		}).catch((e)=>{
-			callback(null, body);
+			callback(null, ret);
 		});
 	})
 }
@@ -274,10 +274,8 @@ exports.order=function order(orderid, money, merchantdata, coinType, _host, call
 	// }).then((order)=>{
 	// 	exOrder=order;
 	// 	return pify(afterPutOrder)(order.orderId, merchantdata.providers['monster'].ownerId);
-	}).then(()=>{
-		var payInfo=exOrder.payInfo.find((ele)=>{return ele.payMethodType=='2'});
-		if (!payInfo) return callback('小怪兽没有正确配置数据');
-		callback(null, url.resolve(imgbase,payInfo.receiveAddress));
+	}).then((order)=>{
+		callback(null, order.url);
 	}).catch((e)=> {
 		// if (e=='C2C买币下单时用户还存在未完成的买币订单') {
 		// 	occupied.add(product);

@@ -31,6 +31,7 @@ const server = require('http').createServer()
 , util=require('util')
 , USDT =require('./usdt.js')
 , md5 = require('md5')
+, sysnotifier =require('./sysnotifier.js')
 , argv = require('yargs')
 	.default('port', 80)
 	.boolean('debugout')
@@ -532,6 +533,11 @@ function main(err, broadcastNeighbors, dbp) {
 		var ret=[];
 		pnames.forEach((n)=>{ret.push(n)});
 		return ret;
+	}));
+	app.all('/sysnotification', verifyAuth, httpf(function() {
+		return httpf.json(sysnotifier.all().filter(n=>{
+			return aclgt(req.acl, n.acl);
+		}));
 	}));
 
 	/////////////////some server rendered pages
