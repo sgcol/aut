@@ -54,14 +54,23 @@
             }
         }
 
-        getAjax('/admin/login', {u:$(input[0]).val(), p:$(input[1]).val()}, function(err, r) {
+        var u=$(input[0]).val(), p=$(input[1]).val();
+        getAjax('/admin/getSalt', {u:u}, function(err, ret) {
             if (err) {
                 if (err=='用户名密码错') {
                     $(input[0]).val('');$(input[1]).val('');
                 }
                 return alert(err);
             }
-            location.href=r.to;
+            getAjax('/admin/login', {u:u, c:md5(ret.message+p)}, function(err, r) {
+                if (err) {
+                    if (err=='用户名密码错') {
+                        $(input[0]).val('');$(input[1]).val('');
+                    }
+                    return alert(err);
+                }
+                location.href=r.to;
+            })    
         })
 
         return false;

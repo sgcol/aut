@@ -4,7 +4,7 @@ const server = require('http').createServer()
 , os =require('os')
 , request = require('request')
 , express = require('express')
-, app = express()
+, app=express()
 , compression = require('compression')
 , bodyParser = require('body-parser')
 , cookieParser = require('cookie-parser')
@@ -88,18 +88,60 @@ function prepareNeighbors(callback) {
 		})
 	});	
 }
-
-async.parallel([prepareNeighbors, getDB], function(err, results) {
-	results.unshift(err);
-	main.apply(null, results);
-})
-function main(err, broadcastNeighbors, dbp) {
+function checkAdminAccountExists(cb) {
+	getDB((err, db)=>{
+		if (err) return cb(err);
+		db.users.find({acl:'admin'}).toArray((err, r)=>{
+			if (err) return cb(err);
+			return cb(null, r.length);
+		})
+	});
+}
+function startsys(callback) {
+	async.parallel([prepareNeighbors, getDB, checkAdminAccountExists], function(err, results) {
+		results.unshift(err);
+		if (results[3]) {
+			main.apply(null, results);
+		} else {
+			initmode(results[2][0], ()=>{
+				main.apply(null, results);
+			})
+		}
+		callback && callback();
+	})	
+}
+startsys();
+var appStarted=false;
+function initmode(db, cb) {
 	app.use(compression());
+	var _appHandlers=app._router.stack.length;
+	app.use(express.static(path.join(__dirname, 'pub'), {maxAge:0, index: 'initsys.html' }));
 	app.use(cookieParser());
 	app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
+	app.all('/createAdmin', httpf({u:'string', p:'string', callback:true}, function(username, password, callback) {
+		var salt=randomstring();
+		db.users.insert({_id:username, password:md5(salt+password), salt:salt, acl:'admin', name:'超级管理员', createTime:new Date()}, err=>{
+			if (err) return callback(err);
+			// delete all handler
+			app._router.stack.splice(_appHandlers-1);
+			cb();  // to the main
+			callback();  //return to browser
+		});
+	}));
+	app.listen(argv.port, function() {
+		appStarted=true;
+		console.log(('init mode port is '+argv.port).green);
+	});
+} 
+function main(err, broadcastNeighbors, dbp, adminAccountExists) {
+	app.use(compression());
 	app.use(express.static(path.join(__dirname, 'pub'), { index: 'index.html' }));
+	app.use(cookieParser());
+	app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 	app.set('views', path.join(__dirname, 'pub/views'));
 	app.set('view engine', 'ejs');
+
+	var db=dbp[0];
 
 	var getProviders = require('./providerManager.js').getProvider;
 	if (argv.debugout) {
@@ -164,7 +206,7 @@ function main(err, broadcastNeighbors, dbp) {
 		callback(null, {url:'alipay.com'});
 	}));
 
-	var db=dbp[0];
+
 	var authedClients={};
 	function verifyAuth(req, res, next) {
 		if (!req.cookies || !req.cookies.a) return res.send({err:'no auth'});
@@ -215,51 +257,6 @@ function main(err, broadcastNeighbors, dbp) {
 			break;
 		}
 	});
-	app.all('/admin/updateAccount', verifyAuth, httpf({id:'?string', merchantid:'?string', /*key:'?string', debugMode:'?boolean', del:'?boolean', */callback:true}, function(id, merchantid,/*key, debugMode, del,*/callback) {
-		var params=merge(this.req.query, this.req.body);
-		delete params.id;
-		delete params.merchantid;
-		// if (params.setpass) {
-		// 	if (typeof params.setpass!='string' || params.setpass.length<6) return callback('setpass 必须是超过6位的字符串');
-		// 	params.password=setpass;
-		// 	delete params.setpass;
-		// }
-		// if (params.fee) {
-		// 	if (params.fee>1) return callback('fee必须小于1');
-		// 	params.share=1-fee;
-		// 	delete params.fee;
-		// }
-		for (var i in params) {
-			if (params[i]==null) delete params[i];
-		}
-
-		var useid={};
-		if (id) useid._id=id;
-		else if (merchantid) useid.merchantid=merchantid;
-		else return callback('id merchantid必须指定一个');
-		if (merchantid) {
-			broadcastNeighbors({type:'admin:updateMerchant', data:params});
-		}
-		if (params.del) {
-			db.users.remove(useid, function(err) {
-				if (err) return callback(err);
-				if (merchantid) delete merchants[merchantid];
-				callback();
-			});
-			return;
-		}
-		db.users.update(useid, {$set:params}, function(err) {
-			if (err) return callback(err);
-			if (merchantid) {
-				return getMerchant(merchantid, function(err, mer) {
-					if (err) return callback(err);
-					merge(mer, params);
-					callback();
-				});	
-			}
-			callback();
-		});
-	}));
 	app.all('/admin/confirmOrder', verifyAuth, verifyManager, httpf({orderid:'string', callback:true}, function(orderid, callback) {
 		confirmOrder(orderid, callback);
 	}));
@@ -399,12 +396,23 @@ function main(err, broadcastNeighbors, dbp) {
 		if (Array.isArray(identity)) identity={$in:identity};
 		db.users.find({acl:identity}).toArray(callback);
 	}));
-	app.all('/admin/login', httpf({u:'string', p:'string', callback:true}, function(username, password, callback) {
+	app.all('/admin/getSalt', httpf({u:'string', callback:true}, function(username, callback) {
+		db.users.find({_id:username}).toArray(function(err, r) {
+			if (err) return callback(err);
+			if (r.length==0) return callback('用户名密码错');
+			callback(null, r[0].salt);
+		})
+	}))
+	app.all('/admin/login', httpf({u:'string', p:'?string', c:'?string', callback:true}, function(username, password, encryptedPassword, callback) {
 		var res=this.res;
 		db.users.find({_id:username}).limit(1).toArray(function(err, r) {
 			if (err) return callback(err);
 			if (r.length==0) return callback('用户名密码错');
-			if (r[0].password!==password) return callback('用户名密码错');
+			if (encryptedPassword) {
+				if (r[0].password!=encryptedPassword) return callback('用户名密码错');
+			} else if (password) {
+				if (r[0].password!==md5(r[0].salt+password)) return callback('用户名密码错');
+			} else return callback('用户名密码错');
 			var now=new Date();
 			var rstr=randomstring()+now.getTime();
 			var o=authedClients[rstr]=r[0];
@@ -420,7 +428,9 @@ function main(err, broadcastNeighbors, dbp) {
 		db.users.find({_id:account}).toArray((e, r)=> {
 			if (e) return callback(e);
 			if (r.length!=0) return callback('账号已被占用');
-			var o={_id:account, name:name, password:password, acl:identity, createTime:new Date()};
+			var o={_id:account, name:name, acl:identity, createTime:new Date()};
+			o.salt=randomstring();
+			o.password=md5(o.salt+password);
 			if (identity=='merchant') {
 				o.key=randomstring({length:24});
 				o.merchantid=randomstring(16)+account;
@@ -432,18 +442,61 @@ function main(err, broadcastNeighbors, dbp) {
 			})	
 		})
 	}))
-	app.all('/admin/changePassword', verifyAuth, httpf({account:'string', password:'string', callback:true}, function(account, password, callback) {
-		var myacl=this.req.auth.acl;
-		db.users.find({_id:account}).limit(1).toArray((err, r) => {
-			if (err) return callback(err);
-			if (r.length==0) return callback('无此用户');
-			var u=r[0];
-			if (!aclgt(myacl, u.acl)) return callback('权限不足');
-			db.update({_id:account}, {$set:{password:password}}, {w:1}, function(err) {
-				callback(err);
+	app.all('/admin/updateAccount', verifyAuth, httpf({id:'?string', merchantid:'?string', /*key:'?string', debugMode:'?boolean', del:'?boolean', */callback:true}, function(id, merchantid,/*key, debugMode, del,*/callback) {
+		var params=merge(this.req.query, this.req.body);
+		delete params.id;
+		delete params.merchantid;
+
+		for (var i in params) {
+			if (params[i]==null) delete params[i];
+		}
+
+		var useid={};
+		if (id) useid._id=id;
+		else if (merchantid) useid.merchantid=merchantid;
+		else return callback('id merchantid必须指定一个');
+		if (!aclgt(this.req.auth.acl, 'manager')) {
+			if ((id && id!=this.auth._id) || (merchantid && merchantid!=this.req.auth.merchantid)) return callback('无此权限');
+		}
+		if (merchantid) {
+			broadcastNeighbors({type:'admin:updateMerchant', data:params});
+		}
+		if (params.del) {
+			db.users.remove(useid, function(err) {
+				if (err) return callback(err);
+				if (merchantid) delete merchants[merchantid];
+				callback();
 			});
-		})
-	}))
+			return;
+		}
+		if (params.password) {
+			params.salt=randomstring();
+			params.password=md5(params.salt+params.password);
+		}
+		db.users.update(useid, {$set:params}, function(err) {
+			if (err) return callback(err);
+			if (merchantid) {
+				return getMerchant(merchantid, function(err, mer) {
+					if (err) return callback(err);
+					merge(mer, params);
+					callback();
+				});	
+			}
+			callback();
+		});
+	}));
+	// app.all('/admin/changePassword', verifyAuth, httpf({account:'string', password:'string', callback:true}, function(account, password, callback) {
+	// 	var myacl=this.req.auth.acl;
+	// 	db.users.find({_id:account}).limit(1).toArray((err, r) => {
+	// 		if (err) return callback(err);
+	// 		if (r.length==0) return callback('无此用户');
+	// 		var u=r[0];
+	// 		if (!aclgt(myacl, u.acl)) return callback('权限不足');
+	// 		db.update({_id:account}, {$set:{password:password}}, {w:1}, function(err) {
+	// 			callback(err);
+	// 		});
+	// 	})
+	// }))
 	app.all('/admin/removeAccount', verifyAuth, httpf({account:'string', callback:true}, function(account, callback) {
 		var myacl=this.req.auth.acl;
 		db.users.find({_id:account}).limit(1).toArray((err, r) => {
@@ -456,15 +509,15 @@ function main(err, broadcastNeighbors, dbp) {
 			})
 		})
 	}))
-	app.all('/admin/changeMerchantDebugmode', verifyAuth, verifyManager, httpf({account:'string', debugMode:'boolean', callback:true}, function(account, debugMode, callback) {
-		db.users.find({_id:account}).limit(1).toArray((err, r) => {
-			if (err) return callback(err);
-			if (r.length==0) return callback('无此用户');
-			db.users.update({_id:account}, {$set:{debugMode:debugMode}}, {w:1}, function(err) {
-				callback(err);
-			})
-		});		
-	}))
+	// app.all('/admin/changeMerchantDebugmode', verifyAuth, verifyManager, httpf({account:'string', debugMode:'boolean', callback:true}, function(account, debugMode, callback) {
+	// 	db.users.find({_id:account}).limit(1).toArray((err, r) => {
+	// 		if (err) return callback(err);
+	// 		if (r.length==0) return callback('无此用户');
+	// 		db.users.update({_id:account}, {$set:{debugMode:debugMode}}, {w:1}, function(err) {
+	// 			callback(err);
+	// 		})
+	// 	});		
+	// }))
 	// app.all('/admin/createMerchant', verifyAuth, verifyManager, httpf({merchantid:'string', key:'string', debugMode:'boolean', callback:true}, function(merchantid, key, debugMode, callback) {
 	// 	var mer=merchants[merchantid];
 	// 	if (mer) return callback('id重复');
@@ -552,7 +605,8 @@ function main(err, broadcastNeighbors, dbp) {
 		res.status(404);
 		res.render('404', {});
 	});
-	  
+	
+	if (appStarted) return console.log('normal server is running'.green);
 	app.listen(argv.port, function() {
 		console.log(('server is running @ '+argv.port).green);
 	})
