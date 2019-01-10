@@ -6,6 +6,7 @@ const BitcoreClient = require('bitcoin-core')
 , os =require('os')
 , async =require('async')
 , notifier =require('./sysnotifier.js')
+, httpf =require('httpf')
 , argv = require('yargs')
 
 if (process.env.NODE_ENV=='production') {
