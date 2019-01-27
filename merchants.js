@@ -1,22 +1,15 @@
-const merge=require('gy-merge'), getUser=require('./users.js').get, md5=require('md5'), qs=require('querystring'),sortObj=require('sort-object');
+const merge=require('gy-merge'), md5=require('md5'), qs=require('querystring'),sortObj=require('sort-object');
+const getDB=require('./db.js');
 
-var merchants={};
-function getMerchant(id, callback) {
-	getUser(id, function(err, user) {
-		if (err=='no such user') return callback('no such merchant');
-		callback(err, user);
+function getMerchant(merchantid, cb) {
+	getDB((err, db)=>{
+		if (err) return cb(err);
+		db.users.find({merchantid:merchantid}).toArray((err, r) =>{
+			if (err) return cb(err);
+			if (r.length==0) return cb('no such merchant');
+			return cb(null, r[0]);
+		})
 	})
-	// if (merchants[id]) return callback(null, merchants[id]);
-	// getUser((err, db)=>{
-	// 	if (err) return callback(err);
-	// 	db.users.find({merchantid:id}).limit(1).toArray(function(err, r) {
-	// 		if (err) return callback(err);
-	// 		if (r.length==0) return callback('no such merchant');
-	// 		if (r[0].acl!='merchant') return callback('no such merchant');
-	// 		merchants[id]=r[0]||{};
-	// 		return callback(null, merchants[id]);
-	// 	})	
-	// })
 }
 exports.verifySign=	function verifySign(req, res, next) {
 	var _p=merge(req.query, req.body), sign=_p.sign;

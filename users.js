@@ -2,7 +2,7 @@ const getDB=require('./db.js');
 const EventEmitter = require('events');
 const initEE = new EventEmitter();
 
-var users={};
+var users={}, merchants={};
 var inited=false, _db=null;
 getDB((err, db)=>{
     if (err) {
@@ -17,6 +17,7 @@ getDB((err, db)=>{
         }
         for (var i=0; i<r.length; i++) {
             users[r[i]._id]=r[i];
+            if (r[i].merchantid) merchants[r[i].merchantid]=r[i];
         }
         inited=true;
         initEE.emit('inited');
@@ -35,9 +36,24 @@ function get(id, cb) {
             cb(null, xget(id));
         })
     }
-    cb(null, xget(u));
+    cb(null, xget(id));
+}
+function xgetmerchant(merid) {
+    if (merchants[merid]) return merchants[merid];
+    return null;    
+}
+function getmerchant(merid, cb) {
+    if (!inited) {
+        initEE.on('inited', ()=>{
+            var mer=xgetmerchant(merid);
+            cb(mer?null:'no such merchant', mer);
+        })
+    }
+    var mer=xgetmerchant(merid);
+    cb(mer?null:'no such merchant', mer);
 }
 module.exports={
     get:get,
+    getmerchant:getmerchant
     // add:add
 };

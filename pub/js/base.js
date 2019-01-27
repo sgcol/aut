@@ -11,7 +11,8 @@
             type: "POST",
             url: addr,
             dataType: "JSON",
-            data: data,
+            data: data?JSON.stringify(data):undefined,
+            contentType:'application/json; charset=utf-8',
             timeout:30000,
             success: function (chunk) {
                 if (chunk.err) return callback(chunk.err, chunk);

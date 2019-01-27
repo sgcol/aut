@@ -1,0 +1,32 @@
+<include file="Public:header"/>
+<link rel="stylesheet" href="__ROOT__/Public/static/css/wallet_a67d39a6b6.css">
+<div class="panel transactions-panel" style="width:80%;margin: 0 auto">
+    <table class="table table-hover">
+        <tr>
+            <td>{$Think.lang.shijian}</td>
+            <td>{$Think.lang.leixing}</td>
+            <td>{$Think.lang.jine}</td>
+            <td>{$Think.lang.sl}</td>
+            <td>{$Think.lang.sxf}</td>
+            <td>{$Think.lang.shouj}</td>
+        </tr>
+        <foreach name="list" item="v">
+            <tr>
+                <td>{$v.orderaddtime|addtime}</td>
+                <td>
+                    <switch name="v.order_type">
+                        <case value="0">{$Think.lang.mairu}</case>
+                        <case value="1">{$Think.lang.shouchu}</case>
+                        <case value="3">{$Think.lang.jylx}</case>
+                    </switch>
+                    {$v.coin_type|strtoupper=###}
+                </td>
+                <td>{$v['amount']}</td>
+                <td>{$v['num']}</td>
+                <td>{$v['fee']}</td>
+                <td>{$v['price']}</td>
+            </tr>
+        </foreach>
+    </table>
+</div>
+<include file="Public:footer"/>

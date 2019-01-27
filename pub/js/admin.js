@@ -14,7 +14,7 @@ const data=etc[filename]||{identity:'', badge:''};
 function getlist() {
     accIntf('/admin/listAccount', {identity:data.identity}, function(err, r) {
         if (err) return showerr(err);
-        window.acclist=r.message;
+        window.acclist=r.rows;
         $('#list').html(ejs.render(`<%r.forEach(function(item) { %>
             <tr>
             <td><%= item.name||'未填写'%></td>
@@ -35,7 +35,7 @@ function getlist() {
             <button type="button" class="btn btn-outline-primary btn-icon" data-toggle="modal" data-target="#editMerchant" data-id="<%= item._id%>"><i class="mdi mdi-key-change"></i></button>
             <button type="button" class="btn btn-outline-secondary btn-icon" onclick="javascript:remove('<%= item._id%>')"><i class="mdi mdi-delete-forever"></i></button>
             </td>
-        <% })%>`, {r:r.message, filename:filename}));
+        <% })%>`, {r:r.rows, filename:filename}));
         typeof onListChanged=='function' && onListChanged.call($('#list'));
     })  
 }

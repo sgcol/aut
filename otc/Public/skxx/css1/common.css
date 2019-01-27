@@ -1,0 +1,1004 @@
+.hide {
+    display: none
+}
+a,.hand {
+    cursor: pointer
+}
+body,p,dl,dt,dd,ul,li,ol,h1,h2,h3,h4,h5,h6,table,td,th,input,select {
+    margin: 0;
+    padding: 0;
+}
+p,a,div,b,strong,h1,h2,h3,h4,h5,h6,dt,button,dd,th,td,span,input,li {
+    font-family:Microsoft YaHei,Arial;
+}
+input {
+    background: none
+}
+input[placeholder],[placeholder],*[placeholder] {
+    color: #999
+}
+button {
+    outline: 0
+}
+html,body{
+    overflow-x: hidden;
+}
+.clear:after {
+    display: block;
+    content: "";
+    clear: both
+}
+img {
+    border: none
+}
+input {
+    outline: none
+}
+a {
+    text-decoration: none;
+    color: #333;
+}
+ul,ol {
+    list-style: none
+}
+body {
+   background: #fff;
+}
+.autobox {
+    width: 1200px;
+    margin: 0 auto;
+}
+.left {
+    float: left
+}
+.right {
+    float: right
+}
+.clearfix:after {
+    clear: both;
+    display: block;
+    content: "";
+    height: 0;
+}
+.header {
+    height: 64px;
+    width: 100%;
+}
+.hearder_top {
+    height: 64px;
+    width: 100%;
+    background-color: #211e1e;
+}
+.bg_w {
+    background: #fff
+}
+.welcome {
+    float: left;
+    color: #888
+}
+.orange {
+    color: #e55600;
+}
+.red{
+    color:#fe6565!important;
+}
+.green {
+    color: #690!important
+}
+.buy{
+    color:#e55600;
+}
+.blue {
+    color:#3dc1ff;
+}
+.sell{
+    color:#009900;
+}
+.now {
+    height: 52px;
+    color: #888;
+    font-size: 14px;
+    line-height: 52px;
+    border-bottom: 2px solid #19a1ff;
+}
+.now .now1-span{
+    display: block;
+    margin: 0;
+    width: 300px;
+    color: color: #19a1ff;
+}
+.now .now1-span a {
+    color: #716e6e;
+}
+
+.nav-bar-collapse{
+    float: left;
+    width: 936px;
+}
+.nav {
+    font-size: 18px;
+    float: left;
+    line-height: 64px;
+}
+.nav li {
+    float: left;
+    position: relative;
+    margin-right: 40px;
+}
+.nav li:hover .deal_list {
+    display: block;
+}
+.nav li img {
+    vertical-align: middle;
+    transform: rotateZ(0deg);
+    -webkit-transform: rotateZ(0deg);
+    -moz-transform: rotateZ(0deg);
+    -o-transform: rotateZ(0deg);
+    -ms-transform: rotateZ(0deg);
+    -webkit-transition: 0.3s ease all;
+    transition: 0.3s ease all;
+    -o-transition: 0.3s ease all;
+    -moz-transition: 0.3s ease all;
+    -ms-transition: 0.3s ease all
+}
+.nav li img:hover {
+    transition: 0.3s ease all;
+    transform: rotateZ(180deg);
+    -webkit-transform: rotateZ(180deg);
+    -webkit-transition: 0.3s ease all;
+    -moz-transform: rotateZ(180deg);
+    -moz-transition: 0.3s ease all;
+    -ms-transform: rotateZ(180deg);
+    -ms-transition: 0.3s ease all;
+    -o-transform: rotateZ(180deg);
+    -o-transition: 0.3s ease all
+}
+.nav li a {
+    color: #fff;
+}
+.login-form {
+    line-height: 60px;
+    color: #fff;
+}
+.login-form a {
+    color: #fff;
+}
+.zhuce {
+    display: inline-block;
+    padding-left: 29px;
+    background-size: 35%
+}
+.deal_list {
+    z-index: 99;
+    display: none;
+    position: absolute;
+    left: -40px;
+    top: 43px;
+    width: 180px;
+    background: #fff;
+    border: 1px solid #cdcdba;
+}
+.deal_list dd {
+    padding:0 30px;
+    border-bottom: 1px solid #eee;
+    height: 40px;
+    line-height: 40px;
+}
+.deal_list p{
+    margin-left: 10px;
+    line-height: 36px;
+    padding-top: 10px;
+}
+.deal_list dd:hover {
+    background: #dcdcdc;
+}
+.deal_list dd a {
+    font-size: 12px;
+    color: #666!important;
+}
+.deal_list dd i {
+    float: left;
+    width: 24px;
+    height: 19px;
+    margin-top: 11px;
+    background: url(../images/coinstyle.png?v=1.42) no-repeat
+}
+.deal_list dd a:hover {
+    text-decoration: none
+}
+.mywallet {
+    margin-left: -19px;
+     line-height: 64px;
+     float: right;
+}
+.mywallet_name {
+    padding: 0 11px;
+    position: relative;
+    float: left;
+}
+.mywallet .mywallet_name:hover .mywallet_list{
+    display: block;
+}
+#login a {
+    color: #fff;
+}
+.mywallet_list {
+    position: absolute;
+    right: -88px;
+    top: 48px;
+    background: #fff;
+    box-shadow: 0 0 4px #d9d9d9;
+    padding: 9px 14px 8px;
+    width: 150px;
+    display: none;
+}
+.mywallet_list h4 {
+    font-weight: normal;
+    margin-bottom: 4px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 14px;
+    color: #a72929;
+}
+.notice-box{
+    background-color: #f1f1f1;
+    height: 38px;
+    line-height: 38px;
+    text-align: center;
+}
+.notice-box .tit{
+    /*float: left;*/
+    display: inline-block;
+    color:  rgb(125,125,125);
+    margin-left: 64px;
+}
+.news-box{
+    display: inline-block;
+    /*float: left;*/
+    height: 26px;
+    width: 300px;
+    overflow:hidden;
+    /*margin-left: 206px;*/
+}
+.notice-box ul{
+    width: 300px;
+}
+.notice-box ul li a {
+    color: #d20a0a;
+}
+/*.notice-box ul li a:hover {
+    color: #3dc0ff;
+}*/
+.notice-box .close {
+    float: right;
+    cursor: pointer;
+    margin-right: 10px;
+}
+.mywallet_list li {
+    height: 30px;
+    line-height: 30px;
+    font-size: 12px
+}
+.mywallet .login-out{
+    float: left;
+    padding: 0 6px 0 5px;
+    color: #333
+}
+.mywallet dd span,.mywallet dd a {
+    color: #e55600
+}
+.mywallet_btn_box {
+    margin-top: 11px;
+    border-top: 1px dotted #888;
+    padding-top: 15px;
+    width: 408px
+}
+.mywallet_btn_box a {
+    float: left;
+    width: 80px;
+    height: 25px;
+    border: 1px solid #e55600;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    color: #e55600;
+    background: #fff;
+    line-height: 25px;
+    font-size: 14px;
+    text-align: center;
+    border-radius: 3px;
+    webkit-transition: 0.3s ease all;
+    transition: 0.3s ease all;
+    -o-transition: 0.3s ease all;
+    -moz-transition: 0.3s ease all;
+    -ms-transition: 0.3s ease all
+}
+.mywallet_list span {
+    float: right;
+}
+.lang-box {
+    float: right;
+    color: #fff;
+    padding-top: 14px;
+    font-size: 14px;
+    position: relative;
+}
+.lang-box .currL {
+    display: block;
+    border: 1px solid #999;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+.lang-box ul{
+    background: #fff;
+    position: absolute;
+    left: 0;
+    top: 64px;
+    width: 100px;
+    z-index: 100;
+    display: none;
+}
+.lang-box ul li {
+    text-align: center;
+    line-height: 30px;
+    border-bottom: 1px solid #eee;
+}
+.lang-box ul li a {
+    color: #585858;
+}
+.btn-nav-bar{
+    display: none;
+}
+.logo {
+    float: left;
+    margin-right: 32px;
+    margin-left: -104px;
+    width: 204px;
+    height: 40px;
+    background-color: rgba(0,0,0,0);
+}
+.phone {
+    width: 140px;
+    height: 60px;
+    text-align: center;
+    margin-top: 12px;
+    margin-right: 2px
+}
+.iphone {
+    display: inline-block;
+    width: 130px;
+    height: 30px;
+    font-size: 20px;
+    font-family: tahoma,Microsoft YaHei,Arial,Helvetica,sans-serif;
+    color: #e55600
+}
+
+.qqkefu {
+    display: inline-block;
+    width: 135px;
+    height: 30px;
+    background: url(../images/qqkefu.png) no-repeat 0px 0px;
+    margin-top: -15px
+}
+.footer{ width:100%;background:#212a53;padding-bottom: 28px;}
+.footer dl {
+    float: left;
+    font-size: 12px;
+    color: #666;
+    line-height: 24px
+}
+.footer .links{
+    float: left;
+    padding-top: 44px;
+}
+.footer .links ul li {
+    float: left;
+    color:#93989B;
+}
+.footer .links ul li a {
+    color: #93989B;
+}
+.footer .links ul li:not(:last-child):after {
+    content: "|";
+    margin: 0 15px;
+}
+.footer dt {
+    font-size: 14px;
+    line-height: 22px
+}
+.footer dd a {
+    color: #666
+}
+.footer dd a:hover {
+    text-decoration: underline
+}
+.footer_bottom {
+    position: relative;
+    background: #212a53;
+    border-top: 1px solid #424246 ;
+    width: 100%;
+    padding-top: 10px;
+    line-height: 24px;
+    color: #a6a9ab;
+    text-align:center;
+    font-size: 12px
+}
+.footer_bottom a {
+    color: #a6a9ab
+}
+.footer_bottom a:hover {
+    text-decoration: underline
+}
+.footer_logo {
+    float: left;
+    margin-top: 15px
+}
+ #footer a{
+        color:#FFF;
+        margin:0px 0px;
+    }
+    .footer .bottom{
+        height:80px;
+        background:#2C2C2C;
+    }
+    .footer .main .list{
+        float:left;
+        margin-top:40px;
+        width: 185px;
+        margin-left: 98px;
+    }
+    .footer .main .list label{
+        margin-top:10px;
+        display:block;
+        font-weight:bold;
+        color:#FFF;
+        font-size:16px;
+        text-align: left;
+    }
+    .footer .main .list ul{
+        margin:10px 0px 0px;
+        padding:0px;
+    }
+    .footer .main .list li{
+        display:block;
+        height:30px;
+        line-height:30px;
+        color:#CCC;
+    }
+    .footer .main .list li a{
+        display:block;
+        width:100%;
+        height:100%;
+        color:#898989;
+        font-size:14px;
+    }
+    .footer .about_me{
+        float:left;
+        width:280px;
+        padding-right:50px;
+    }
+    .footer .wx{
+        height:55px;
+    }
+    .footer .wx a{
+        position:relative;
+        margin:0 14px;
+        cursor:pointer;
+    }
+    .footer .wx a img{
+        transition:300ms;
+        -webkit-transition:300ms;
+        -ms-transition:300ms;
+        -o-transition:300ms;
+        -moz-transition:300ms;
+    }
+    .footer .wx a:hover img{
+        display:block;
+        top:-180px;
+    }
+    .footer .footer_wx_icon{
+        float:left;
+        border-radius:55px;
+        -webkit-border-radius:55px;
+        -ms-border-radius:55px;
+        -o-border-radius:55px;
+        -moz-border-radius:55px;
+        transition:300ms;
+        -webkit-transition:300ms;
+        -ms-transition:300ms;
+        -o-transition:300ms;
+        -moz-transition:300ms;
+    }
+    .footer .footer_wx_icon:hover{
+    }
+    .footer .footer_sn_icon{
+        float:left;
+        width:55px;
+        height:55px;
+        background-color:#34353A;
+        border-radius:55px;
+        -webkit-border-radius:55px;
+        -ms-border-radius:55px;
+        -o-border-radius:55px;
+        -moz-border-radius:55px;
+        transition:300ms;
+        -webkit-transition:300ms;
+        -ms-transition:300ms;
+        -o-transition:300ms;
+        -moz-transition:300ms;
+    }
+    .footer .footer_sn_icon:hover{
+        background-color:#F00;
+    }
+    .footer .footer_qq_icon{
+        float:left;
+        width:55px;
+        height:55px;
+        background-color:#34353A;
+        border-radius:55px;
+        -webkit-border-radius:55px;
+        -ms-border-radius:55px;
+        -o-border-radius:55px;
+        -moz-border-radius:55px;
+        transition:300ms;
+        -webkit-transition:300ms;
+        -ms-transition:300ms;
+        -o-transition:300ms;
+        -moz-transition:300ms;
+    }
+    .footer .footer_qq_icon:hover{
+        background-color:#F00;
+    }
+    .footer .about_me h4{
+        margin:10px 0px 0px 44px;
+        color:#FFF;
+        font-size:14px;
+        font-weight:normal;
+    }
+    .footer .about_me .about_me_text{
+        margin-top:20px;
+        margin-left:44px;
+        font-size:14px;
+        color:#CCC;
+    }
+    .footer .contact_us{
+        float:left;
+        margin-top:40px;
+        padding-left:57px;
+        color:#898989;
+        font-size:14px;
+    }
+.footer .contact_us .contact_us_text0{
+    margin-top: 10px;
+    display: block;
+    font-weight: bold;
+    color: #FFF;
+    font-size: 16px;
+    text-align: left;
+}
+    .footer .contact_us_text1{
+        margin-top:10px;
+    }
+    .footer .contact_us_text1 span{
+        margin-right: 10px;
+    }
+     .footer .contact_us_text i{
+        display:block;
+        float:left;
+        margin-left:10px;
+        width:32px;
+        height:30px;
+        cursor:pointer;
+        border:1px #CCC solid;
+        border-radius:16px;
+        -webkit-border-radius:16px;
+        -ms-border-radius:16px;
+        -o-border-radius:16px;
+        -moz-border-radius:16px;
+        transition:300ms;
+        -webkit-transition:300ms;
+        -ms-transition:300ms;
+        -o-transition:300ms;
+        -moz-transition:300ms;
+    }
+    .footer .contact_us_text3 i:hover{
+        border:1px #DB0015 solid;
+        background-color:#DB0015;
+    }
+    .footer .bottom .text{
+        float:left;
+        margin-top:34px;
+        color:#999;
+        font-size:14px;
+    }
+    .footer .bottom .g{
+        float:right;
+        margin-right:10px;
+    }
+    .footer .bottom .g a{
+        float:left;
+        margin-left:20px;
+        margin-top:24px;
+        width:100px;
+        height:36px;
+    }
+/* 翻页*/
+.pages{
+    clear:both;
+    margin:15px 15px 0px;
+    text-align:center;
+}
+.pages a{
+    background:#ffffff;
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:3px;
+    border:1px solid #23aaff;
+    margin:0 2px;
+    color:#23aaff;
+}
+.pages a:hover{
+    text-decoration:none;
+}
+.pages .current, .pages a:hover{
+    background:#23aaff;
+    color:#ffffff;
+    padding:4px 8px;
+    border-radius:3px;
+    border:1px solid #23aaff;
+    margin:0 2px;
+}
+.pages a.arr{
+    width:19px;
+    height:19px;
+    display:inline-block;
+    border-radius:0;
+    border:0;
+}
+.pages a.arr.prev{
+    background-position:-182px -286px;
+}
+.pages a:hover.arr.prev{
+    background-position:-182px -265px;
+}
+.pages a.arr.next{
+    background-position:-206px -265px;
+}
+.pages a:hover.arr.next{
+    background-position:-206px -286px;
+}
+/*首页头部*/
+.header-wrap {
+    position: relative;
+    height: 524px;
+}
+.header-wrap .header {
+    position: absolute;
+    top: 16px;
+    z-index: 100;
+    background: none;
+    height: 60px;
+}
+.header-wrap .header .nav {
+    height: 60px;
+    line-height: 60px;
+}
+.header-wrap .header .mywallet {
+    height: 60px;
+    line-height: 60px;
+    margin-left: 40px;
+}
+.header-wrap .header .mywallet .mywallet_name {
+    color: #fff;
+}
+.header-wrap .header .mywallet .mywallet_name a {
+    color: #fff;
+}
+.header-wrap .header .nav li a {
+    color: #fff;
+    font-weight:-700;
+}
+.tn_home{
+    width:100%;
+    height: 524px;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    background: url(../images/banner.jpg) no-repeat;
+}
+/*.swiper-container {
+    height: 600px!important;
+}
+.slideA3 a{background:url(../images/201608261821000_gC1SE.jpg) center top no-repeat;}
+.slideA4 a{background:url(../images/201608261827027_dk4Su.jpg) center top no-repeat;}
+.slideA5 a{background:url(../images/201608261827027_dk4Su.jpg) center top no-repeat;}*/
+.new-box-scroll {
+    width: 1200px;
+    margin: 0 auto;
+    height: 100%;
+    overflow: hidden;
+}
+.new-box-scroll ul {
+    float: left;
+    height: 100%;
+}
+/*.new_box_center {
+    width: 2400px;
+    height: 100%;
+}*/
+.xg-bg{
+    position: absolute;
+    width:100%;
+    height: 100%;
+    /*background:rgba(0,0,0,.48);*/
+    top:0;
+    left: 0;
+    z-index: 1;
+}
+.xg-min{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.1);
+    height: 156px;
+    z-index: 199;
+}
+.xg-min li{
+    text-align: center;
+    float: left;
+    width: 300px;
+    padding-top: 34px;
+}
+.xg-min li>span{
+    display: block;
+    font-size: 14px;
+    color: #fff;
+    margin-bottom: 20px;
+
+}
+.xg-min li>span.red {
+    font-size: 22px;
+}
+.logo-small {
+    float: left;
+    padding-top: 24px;
+    width: 150px;
+    margin-left: -62px;
+    margin-right: 44px;
+}
+/*交易页头部*/
+.all_coin_wrap {
+    background: #f7f7f7;
+    margin-top: 24px;
+    padding: 0 36px;
+    box-sizing: border-box;
+    padding-bottom: 30px;
+}
+.all_coin_price {
+    padding-top: 40px;
+    margin-bottom: 30px;
+    position: relative;
+}
+.all_coin_show {
+    width: 170px;
+    height: 67px;
+    border: 0px solid #2e3136;
+    border-bottom: none;
+    z-index: 100;
+    padding-left: 12px;
+    padding-top: 18px;
+    display: none;
+    /*background: #ffffff;*/
+    /*position: relative*/
+}
+.all_coin_show  .iconfont{
+    font-size: 16px!important;
+    font-weight: bold;
+}
+.all_coin_box {
+}
+.all_coin_box ul {
+   overflow: hidden;
+   height: 46px;
+}
+.all_coin_box li {
+    float: left;
+    padding: 0 40px;
+    padding-bottom: 20px;
+}
+.all_coin_box li a {
+    color: #333;
+}
+.all_coin_box li:first-child{
+    border-bottom: 2px solid #189fff;
+}
+.all_coin_box li:hover,.all_coin_box li.active {
+     border-bottom: 2px solid #189fff;
+}
+.all_coin_name {
+   /* float: left;*/
+    padding-top: 4px;
+    font-size: 14px
+}
+.all_coin_name p {
+    height: 22px;
+    line-height: 22px;
+    color: #333
+}
+.all_coin_name p:hover {
+    color: #e55600
+}
+.all_coin_info {
+}
+ul {
+    -webkit-padding-start: 0px !important;
+}
+.all_coin_info dt {
+    height: 50px;
+    line-height: 50px;
+    float: left;
+    width: 200px;
+    padding-left: 12px;
+    font-family: Verdana;
+    color: #0099e3;
+    font-size: 32px
+}
+.all_coin_info dd {
+    float: left;
+    width: 200px;
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+    line-height: 38px;
+}
+.all_coin_info dd p {
+    line-height: 22px;
+    font-size: 26px;
+    font-family: Verdana;
+    margin-top: 12px;
+}
+
+@media (max-width: 768px) {
+    .header-wrap {
+        height: 80px;
+    }
+    .autobox {
+        width: 100%;
+    }
+    .logo-small {
+        float: none;
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .header{
+    }
+    .nav-bar-collapse {
+        display: none;
+        background-color: #fff;
+        height: 500px;
+        width: 100%;
+    }
+    .tn_home {
+        display: none;
+    }
+    .logo {
+        float: none;
+        margin-right: 0;
+    }
+    .nav {
+        float: none;
+        background: #fff;
+        height: 600px!important;
+        border-top: 1px solid #eee;
+        padding-top: 50px;
+    }
+    .nav ul{
+    }
+    .nav li {
+        float: none;
+        margin-left: 56px;
+        margin-right: 0;
+    }
+    .nav li a {
+        color: #333!important;
+    }
+    .btn-nav-bar{
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        display: block;
+        background: none;
+        border:0;
+    }
+    .btn-nav-bar.iconfont {
+        font-size: 34px!important;
+        color: #189fff;
+    }
+    .hearder_top {
+        background: none;
+    }
+    #login {
+        position: absolute;
+        top: 56px;
+        left: 0;
+        color: #333;
+    }
+    #login a{
+        color: #333;
+    }
+    .mywallet dt {
+        display: none;
+    }
+    .mywallet dd {
+        float: none;
+        position: absolute;
+        bottom: 0;
+    }
+    .lang-box {
+        /*display: none;*/
+        position: absolute;
+        top: -6px;
+        right: 48px;
+        color: #696565;;
+    }
+    .footer .main .list {
+        margin-left: 60px;
+        width: auto;
+    }
+    .footer{
+        display: none;
+    }
+    #leftsead {
+        display: none;
+    }
+    .notice-box .tit{
+        margin-left: 22px;
+    }
+    .news-box{
+        margin-left: 10px;
+        width: 250px;
+    }
+    /*交易手机自适应*/
+    .all_coin_show {
+        display: block;
+    }
+    .all_coin_info {
+        display: none;
+    }
+    .all_coin_box li:first-child {
+        border:0;
+    }
+    .all_coin_wrap {
+        padding: 0 10px;
+    }
+    .all_coin_box {
+        position: absolute;
+        left: 2px;
+        top: 80px;
+        width: 224px;
+        height: 218px;
+        padding: 0 10px;
+        background-color: #fff;
+        z-index: 99;
+        display: none;
+    }
+    .all_coin_box ul {
+        overflow: inherit;
+        height: inherit;
+        border:1px solid #ccc;
+    }
+    .all_coin_box li {
+        padding: 10px 0px;
+        width: 100px;
+        margin-left: 10px;
+        /*float: none;*/
+    }
+      .all_coin_price {
+        padding-top: 10px;
+    }
+    .now {
+        padding-left: 10px;
+    }
+   
+}

@@ -1,0 +1,44 @@
+[ 2018-12-20T15:48:38+08:00 ] 127.0.0.1 /a.php
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: [ app_init ] --START--
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: Run Behavior\BuildLiteBehavior [ RunTime:0.000000s ]
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: [ app_init ] --END-- [ RunTime:0.005000s ]
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: [ app_begin ] --START--
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: Run Behavior\ReadHtmlCacheBehavior [ RunTime:0.001000s ]
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: Run Behavior\CheckLangBehavior [ RunTime:0.001000s ]
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: [ app_begin ] --END-- [ RunTime:0.004000s ]
+NOTIC: [2] session_start(): Cannot send session cache limiter - headers already sent (output started at F:\PHP\WWW\danbaobtc\ThinkPHP\ThinkPHP.php:41) F:\PHP\WWW\danbaobtc\ThinkPHP\Common\functions.php 第 2527 行.
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: [ view_parse ] --START--
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: [ template_filter ] --START--
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: Run Behavior\ContentReplaceBehavior [ RunTime:0.000000s ]
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: [ template_filter ] --END-- [ RunTime:0.002000s ]
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: Run Behavior\ParseTemplateBehavior [ RunTime:0.158009s ]
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: [ view_parse ] --END-- [ RunTime:0.527030s ]
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: [ view_filter ] --START--
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: Run Behavior\WriteHtmlCacheBehavior [ RunTime:0.039002s ]
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: [ view_filter ] --END-- [ RunTime:0.041002s ]
+NOTIC: [2] Cannot modify header information - headers already sent by (output started at F:\PHP\WWW\danbaobtc\ThinkPHP\ThinkPHP.php:41) F:\PHP\WWW\danbaobtc\ThinkPHP\Library\Think\View.class.php 第 181 行.
+NOTIC: [2] Cannot modify header information - headers already sent by (output started at F:\PHP\WWW\danbaobtc\ThinkPHP\ThinkPHP.php:41) F:\PHP\WWW\danbaobtc\ThinkPHP\Library\Think\View.class.php 第 183 行.
+NOTIC: [2] Cannot modify header information - headers already sent by (output started at F:\PHP\WWW\danbaobtc\ThinkPHP\ThinkPHP.php:41) F:\PHP\WWW\danbaobtc\ThinkPHP\Library\Think\View.class.php 第 185 行.
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: [ app_end ] --START--
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: Run Behavior\ShowPageTraceBehavior [ RunTime:0.001000s ]
+NOTIC: [8] Use of undefined constant M_DEBUG - assumed 'M_DEBUG' F:\PHP\WWW\danbaobtc\Application\Common\Common\function.php 第 587 行.
+INFO: [ app_end ] --END-- [ RunTime:0.004000s ]
+

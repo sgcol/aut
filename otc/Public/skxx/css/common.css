@@ -1,0 +1,1250 @@
+.hide {
+    display: none
+}
+a,.hand {
+    cursor: pointer
+}
+body,p,dl,dt,dd,ul,li,ol,h1,h2,h3,h4,h5,h6,table,td,th,input,select {
+    margin: 0;
+    padding: 0;
+}
+p,a,div,b,strong,h1,h2,h3,h4,h5,h6,dt,button,dd,th,td,span,input,li {
+    font-family:Microsoft YaHei,Arial;
+}
+input {
+    background: none
+}
+input[placeholder],[placeholder],*[placeholder] {
+    color: #999
+}
+button {
+    outline: 0
+}
+html,body{
+    overflow-x: hidden;
+}
+.clear:after {
+    display: block;
+    content: "";
+    clear: both
+}
+img {
+    border: none
+}
+input {
+    outline: none
+}
+a {
+    text-decoration: none;
+    color: #333;
+}
+ul,ol {
+    list-style: none;
+}
+body {
+      background: #f6f6f6;
+}
+.autobox {
+    width: 1200px;
+    margin: 0 auto;
+}
+.left {
+    float: left
+}
+.right {
+    float: right
+}
+.header {
+    height: 64px;
+    width: 100%;
+}
+.hearder_top {
+    height: 64px;
+    width: 100%;
+    background-color: #fff;
+}
+.bg_w {
+    background: #fff
+}
+.welcome {
+    float: left;
+    color: #888
+}
+
+.red{
+    color:#fe6565!important;
+}
+.green {
+    color: #690!important
+}
+.buy{
+    color:#e80e0e;
+}
+.blue {
+    color:#3dc1ff;
+}
+.sell{
+    color:#009900;
+}
+.now {
+    height: 52px;
+    color: #888;
+    font-size: 14px;
+    line-height: 52px;
+    border-bottom: 2px solid #1e73d0;
+    position: relative;
+}
+.now .now1-span {
+   position: absolute;
+   left: 0;
+   right: 0;
+}
+.nav-bar-collapse{
+    float: right;
+   /* width: 856px;*/
+   width: 622px;
+}
+.nav {
+    font-size: 18px;
+    float: right;
+    line-height: 64px;
+}
+/*.nav .active_col{*/
+    /*color: #1e73d0;*/
+/*}*/
+.nav li.active_col {
+    border-bottom: 1px solid #FFBA00;
+}
+.nav li.active_col a {
+    color: #FFBA00;
+}
+.nav li {
+    float: left;
+    position: relative;
+    margin-right: 40px;
+}
+.nav li:hover .deal_list {
+    display: block;
+}
+.nav li img {
+    vertical-align: middle;
+    transform: rotateZ(0deg);
+    -webkit-transform: rotateZ(0deg);
+    -moz-transform: rotateZ(0deg);
+    -o-transform: rotateZ(0deg);
+    -ms-transform: rotateZ(0deg);
+    -webkit-transition: 0.3s ease all;
+    transition: 0.3s ease all;
+    -o-transition: 0.3s ease all;
+    -moz-transition: 0.3s ease all;
+    -ms-transition: 0.3s ease all
+}
+.nav li img:hover {
+    transition: 0.3s ease all;
+    transform: rotateZ(180deg);
+    -webkit-transform: rotateZ(180deg);
+    -webkit-transition: 0.3s ease all;
+    -moz-transform: rotateZ(180deg);
+    -moz-transition: 0.3s ease all;
+    -ms-transform: rotateZ(180deg);
+    -ms-transition: 0.3s ease all;
+    -o-transform: rotateZ(180deg);
+    -o-transition: 0.3s ease all
+}
+.nav li a {
+    color: #000;
+}
+.login-form a {
+    color: #fff;
+}
+.zhuce {
+    margin-right: 10px;
+}
+.deal_list {
+    z-index: 99;
+    display: none;
+    position: absolute;
+    left: -40px;
+    top: 56px;
+    width: 180px;
+    background: #fff;
+    border: 1px solid #cdcdba;
+}
+.deal_list dd {
+    padding:0 30px;
+    border-bottom: 1px solid #eee;
+    height: 40px;
+    line-height: 40px;
+}
+.deal_list p{
+    margin-left: 10px;
+    line-height: 36px;
+    padding-top: 10px;
+}
+.deal_list dd:hover {
+    background: #dcdcdc;
+}
+.deal_list dd a {
+    font-size: 12px;
+    color: #666!important;
+}
+.deal_list dd i {
+    float: left;
+    width: 24px;
+    height: 19px;
+    margin-top: 11px;
+    background: url(../images/coinstyle.png?v=1.42) no-repeat
+}
+.deal_list dd a:hover {
+    text-decoration: none
+}
+.daohang{
+    width: 100%;
+    height: 66px;
+    background-color: #fff;
+
+}
+.daohang .dhauto{
+    width: 1200px;
+    margin: 0 auto;
+
+}
+.mywallet {
+     line-height: 40px;
+     float: right;
+}
+.mywallet a{
+    color: #fff;
+}
+.mywallet_name {
+    padding: 0 49px;
+    position: relative;
+    float: left;
+    color: #fff;
+}
+.mywallet .mywallet_name:hover .mywallet_list{
+    display: block;
+}
+.mywallet_list {
+    position: absolute;
+    right: 0px;
+    top: 64px;
+    background: #fff;
+    box-shadow: 0 0 4px #d9d9d9;
+    padding: 9px 14px 8px;
+    width: 150px;
+    display: none;
+    z-index: 100;
+}
+.mywallet_list h4 {
+    font-weight: normal;
+    margin-bottom: 4px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 14px;
+    color: #a72929;
+}
+.notice-box{
+   /* position: absolute;
+    top: 0;*/
+    width: 100%;
+    /*z-index: 99;*/
+    background-color: #1c2953;
+    height: 38px;
+    
+}
+.notice-box .notice-fl{
+    float: left;
+    margin-left: 0;
+    overflow: hidden;
+    color: #F5F5F5;
+}
+.notice-box .notice-fl span{
+  /* display: block;
+    margin-top: 10px;*/
+   position: relative;
+   height: 40px;
+   line-height: 40px;
+}
+.notice-box .tit{
+    float: left;
+    /*vertical-align: 10px;*/
+    height: 38px;
+    line-height: 38px;
+    color: #fff;
+}
+.notice-box .tit .iconfont {
+    font-size: 28px;
+}
+.news-box{
+    float: left;
+    height: 38px;
+    line-height: 38px;
+    width: 500px;
+    overflow:hidden;
+}
+.news-box ul li {
+	width:100%;
+	overflow: hidden;
+    white-space: nowrap;
+    text-overflow: clip;
+}
+.notice-box ul li a {
+    color: #fff;
+}
+/*.notice-box ul li a:hover {
+    color: #3dc0ff;
+}*/
+.notice-box .close {
+    float: right;
+    cursor: pointer;
+    margin-right: 10px;
+}
+.mywallet_list li {
+    height: 30px;
+    line-height: 30px;
+    font-size: 12px
+}
+.mywallet .login-out{
+    float: left;
+    padding: 0 6px 0 5px;
+    color: #333
+}
+.mywallet dd span,.mywallet dd a {
+    color: #e55600
+}
+.mywallet_btn_box {
+    margin-top: 11px;
+    border-top: 1px dotted #888;
+    padding-top: 15px;
+    width: 408px
+}
+.mywallet_btn_box a {
+    float: left;
+    width: 80px;
+    height: 25px;
+    border: 1px solid #e55600;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    color: #e55600;
+    background: #fff;
+    line-height: 25px;
+    font-size: 14px;
+    text-align: center;
+    border-radius: 3px;
+    webkit-transition: 0.3s ease all;
+    transition: 0.3s ease all;
+    -o-transition: 0.3s ease all;
+    -moz-transition: 0.3s ease all;
+    -ms-transition: 0.3s ease all
+}
+.mywallet_list span {
+    float: right;
+}
+.lang-box {
+        float: right;
+    color: #fff;
+    font-size: 14px;
+    height: 40px;
+    line-height: 40px;
+    position: relative;
+    margin-right: 25px;
+}
+.lang-box .curr-box {
+    cursor: pointer;
+}
+.lang-box .currL {
+    font-style: normal;
+    
+}
+.lang-box ul{
+    background: #fff;
+    position: absolute;
+    left: -24px;
+    top: 38px;
+    width: 100px;
+    z-index: 100;
+    display: none;
+}
+.lang-box ul li {
+    text-align: center;
+    line-height: 30px;
+    border-bottom: 1px solid #eee;
+}
+.lang-box ul li a {
+    color: #585858;
+}
+.btn-nav-bar{
+    display: none;
+}
+.clearfix {
+    clear: both;
+    zoom: 1;
+}
+.clearfix:after, .clearfix:before {
+    content: '.';
+    display: block;
+    font-size: 0;
+    height: 0;
+    line-height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    width: 0;
+}
+
+.phone {
+    width: 140px;
+    height: 60px;
+    text-align: center;
+    margin-top: 12px;
+    margin-right: 2px
+}
+.iphone {
+    display: inline-block;
+    width: 130px;
+    height: 30px;
+    font-size: 20px;
+    font-family: tahoma,Microsoft YaHei,Arial,Helvetica,sans-serif;
+    color: #e55600
+}
+
+.qqkefu {
+    display: inline-block;
+    width: 135px;
+    height: 30px;
+    background: url(../images/qqkefu.png) no-repeat 0px 0px;
+    margin-top: -15px
+}
+.footer{ 
+    width:100%;
+    /*background:#1c2953;*/
+    padding-bottom: 6px;
+    margin-top: 78px;
+    background: url("../images/fo.png")no-repeat;
+    background-size: 100%;
+height: 100px;
+}
+.footer dl {
+    float: left;
+    font-size: 12px;
+    color: #666;
+    line-height: 24px
+}
+.footer .links{
+    width: 950px;
+    float: left;
+    padding-top: 30px;
+}
+.footer .links ul li {
+    float: left;
+    color:#93989B;
+}
+.footer .links ul li a {
+    color: #fff;
+}
+.footer .links ul li:not(:last-child):after {
+    content: "|";
+    margin: 0 15px;
+}
+.footer dt {
+    font-size: 14px;
+    line-height: 22px
+}
+.footer dd a {
+    color: #666
+}
+.footer dd a:hover {
+    text-decoration: underline
+}
+.footer_bottom {
+    position: relative;
+    /*background: #1c2953;*/
+    /*border-top: 1px solid #424246 ;*/
+    width: 100%;
+
+    line-height: 14px;
+    color: #fff;
+    text-align:center;
+    font-size: 12px;
+    top: 26px;
+}
+.footer_bottom a {
+    color: #fff;
+}
+.footer_bottom a:hover {
+    text-decoration: underline
+}
+.footer_logo {
+    float: left;
+    margin-top: 15px
+}
+ #footer a{
+        color:#FFF;
+        margin:0px 0px;
+    }
+    .footer .bottom{
+        height:80px;
+        background:#2C2C2C;
+    }
+    .footer .main .list{
+        float:left;
+        margin-top:40px;
+        width: 185px;
+        margin-left: 98px;
+    }
+    .footer .main .list label{
+        margin-top:10px;
+        display:block;
+        font-weight:bold;
+        color:#FFF;
+        font-size:16px;
+        text-align: left;
+    }
+    .footer .main .list ul{
+        margin:10px 0px 0px;
+        padding:0px;
+    }
+    .footer .main .list li{
+        display:block;
+        height:30px;
+        line-height:30px;
+        color:#CCC;
+    }
+    .footer .main .list li a{
+        display:block;
+        width:100%;
+        height:100%;
+        color:#898989;
+        font-size:14px;
+    }
+    .footer .about_me{
+        float:left;
+        width:180px;
+        margin-right: 50px;
+        padding-top: 14px;
+    }
+	.footer .about_me img {
+		width:90%;
+	}
+    .footer .footer_sn_icon{
+        float:left;
+        width:55px;
+        height:55px;
+        background-color:#34353A;
+        border-radius:55px;
+        -webkit-border-radius:55px;
+        -ms-border-radius:55px;
+        -o-border-radius:55px;
+        -moz-border-radius:55px;
+        transition:300ms;
+        -webkit-transition:300ms;
+        -ms-transition:300ms;
+        -o-transition:300ms;
+        -moz-transition:300ms;
+    }
+    .footer .footer_sn_icon:hover{
+        background-color:#F00;
+    }
+    .footer .footer_qq_icon{
+        float:left;
+        width:55px;
+        height:55px;
+        background-color:#34353A;
+        border-radius:55px;
+        -webkit-border-radius:55px;
+        -ms-border-radius:55px;
+        -o-border-radius:55px;
+        -moz-border-radius:55px;
+        transition:300ms;
+        -webkit-transition:300ms;
+        -ms-transition:300ms;
+        -o-transition:300ms;
+        -moz-transition:300ms;
+    }
+    .footer .footer_qq_icon:hover{
+        background-color:#F00;
+    }
+    .footer .about_me h4{
+        margin:10px 0px 0px 44px;
+        color:#FFF;
+        font-size:14px;
+        font-weight:normal;
+    }
+    .footer .about_me .about_me_text{
+        margin-top:20px;
+        margin-left:44px;
+        font-size:14px;
+        color:#CCC;
+    }
+    .footer .contact_us{
+        float:left;
+        margin-top:40px;
+        padding-left:57px;
+        color:#898989;
+        font-size:14px;
+    }
+.footer .contact_us .contact_us_text0{
+    margin-top: 10px;
+    display: block;
+    font-weight: bold;
+    color: #FFF;
+    font-size: 16px;
+    text-align: left;
+}
+    .footer .contact_us_text1{
+        margin-top:10px;
+    }
+    .footer .contact_us_text1 span{
+        margin-right: 10px;
+    }
+     .footer .contact_us_text i{
+        display:block;
+        float:left;
+        margin-left:10px;
+        width:32px;
+        height:30px;
+        cursor:pointer;
+        border:1px #CCC solid;
+        border-radius:16px;
+        -webkit-border-radius:16px;
+        -ms-border-radius:16px;
+        -o-border-radius:16px;
+        -moz-border-radius:16px;
+        transition:300ms;
+        -webkit-transition:300ms;
+        -ms-transition:300ms;
+        -o-transition:300ms;
+        -moz-transition:300ms;
+    }
+    .footer .contact_us_text3 i:hover{
+        border:1px #DB0015 solid;
+        background-color:#DB0015;
+    }
+    .footer .bottom .text{
+        float:left;
+        margin-top:34px;
+        color:#999;
+        font-size:14px;
+    }
+    .footer .bottom .g{
+        float:right;
+        margin-right:10px;
+    }
+    .footer .bottom .g a{
+        float:left;
+        margin-left:20px;
+        margin-top:24px;
+        width:100px;
+        height:36px;
+    }
+/* 翻页*/
+.pages{
+    clear:both;
+    margin:15px 15px 0px;
+    text-align:center;
+}
+.pages a{
+    background:#ffffff;
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:3px;
+    border:1px solid #1d72cf;
+    margin:0 2px;
+    color:#1d72cf;
+}
+.pages a:hover{
+    text-decoration:none;
+}
+.pages .current, .pages a:hover{
+    background:#1d72cf;
+    color:#ffffff;
+    border-radius:3px;
+        border: 1px solid #1d72cf;
+}
+.pages a.arr{
+    width:19px;
+    height:19px;
+    display:inline-block;
+    border-radius:0;
+    border:0;
+}
+.pages a.arr.prev{
+    background-position:-182px -286px;
+}
+.pages a:hover.arr.prev{
+    background-position:-182px -265px;
+}
+.pages a.arr.next{
+    background-position:-206px -265px;
+}
+.pages a:hover.arr.next{
+    background-position:-206px -286px;
+}
+/*首页头部*/
+.header-wrap {
+    position: relative;
+    height: 468px;
+}
+.header-wrap .header {
+    position: absolute;
+    /*top: 40px;*/
+    z-index: 80;
+  
+    height: 70px;
+}
+.header-wrap .header .nav {
+    height: 70px;
+    line-height: 70px;
+}
+.header-wrap .header .nav-bar-collapse{
+    width: 928px;
+}
+.header-wrap .header .mywallet {
+    height: 70px;
+    line-height: 70px;
+}
+.header-wrap .header .mywallet .mywallet_name {
+    color: #fff;
+}
+.header-wrap .header .mywallet .mywallet_name a {
+    color: #fff;
+}
+.header-wrap .header .nav li a {
+    color: #fff;
+}
+.tn_home{
+   /* width:100%;
+    height: 468px;
+    position: absolute;
+    top: 0;
+    background: url(../images/banner1.jpg) no-repeat;
+    background-size: cover;*/
+}
+.tn_home img {
+    width: 100%;
+    background-size: cover;
+}
+/*.swiper-container {
+    height: 600px!important;
+}
+.slideA3 a{background:url(../images/201608261821000_gC1SE.jpg) center top no-repeat;}
+.slideA4 a{background:url(../images/201608261827027_dk4Su.jpg) center top no-repeat;}
+.slideA5 a{background:url(../images/201608261827027_dk4Su.jpg) center top no-repeat;}*/
+.new-box-scroll {
+    overflow: hidden;
+    background:#fff;
+    background: url(../images/wantu.png)no-repeat;
+    background-size: 100%;
+    height: 66px;
+    margin-top: -14px;
+    padding-top: 52px;
+}
+.new-box-scroll ul {
+    padding-left: 38%;
+    padding-right: 28%;
+}
+.xg-bg{
+    position: absolute;
+    width:100%;
+    height: 100%;
+    /*background:rgba(0,0,0,.48);*/
+    top:0;
+    left: 0;
+    z-index: 1;
+}
+.xg-min{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    line-height: 56px;
+    z-index: 19;
+
+}
+.xg-min li{
+    float: left;
+   padding: 0 30px;
+}
+
+.xg-min li a{
+    display: block;
+    font-size: 18px;
+    color: #fdfdfd;
+}
+.xg-min li.active,.xg-min li:hover{
+
+    border-bottom: 1px solid #ffba00;
+}
+.xg-min li.active a,.xg-min li:hover a{
+    color: #ffba00;
+}
+.zxthree {
+    text-align: center;
+    color: #a0a0a0;
+    padding-top: 10px;
+    padding-bottom: 42px;
+    margin-left: 232px;
+}
+.zxthree .zxdiv {
+    float: left;
+    width: 100px;
+    border: 2px solid #1c2953;
+    margin: 16px 70px;
+    border-radius: 15px;
+    padding: 6px 0;
+    color: #1c2953;
+}
+.zxthree .zxactive {
+    background: #ffba00;
+    border: none;
+}
+.zxinfo{
+width: 100%;
+height: auto;
+}
+.zxinfo .ggao{
+    float: left;
+    width: 390px;
+    height: 240px;
+    margin: 0 5px;
+}
+/*.zxinfo .ggao:hover{*/
+    /*box-shadow:-1px 2px 5px 0px #b9b9b9;*/
+    /*background: #f6f6f6;*/
+/*}*/
+
+ .gtitle {
+   height: 36px;
+    border-bottom: 1px solid #000;
+    padding: 1px 3px;
+    margin: 0 3px;
+}
+.contents {
+    font-size: 14px;
+    color: #444343;
+    padding: 24px 10px;
+    margin: 24px 3px;
+    height: 94px;
+    overflow: hidden;
+    background: #c3baba3b;
+    border-radius: 5px;
+    box-shadow: 1px 1px 6px 1px #c1bfbf;
+}
+.zxfooter{
+height: 36px;
+    padding: 0 6px;
+}
+.hddiv{
+    width: 100%;
+    height: auto;
+}
+.hddiv .hdong {
+    float: left;
+    width: 390px;
+    height: 240px;
+    margin: 0 5px;
+}
+.hdong .htitle {
+    height: 36px;
+    border-bottom: 1px solid #000;
+    padding: 1px 3px;
+    margin: 0 3px;
+}
+.hdong .hcontents {
+    padding: 10px 10px;
+    margin: 24px 3px;
+    height: 94px;
+    border: 1px solid;
+    overflow: hidden;
+}
+.hddiv .hdong :hover{
+    box-shadow:-1px 2px 5px 0px #b9b9b9;
+    background: #f6f6f6;
+}
+.zxshow {
+    display: none;
+}
+.zxshow2{
+    display: none;
+}
+.logo-small {
+    float: left;
+    width: 190px;
+    height: 59px;
+}
+.logo-small a {
+    display: block;
+}
+/*交易页头部*/
+.all_coin_wrap {
+    height: 60px;
+    line-height: 60px;
+    background: #fff;
+    margin-top: 36px;
+    padding: 0px 20px;
+    box-sizing: border-box;
+    box-shadow: 0 0 6px 0 rgba(0,0,0,.1), inset 0 -1px 0 0 #e6e6e6;
+}
+.all_coin_price {
+    float: left;
+    width: 276px;
+}
+.all_coin_show {
+    float: left;
+    padding-right: 16px;
+    border-right: 1px solid #eee;
+    z-index: 100;
+    position: relative;
+}
+.dropdown-rel{
+    cursor: pointer;
+    
+}
+.dropdown-rel .text1.on {
+    color: #1d72cf;
+}
+.all_coin_show  .iconfont{
+    font-size: 16px!important;
+    font-weight: bold;
+}
+.all_coin_box1 {
+    position: absolute;
+     top: 58px;
+    left: -16px;
+    padding-top: 10px;
+    background: #fff;
+    width: 100px;
+    min-height: 100px;
+    border-radius: 3px;
+    text-align: center;
+    box-shadow: 0 1px 6px rgba(0,0,0,.2);
+    display: none;
+
+}
+.all_coin_box1 ul li {
+    line-height: 26px;
+}
+.all_coin_box2{
+    position: absolute;
+     top: 58px;
+    left: 0px;
+    padding-top: 10px;
+    background: #fff;
+    width: 500px;
+    min-height: 100px;
+    border-radius: 3px;
+    box-shadow: 0 1px 6px rgba(0,0,0,.2);
+    display: none;
+}
+.all_coin_box2 li {
+    float: left;
+    margin: 0 10px;
+    line-height: 24px;
+}
+.all_coin_box2 li img {
+    width: 19px;
+    display: inline-block;
+    vertical-align: -2px;
+    margin-right: 2px;
+}
+.all_coin_box li a {
+    color: #333;
+    display: block;
+}
+.all_coin_name {
+     display: inline-block;
+    color: #333
+}
+.all_coin_info{
+    float: left;
+}
+.all_coin_name p:hover {
+    color: #e55600
+}
+/*.all_coin_info dt {
+    height: 50px;
+    line-height: 50px;
+    float: left;
+    padding-left: 12px;
+    font-family: Verdana;
+    color: #0099e3;
+}*/
+.all_coin_info dd {
+    float: left;
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+    margin: 0 16px;
+    font-weight: bold;
+}
+.all_coin_info dd p {
+    display: inline-block;
+    font-family: Verdana;
+}
+
+@media (max-width: 768px) {
+    body {
+        background: #fff;
+    }
+    .header-wrap {
+        height: 120px;
+    }
+    .notice-box .notice-fl {
+        margin-left: 0;
+    }
+    .autobox {
+        width: 100%;
+    }
+    .logo-small {
+        float: none;
+        margin-left: 0;
+        margin-right: 0;
+        height: 50px;
+        background: url(../images/logo1.png) no-repeat;
+        margin-left: 80px;
+    }
+    .logo-small img {
+        display: none;
+    }
+   .header-wrap   .header{
+		  background:#9751ff;
+    }
+   .nav-bar-collapse {
+         position:fixed;
+         top: -2px;
+        left: -260px;
+        z-index: 90;
+        float: none;
+        width: 260px!important;
+         height: 100%;
+        /*display: none;*/
+        background-color: #9751ff;
+        transition: all 1s;
+        -moz-transition: all 1s; /* Firefox 4 */
+        -webkit-transition: all 1s; /* Safari 和 Chrome */
+        -o-transition: all 1s; /* Opera */
+        z-index: 120;
+    }
+    .nav-bar-collapse.leftmenu {
+        -webkit-transform: translate3d(260px,0,0);
+        transform: translate3d(260px,0px,0px);
+    }
+
+    .tn_home {
+        display: none;
+    }
+    .logo {
+        width: 188px;
+        height: 74px;
+        float: none;
+        margin-right: 0;
+        /*background: url(../images/logo1.png) no-repeat;*/
+        margin-left: 78px;
+    }
+    .logo img {
+        
+        width: 90%;
+    }
+    .xg-min{
+        /*overflow-x: auto;*/
+        height: 50px;
+        line-height: 48px;
+    }
+    .nav {
+        float: none;
+        border-top: 1px solid #eee;
+        padding-top: 50px;
+        height: 50px!important;
+        line-height: 50px!important;
+    }
+    .nav ul{
+    }
+    .nav li {
+        float: none;
+        padding-left: 30px;
+        margin-right: 0;
+        border-bottom: 1px solid #eee;
+    }
+    .nav li a {
+    }
+    .new-box-scroll{
+        padding:  0 10px;
+        overflow-x: auto;
+        background: #fff;
+        border-bottom: 1px solid #eee;
+    }
+    .xg-min li {
+        float: left;
+        padding: 0px 20px;
+    }
+    .xg-min li.active {
+        border-bottom: 2px solid #9751ff;
+    }
+    .xg-min li a {
+        color: #000;
+    }
+    .new-box-scroll ul {
+        /*width: 1200px;*/
+    }
+    .btn-nav-bar{
+        position: absolute;
+        top: 44px;
+        left: 0;
+        display: block;
+        background: none;
+        border:0;
+    }
+    .header-wrap .btn-nav-bar{
+        top: 15px;
+    }
+    .btn-nav-bar.iconfont {
+        font-size: 34px!important;
+        color: #fff;
+    }
+    .mywallet_list{
+        display: none!important;
+    }
+    .hearder_top {
+        /*background: none;*/
+    }
+    .mywallet{
+        position: absolute;
+        top:-7px;
+        left: 0px;
+        width: 100%;
+        color: #333;
+        float: none;
+        height: 60px!important;
+        line-height: 60px!important;
+        border-bottom: 1px solid #eee;
+    }
+    .mywallet .login-form{
+        height: 60px;
+    }
+    .zhuce {
+        float: left;
+        width: 49%;
+        text-align: center;
+        border-right: 1px solid #eee;
+
+    }
+    .login-b{
+        float: left;
+        width: 46%;
+        text-align: center;
+    }
+    .mywallet .mywallet_name {
+        padding: 0;
+        width: 49%;
+        border-right: 1px solid #eee;
+        text-align: center;
+    }
+    .mywallet .login-out{
+        width: 50%;
+        padding: 0;
+        text-align: center;
+    }
+    .mywallet .mywallet_name a {
+        color:#b72727;
+    }
+    #login a{
+        /*color: #333;*/
+    }
+    .mywallet dt {
+        display: none;
+    }
+    .mywallet dd {
+        float: none;
+        position: absolute;
+        bottom: 0;
+    }
+    .lang-box {
+        margin-right: 10px;
+        /*display: none;*/
+        /*position: absolute;
+        top: -6px;
+        right: 48px;
+        color: #696565;*/
+    }
+    .footer .main .list {
+        margin-left: 60px;
+        width: auto;
+    }
+    .footer{
+        display: none;
+    }
+    #leftsead {
+        display: none;
+    }
+    .notice-box .tit{
+        margin-left: 22px;
+    }
+    .news-box{
+        margin-left: 10px;
+        width: 190px;
+    }
+    .news-box li {
+        width: 190px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: clip;
+    }
+
+    /*交易手机自适应*/
+    .all_coin_show {
+        display: block;
+    }
+    .all_coin_info {
+        display: none;
+    }
+    .all_coin_box li:first-child {
+        border:0;
+    }
+    .all_coin_wrap {
+        padding: 0 10px;
+        height: 52px;
+        line-height: 52px;
+        margin-top: 0px;
+    }
+    .all_coin_box {
+        position: absolute;
+        left: 2px;
+        top: 62px;
+        width: 224px;
+        /*height: 218px;*/
+        background-color: #fff;
+        z-index: 99;
+        display: none;
+    }
+    .all_coin_box1 {
+        width: 100px;
+        min-height: 20px;
+    }
+    .all_coin_box ul {
+        overflow: inherit;
+        height: inherit;
+        /*border:1px solid #ccc;*/
+    }
+    .all_coin_box li {
+        padding: 10px 0px;
+        /*margin-left: 10px;*/
+        /*float: none;*/
+    }
+    .all_coin_box1 {
+        margin-left: 0;
+    }
+      .all_coin_price {
+    }
+        
+    }
+    .now {
+        padding-left: 10px;
+    }
+   
+}
+@media (max-width: 360px) {
+        .now .now1-span {
+        width: 319px;
+    }
+}

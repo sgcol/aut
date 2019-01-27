@@ -32,6 +32,7 @@ const server = require('http').createServer()
 , USDT =require('./usdt.js')
 , md5 = require('md5')
 , sysnotifier =require('./sysnotifier.js')
+, verifyOTC =require('./otc.js').verifyOTC
 , argv = require('yargs')
 	.default('port', 80)
 	.boolean('debugout')
@@ -118,6 +119,7 @@ function initmode(db, cb) {
 	app.use(express.static(path.join(__dirname, 'pub'), {maxAge:0, index: 'initsys.html' }));
 	app.use(cookieParser());
 	app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
+	app.use(bodyParser.json());
 	app.all('/createAdmin', httpf({u:'string', p:'string', callback:true}, function(username, password, callback) {
 		var salt=randomstring();
 		db.users.insert({_id:username, password:md5(salt+password), salt:salt, acl:'admin', name:'超级管理员', createTime:new Date()}, err=>{
@@ -138,6 +140,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.use(express.static(path.join(__dirname, 'pub'), { index: 'index.html' }));
 	app.use(cookieParser());
 	app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
+	app.use(bodyParser.json());
 	app.set('views', path.join(__dirname, 'pub/views'));
 	app.set('view engine', 'ejs');
 
@@ -169,27 +172,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		});
 		res.end('pf ' + req.provider + ' not defined');
 	});
-	const OTCKey='$mVd!w9R%Wr4NDSJr8';
-	const verifyOTC=(function createVerifyOTC(lastT) {
-		return function (req, res, next) {
-			var _p=merge(req.query, req.body), sign=_p.sign;
-			if (!sign) return res.send({err:'没有签名sign'});
-			delete _p.sign;
-			if (_p.t==null) return res.send({err:'没有时间戳'});
-			var wanted=md5(qs.stringify(sortObj(_p))+OTCKey);
-			if (sign!=wanted) {
-				var e={err:'签名错误'};
-				if (argv.debugout) {
-					e.wanted=wanted;
-					e.str=qs.stringify(sortObj(_p))+OTCKey;
-				}
-				return res.send(e);
-			}
-			if (Number(_p.t)<=lastT) return res.send({err:'时间戳异常'});
-			lastT=Number(_p.t);
-			next();
-		}
-	})(0);
+
 	if (USDT.bitcoincli) {
 		app.all('/getAddress', verifyOTC, httpf({account:'string', callback:true}, USDT.getaddress));
 		app.all('/getreceivedbyaddress', verifyOTC, httpf({address:'string', minconf:'?number', callback:true}, USDT.getreceivedbyaddress))
@@ -220,6 +203,18 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		auth.validUntil=new Date(now.getTime()+auth_timeout);
 		req.auth=auth;
 		next();
+	}
+	function getAuth(req, res, next) {
+		if (!req.cookies || !req.cookies.a) return res.send({err:'no auth'});
+		var auth=authedClients[req.cookies.a];
+		if (!auth) return res.send({err:'no auth'});
+		var now=new Date();
+		if (auth.validUntil<now) {
+			delete authedClients[req.cookies.a]
+			return res.send({err:'no auth'});
+		}
+		req.auth=auth;
+		next();		
 	}
 	const noAuthToLogin=verifyAuth;
 	function verifyAdmin(req, res, next) {
@@ -331,32 +326,34 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		});
 	}));
 	app.all('/doOrder', httpf({orderid:'string', callback:true}, function(sysOrderId, callback) {
-		var host=argv.host||this.req.headers.host;
+		var req=this.req;
+		var basepath=url.format({protocol:req.protocol, host:req.headers.host, pathname:url.parse(req.originalUrl).pathname});
 		getOrderDetail(sysOrderId, function(err, merchantid, money, cb_url) {
 			if (err) return callback(err);
 			// find a provider & create a provider order
 			pify(getMerchant)(merchantid).then(function(mer) {
-				return pify(paysys.order)(sysOrderId, money, mer, host);
+				return pify(paysys.order)(sysOrderId, money, mer, basepath);
 			}).then((payurl)=>{
-				return s2a(request({uri:payurl}));
-			})
-			.then(function (parts) {
-				return new Promise((resolve)=> {
-					const buffers = parts.map(part => util.isBuffer(part) ? part : Buffer.from(part));
-					return resolve(Buffer.concat(buffers));
+				if (payurl.url) return callback(null, payurl.url);
+				s2a(request({uri:payurl}))
+				.then(function (parts) {
+					return new Promise((resolve)=> {
+						const buffers = parts.map(part => util.isBuffer(part) ? part : Buffer.from(part));
+						return resolve(Buffer.concat(buffers));
+					})
 				})
-			})
-			.then(imgbuffer =>{
-				return Jimp.read(imgbuffer);
-			})
-			.then((img)=>{
-				var qr = new QrCode();
-				qr.callback = function(err, value) {
-					if (err) return callback(err);
-					if (value.result.toLowerCase().indexOf('https://qr.alipay.com')!=0) return callback('渠道返回的不是支付宝二维码');
-					callback(null, value.result);
-				};
-				qr.decode(img.bitmap);
+				.then(imgbuffer =>{
+					return Jimp.read(imgbuffer);
+				})
+				.then((img)=>{
+					var qr = new QrCode();
+					qr.callback = function(err, value) {
+						if (err) return callback(err);
+						if (value.result.toLowerCase().indexOf('https://qr.alipay.com')!=0) return callback('渠道返回的不是支付宝二维码');
+						callback(null, value.result);
+					};
+					qr.decode(img.bitmap);
+				}).catch(callback)
 			}).catch(callback)
 		});
 	}));
@@ -392,9 +389,29 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			});
 		});		
 	})
-	app.all('/admin/listAccount', verifyAuth, verifyManager, httpf({identity:'any', callback:true}, function(identity, callback) {
+	app.all('/admin/listAccount', verifyAuth, verifyManager, httpf({identity:'any', search:'?string', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, function(identity, search, sort, order, offset, limit, callback) {
+		if (!identity) identity=['merchant', 'agent'];
 		if (Array.isArray(identity)) identity={$in:identity};
-		db.users.find({acl:identity}).toArray(callback);
+		var cur=db.users.find({acl:identity}, {password:0, salt:0});
+		if (sort) {
+			var so={};
+			so[sort]=(order=='asc'?1:-1);
+			cur.sort(so);
+		}
+		if (offset) cur.skip(offset);
+		if (limit) cur.limit(limit);
+		cur.toArray().then(r=>{
+			cur.count((err, c)=>{
+				if (err) return callback(err);
+				r.forEach(item=>{
+					item.money=item.total-(item.used||0);
+					item.leftusdt=item.usdt-item.usedusdt||0;
+				})
+				callback(null, {total:c, rows:r});
+			})
+		}).catch(e=>{
+			callback(e);
+		})
 	}));
 	app.all('/admin/getSalt', httpf({u:'string', callback:true}, function(username, callback) {
 		db.users.find({_id:username}).toArray(function(err, r) {
@@ -419,7 +436,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			o.validUntil=new Date(now.getTime()+auth_timeout);
 			o.acl=o.acl||o.identity;
 			o.name=o.name||o._id;
-			res.cookie('a',rstr, { maxAge: 900000});
+			res.cookie('a',rstr);
 			if (o.acl=='admin'||o.acl=='manager') return callback(null, {to:'/dashboard.html', token:rstr});
 			else return callback(null, {to:'/merentry.html', token:rstr});
 		})
@@ -434,6 +451,11 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			if (identity=='merchant') {
 				o.key=randomstring({length:24});
 				o.merchantid=randomstring(16)+account;
+				o.providers={};
+				var prds=getProviders();
+				for (var k in prds) {
+					o.providers[k]={};
+				}
 				o.debugMode=true;
 				o.share=0.985;
 			}
@@ -448,7 +470,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		delete params.merchantid;
 
 		for (var i in params) {
-			if (params[i]==null) delete params[i];
+			if (params[i]==null || params[i]==='') delete params[i];
 		}
 
 		var useid={};
@@ -473,15 +495,15 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			params.salt=randomstring();
 			params.password=md5(params.salt+params.password);
 		}
-		db.users.update(useid, {$set:params}, function(err) {
+		db.users.updateOne(useid, {$set:params}, {w:1}, function(err) {
 			if (err) return callback(err);
-			if (merchantid) {
-				return getMerchant(merchantid, function(err, mer) {
-					if (err) return callback(err);
-					merge(mer, params);
-					callback();
-				});	
-			}
+			// if (merchantid) {
+			// 	return getMerchant(merchantid, function(err, mer) {
+			// 		if (err) return callback(err);
+			// 		merge(mer, params);
+			// 		callback();
+			// 	});	
+			// }
 			callback();
 		});
 	}));
@@ -553,19 +575,55 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			}
 		}, callback);
 	}));
-	app.all('/merchant/balance', verifyAuth, httpf({merchantid:'?string', callback:true}, function(merchantid, callback) {
+	app.all('/getOTCPrice', verifyAuth, httpf({coinType:'?string', market:'?string', callback:true}, function(coinType, market, callback) {
+		coinType=coinType||'usdt';
+		market=market||null;
+		request('https://otc-api.huobi.co/v1/data/trade-market?country=37&currency=1&payMethod=2&currPage=1&coinId=2&tradeType=buy&blockType=general&online=1', function(err, header, body) {
+			if (err) return callback(err);
+			try {
+				var ret=JSON.parse(body);
+			}catch(e) {
+				return callback(e);
+			}
+			if (ret.code!=200) return callback(ret.message);
+			var t=0;
+			ret.data.foeEach(item=>{
+				t+=item.price;
+			});
+			callback(null, {usdt:(t/ret.pageSize).toFixed(2)});
+		});
+	}));
+	app.all('/admin/getallbalances', verifyAuth, verifyManager, httpf({search:'?string', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, function(search, sort, order, offset, limit, callback) {
+		var cur=db.users.find({acl:{$in:['agent', 'merchant']}}, {total:1, usdt:1, name:1, merchantid:1});
+		if (sort) {
+			var so={};
+			so[sort]=(order=='asc'?1:-1);
+			cur.sort(so);
+		}
+		if (offset) cur.skip(offset);
+		if (limit) cur.limit(limit);
+		cur.toArray().then(r=>{
+			cur.count((err, c)=>{
+				if (err) return callback(err);
+				callback(null, {total:c, rows:r});
+			})
+		}).catch(e=>{
+			callback(e);
+		})
+	}));
+	app.all('/merchant/balance', verifyAuth, httpf({userid:'?string', callback:true}, function(userid, callback) {
 		if (this.req.auth.acl=='admin' || this.req.auth.acl=='manager') {
 			//check merchantid
-			if (!merchantid) return callback('no merchantid specified');
+			if (!userid) return callback('no merchantid specified');
 		}
-		if (this.req.auth.acl=='merchant') merchantid=this.req.auth.merchantid;
+		if (this.req.auth.acl=='merchant' || this.req.auth.acl=='agent') userid=this.req.auth._id;
 		// if agent, more condition
 		async.parallel({
 			total:(cb) =>{
-				db.bills.aggregate([{$match:{paidmoney:{$gt:-1}, merchantid:merchantid}}, {$group:{_id:null, sum:{$sum:{$multiply:['$paidmoney', '$share']}}}}], function(err, r) {
+				db.users.find({_id:userid}).toArray((err, r)=>{
 					if (err) return cb(err);
-					if (r.length==0) return cb(null, 0);
-					cb(null, r[0].sum);
+					if (r.length==0) return cb('no such user');
+					return cb(null, r[0].total);
 				})
 			},
 			arrivaled:(cb)=>{
@@ -577,17 +635,15 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}, callback);
 	}));
 	app.all('/admin/providers', verifyAuth, httpf(function() {
-		var pnames=new Set();
 		var external_provider=getProviders();
+		var ret=[];
 		for (var i in external_provider) {
 			var p=external_provider[i];
-			if (p.name) pnames.add(p.name);
+			ret.push({id:i, name:p.name, params:p.params});
 		}
-		var ret=[];
-		pnames.forEach((n)=>{ret.push(n)});
 		return ret;
 	}));
-	app.all('/sysnotification', verifyAuth, httpf(function() {
+	app.all('/sysnotification', getAuth, httpf(function() {
 		return httpf.json(sysnotifier.all().filter(n=>{
 			return aclgt(req.acl, n.acl);
 		}));

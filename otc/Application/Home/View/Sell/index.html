@@ -1,0 +1,93 @@
+<include file="Public:header"/>
+<link rel="stylesheet" href="__ROOT__/Public/static/css/buy_2a0acc48d5.css">
+<style>
+    .coin-tab{
+        border-bottom: 1px solid #d7dcde;
+        position: relative;
+        font-size: 0;
+        margin-bottom: 30px;
+        margin: 0 auto;
+    }
+    .coin-tab .coin.current {
+        color: #1798f2;
+        font-weight: 700;
+        border-color: #1798f2;
+    }
+    .coin-tab .coin {
+        width: 150px;
+        text-align: center;
+        line-height: 42px;
+        height: 44px;
+        box-sizing: border-box;
+        font-size: 16px;
+        color: #25495e;
+        display: inline-block;
+        border-bottom: 2px solid transparent;
+    }
+</style>
+<div class="container">
+    <div class="coin-tab">
+        <a href="__APP__/sell/index/type/usdt" class="coin current">USDT</a>
+    </div>
+    <table class="table buy">
+        <thead>
+        <tr>
+            <th class="pl-30">{$Think.lang.nicheng}</th>
+            <th>{$Think.lang.xiny}</th>
+            <th>{$Think.lang.fkfs}</th>
+            <th>{$Think.lang.jiage}</th>
+            <th>最大可出售</th>
+            <th></th>
+
+        </tr>
+        </thead>
+
+        <tbody>
+        <if condition="!empty($adinfo)">
+            <foreach name="adinfo" item="v">
+                <tr class="odd">
+                    <td class="head-portrait pl-30">
+                        <a href="{:U('user/view',array('id'=>$v['userid']))}" ><img class="user-head" src="{$v.ue_img}"  alt="">
+                            <span>{$v.username}</span>
+                            <span class="state <if condition='$v.zaixian eq 1'>ONLINE</if>"></span>
+                        </a>
+                        
+                        
+                    </td>
+                    <td class="td-normal">
+                        {$Think.lang.jy}{$v['userid']|getjycs=###} |
+                         {$Think.lang.hpd}{$v['userid']|gethpl=###}%
+                    </td>
+                    <switch name="v.provider" >
+                        <case value="1"><td>{$Think.lang.yhzz}</td></case>
+                        <case value="2"><td>{$Think.lang.zfb}</td></case>
+                        <case value="3"><td>{$Think.lang.wxzf}</td></case>
+                        <case value="4"><td>{$Think.lang.qita}</td></case>
+                    </switch>
+                    <td class="td-price">{$v.price} {$v.currency|strtoupper=###}</td>
+                    <td class="td-price"><span style="color: #f2aa1f">{$userusdt|number_format=###,2,'.',''}</span> USDT</td>
+                    <td class="pr-30"><a href="{:U('Addetail/index',array('adid'=>$v['adid']))}"  class="buy">{$Think.lang.chushou}</a></td>
+                </tr>
+            </foreach>
+            <else/>
+            <tr>
+                <td colspan="5"><div class="no-record">
+                    <div class="icon-no-record"></div>
+                    <div class="text-no-record">{$Think.lang.zanwgg}</div>
+                </div></td>
+            </tr>
+        </if>
+        </tbody>
+    </table>
+
+    <div class="no-record"  style="display: none;"  >
+        <div class="icon-no-record"></div>
+        <div class="text-no-record">{$Think.lang.zanwgg}</div>
+    </div>
+
+    <div class="page1" style="width:550px;height:50px">{$page}</div>
+</div>
+
+<include file="Public:footer"/>
+</body>
+</html>

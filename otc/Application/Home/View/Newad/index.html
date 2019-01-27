@@ -1,0 +1,187 @@
+<include file="Public:header"/>
+<link rel="stylesheet" href="__ROOT__/Public/static/css/newad.css">
+
+<div class="pt-30"></div>
+<div class="container new-ad">
+    <h1 class="h1">{$Think.lang.fabu}</h1>
+    <h3 class="h3 new-ad-tit">{$Think.lang.fabuinfo}<br>{$Think.lang.fabugg}<br>{$Think.lang.feiyonginfo}<br>{$Think.lang.fukuanfx}<br></h3>
+    <form id="newContent" class="form-cont clear-float">
+
+        <div class="form-title">
+            <span class="form-name"> {$Think.lang.jylx} </span>
+            <div class="line"></div>
+        </div>
+
+        <div class="input-cont  mb-20">
+            <div class="input-name clear-float">
+                <div class="require fl">{$Think.lang.jybz}:</div>
+                <select searchable class="select fl" name="crypto_currency">
+                    <option selected value="usdt">USDT</option>
+                </select>
+                <span class="input-name-decs">{$Think.lang.xzbz}</span>
+            </div>
+        </div>
+
+        <div class="input-cont">
+            <div class="input-name clear-float">
+                <div class="require fl">{$Think.lang.gglx}:</div>
+                <div class="fl">
+                    <input type="radio" checked="" value="ONLINE_SELL" id="ONLINE_SELL" name="trade_type"><label for="ONLINE_SELL">{$Think.lang.zxcs}</label>
+                    <input type="radio" value="ONLINE_BUY" id="ONLINE_BUY" name="trade_type"><label for="ONLINE_BUY">{$Think.lang.zxgm}</label>
+                </div>
+                <span class="input-name-decs">{$Think.lang.zxinfo}</span>
+            </div>
+           
+        </div>
+        <div class="form-title">
+            <span class="form-name">{$Think.lang.gdinfo}</span>
+            <div class="line"></div>
+        </div>
+        <div class="input-cont ">
+
+            <div class="input-name clear-float">
+                <div class="require fl">{$Think.lang.huobi}: </div>
+                <select searchable class="select fl" name="currency">
+                    <option selected value="cny">CNY  {$Think.lang.rmb}</option>
+                </select>
+                <span class="input-name-decs">{$Think.lang.jypay}</span>
+            </div>
+            
+        </div>
+
+        <div class="input-cont ">
+
+            <div class="input-name clear-float">
+
+                <div class="require fl">{$Think.lang.jiage}:</div>
+                    <div class="fl">
+                        <input class="input" name="price" type="number" validate placeholder="{$Think.lang.srjg}">
+                        <div class="input-after input-currency">CNY</div>
+                    </div>
+                <span class="input-name-decs">{$Think.lang.csjg}区间为：{$usdtcoin['min_price']}CNY-{$usdtcoin['max_price']}CNY</span>
+            </div>
+
+        </div>
+        <div class="input-cont ">
+            <div class="input-name clear-float">
+                <span class="require fl">{$Think.lang.zxxe}:</span>
+                <div class="fl">
+                    <input class="input" type="number" name="min_amount" validate check-type="min_amount" value="10" disabled  style="background: #e1e1e1">
+                    <div class="input-after input-currency">CNY</div>
+                    <div class="form-tips"></div>
+                    <div class="error-msg">{$Think.lang.zxxe3}</div>  
+                </div>
+                <span class="input-name-decs">{$Think.lang.zxxe4}</span>
+            </div>
+           
+            
+        </div>
+      <!--  <div class="input-cont ">
+            <div class="input-name clear-float">
+                <span class="require fl">{$Think.lang.zdxe}:</span>
+                <div class="fl">
+                    <input class="input" type="number" name="max_amount" validate check-type="max_amount"  placeholder="{$Think.lang.zdxe}">
+                    <div class="input-after input-currency" >CNY</div>
+                    <div class="form-tips"></div>
+                    <div class="error-msg">{$Think.lang.zdjy}</div> 
+                </div>
+                <span class="input-name-decs">{$Think.lang.jyinfo}</span>
+            </div>
+        </div>-->
+      <!--  <div class="input-cont input-payment_window_minutes" style="display: none">
+            <div class="input-name clear-float">
+                <span class="require fl">{$Think.lang.fkqx}:</span>
+                <div class="fl">
+                    <input class="input" type="number" name="payment_window_minutes" validate check-type="payment_window_minutes" placeholder="{$Think.lang.fkqx}">
+                    <div class="form-tips"></div>
+                    <div class="error-msg">{$Think.lang.qxfw}</div>
+                </div>
+                <span class="input-name-decs">{$Think.lang.qxnhei}（{$Think.lang.fenzhong}）</span>
+            </div>
+
+        </div>-->
+        <div class="input-cont">
+            <div class="input-name clear-float">
+                <div class="require fl">{$Think.lang.skfs}: </div>
+                <select class="select fl" name="payment_provider" searchable>
+                    <option value="alipay">{$Think.lang.zfb}</option>
+
+                    <option value="bank">{$Think.lang.yhzz}</option>
+
+                    <option value="weixin">{$Think.lang.wxzf}</option>
+
+                </select>
+            </div>
+           
+        </div>
+        <div class="input-cont">
+            <div class="input-name clear-float">
+                <div class="require fl">{$Think.lang.gglyan}: </div>
+                <div class="fl">
+                    <textarea class="input textarea" name="message" validate check-type="message" placeholder="{$Think.lang.jyty}（{$Think.lang.kejian}）"></textarea>
+                    <div class="form-tips"></div>
+                    <div class="error-msg">{$Think.lang.bsy}</div>
+                </div>
+                <span class="input-name-decs"></span>
+            </div>
+
+        </div>
+        <div class="line"></div>
+        <div class="pt-30"></div>
+        <a id="submit" class="btn submit" href="javascript:;">{$Think.lang.ljfb}</a>
+        <div class="pt-30"></div>
+    </form>
+</div>
+<include file="Public:footer"/>
+
+<script>
+
+    $('#submit').click(function () {
+         var trade_type=$('input:radio:checked').val();
+         var currency=$('[name=currency]').val();
+         var price=$('[name=price]').val();
+         var min_amount=$('[name=min_amount]').val();
+         var provider=$('[name=payment_provider]').val();
+         var message=$('[name=message]').val();
+         var coin=$('[name=crypto_currency]').val();
+         if(price==''){
+             layer.msg('请输入价格', {
+                 icon: 2
+             });
+             return false;
+         }
+         if(!(/^([1-9]\d*|0)(\.\d{1,2})?$/.test(price))){
+             layer.msg('价格输入错误', {
+                 icon: 2
+             });
+             return false;
+         }
+
+         $.post('{:U("Newad/index")}',{
+             trade_type:trade_type,
+             currency:currency,
+             price:price,
+             min_amount:min_amount,
+             provider:provider,
+             message:message,
+             coin:coin,
+         },function (data) {
+              if(data.status){
+                  layer.msg(data.info, {
+                      icon: 1
+                  });
+                  location.href='{:U("Manage/adsell")}';
+              } else {
+                  layer.msg(data.info, {
+                      icon: 2
+                  });
+                  if(data.url) {
+                      setTimeout('location.href="'+data.url+'"', 2000);
+                  }
+
+              }
+         })
+
+
+    })
+</script>

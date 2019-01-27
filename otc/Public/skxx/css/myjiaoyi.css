@@ -1,0 +1,510 @@
+/*网站公告*/
+  #testButton { 
+  color:rgb(255, 255, 255);
+  font-size:14px;
+  padding-top:3px;
+  padding-bottom:3px;
+  padding-left:25px;
+  border-width:2px;
+  border-style:outset;
+  border-radius:16px;
+  height: 23px;
+  background-color:rgb(151, 81, 255);
+  }
+  #testButton:hover{
+  color:#ffffff;background-color:#6b4bd6;
+  border-color:#6b4bd6;
+  }
+   .coin_menu{
+    float: left;
+    width: 246px;
+    min-height: 596px;
+    background-color: #fafafa;
+    box-sizing: border-box;
+  }
+  .clearfix:after {
+  visibility: hidden;
+  display: block;
+  content: " ";
+  clear: both;
+  height: 0;
+}
+ul{
+    list-style: none;
+      margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    vertical-align: baseline;
+    background: transparent;
+}
+
+.coin_menu .first-class-nav-item {
+    border-bottom: 1px solid #d2d2d2;
+}
+.coin_menu .asset-ico {
+    background: url(/Public/Home/images/qianbao.png) no-repeat 12px;
+}
+.coin_menu .safe-ico {
+    background: url(/Public/Home/images/anquan.png) no-repeat 12px;
+}
+
+.coin_menu .other-ico {
+    background: url(/Public/Home/images/qita.png) no-repeat 12px;
+}
+.coin_menu .nav-item-href.active .ico-1 {
+    background: url(/Public/Home/images/zais.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href .ico-1 {
+    background: url(/Public/Home/images/zai.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href .ico-2 {
+    background: url(/Public/Home/images/jilu.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href.active .ico-2 {
+    background: url(/Public/Home/images/jilus.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href .ico-9 {
+    background: url(/Public/Home/images/chengjiao.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href.active .ico-9 {
+    background: url(/Public/Home/images/chengjiaos.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href .ico-19 {
+    background: url(/Public/Home/images/geren.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href.active .ico-19 {
+    background: url(/Public/Home/images/gerens.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href .ico-18 {
+    background: url(/Public/Home/images/dezhi.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href.active .ico-18 {
+    background: url(/Public/Home/images/dezhis.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href .ico-3 {
+    background: url(/Public/Home/images/shengfen.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href.active .ico-3 {
+    background: url(/Public/Home/images/shengfens.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href .ico-17 {
+    background: url(/Public/Home/images/chengjiao.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href.active .ico-17 {
+    background: url(/Public/Home/images/chengjiaos.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href .ico-5{
+    background: url(/Public/Home/images/guge.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href.active .ico-5 {
+    background: url(/Public/Home/images/guges.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href .ico-6{
+    background: url(/Public/Home/images/dl.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href.active .ico-6{
+    background: url(/Public/Home/images/dls.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href .ico-7{
+    background: url(/Public/Home/images/geren.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href.active .ico-7{
+    background: url(/Public/Home/images/gerens.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href .ico-8{
+    background: url(/Public/Home/images/tuijian.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href.active .ico-8{
+    background: url(/Public/Home/images/tuijians.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href .ico-16{
+    background: url(/Public/Home/images/jiangpin.png) no-repeat 50%;
+}
+.coin_menu .nav-item-href.active .ico-16{
+    background: url(/Public/Home/images/jiangpins.png) no-repeat 50%;
+}
+.coin_menu .first-class-item-title {
+    height: 60px;
+    border-bottom: 1px solid #d2d2d2;
+    line-height: 60px;
+    font-size: 18px;
+    color: #333;
+    padding-left: 56px;
+    box-sizing: border-box;
+}
+.coin_menu .nav-item-href.active {
+    /*background-color: #ff4b46;*/
+    background-color: #ffba00;
+    color: #fff7e9;
+}
+.coin_menu .nav-item-href {
+    display: block;
+    height: 54px;
+    line-height: 54px;
+    font-size: 16px;
+    color: #666;
+}
+.coin_menu .nav-item-href {
+    padding: 0 10px;
+}
+.coin_menu .nav-item-con {
+    padding-left: 35px;
+    border-bottom: 1px solid #ececec;
+}
+/*.coin_menu .nav-item-href.active .ico-1 {
+    background: url(/Public/Home/images/zai.png) no-repeat 50%;
+}*/
+
+.coin_menu .nav-item-href .ico {
+    float: left;
+    width: 36px;
+    height: 36px;
+    padding: 9px 0;
+}
+
+
+.account-left-menu {
+    float: left;
+    width: 210px;
+    margin-right: 30px;
+    margin-top: 30px;
+    text-align: center;
+    font-size: 14px;
+    line-height: 50px;
+    background-color: #fff;
+    border-radius: 15px;
+    padding-left: 0;
+    webkit-box-shadow: 0 15px 30px rgba(0,0,0,.1);
+    box-shadow: 0 15px 30px rgba(0,0,0,.1);
+        margin-left: 20px;
+}
+.actives{
+  background: #ffba00;
+}
+.actives a{
+  color: #fff;
+}
+
+
+/*//首页*/
+     .reg-fb .spani{
+    position: absolute;
+    top: 3px;
+}
+.myicon{
+    font-size: 22px;
+    color: #1d72cf;
+
+}
+.login_text input {
+    border: none;
+    border-bottom: 1px solid #ccc;
+
+    }
+    .login_text {
+
+    margin-left: 86px;
+}
+
+/*商城*/
+
+ .wraphtml {
+    position: relative;
+}   
+  .clearfix {
+    clear: both;
+    zoom: 1;
+}
+.f_title {
+    margin-bottom: 20px;
+}
+.clearfix:after, .clearfix:before {
+    content: '.';
+    display: block;
+    font-size: 0;
+    height: 0;
+    line-height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    width: 0;
+}
+.left {
+    float: left;
+}
+.f_title span.current {
+    color: #ffffff;
+}
+.f_title span {
+    position: relative;
+    background: 0;
+    cursor: pointer;
+    margin-right: 10px;
+}
+.f_title span.current i {
+    position: absolute;
+    top: 34px;
+    left: 42%;
+    border-color: #ffba00 transparent transparent transparent;
+    border-style: solid;
+    border-width: 8px;
+}
+.f_title span.current a {
+    background: #ffba00;
+    color: #ffffff;
+}
+.f_title a {
+    color: #ffffff;
+    padding: 8px 30px;
+    background: #c0c0c0;
+    border-radius: 8px;
+}
+.clearfix:after, .clearfix:before {
+    content: '.';
+    display: block;
+    font-size: 0;
+    height: 0;
+    line-height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    width: 0;
+}  
+.mytips {
+    line-height: 1.8;
+    background: #FEFBF1;
+    margin: 10px 0px 10px;
+    border: 1px solid #fec2b7;
+    padding: 10px 12px 10px;
+    color: #e55600;
+    text-align: left;
+    font-size: 12px;
+    border-radius: 5px;
+    clear: both;
+    _height: 150px;
+    max-height: 150px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin: 0px 15px;
+    display: none;
+}
+.mytips h6 {
+    font-size: 14px;
+    line-height: 2.4;
+}
+.category-nav {
+    margin: 0px 0 0;
+    padding: 0 10px;
+    border: 1px solid #d9c7a7;
+    border-top: 2px solid #1e73d0;
+    background: #ffffff;
+}
+.search-box .search {
+    position: relative;
+    width: 536px;
+    height: 32px;
+    border: 2px solid #ffba00;
+    z-index: 3;
+}
+.search-text {
+    padding: 6px 10px;
+    width: 427px;
+    height: 20px;
+    font: 14px/20px "Microsoft YaHei", "\5FAE\8F6F\96C5\9ED1";
+    color: #666666;
+    border: 0 none;
+    outline: 0 none;
+}
+.search-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 89px;
+    height: 32px;
+    font: 16px/32px "Microsoft YaHei", "\5FAE\8F6F\96C5\9ED1";
+    color: #ffffff;
+    border: 0 none;
+    background: #ffba00;
+    cursor: pointer;
+}
+.category-nav dl {
+    position: relative;
+    zoom: 1;
+    padding: 11px 0 11px 65px;
+    border-bottom: 1px dotted #e6e6e6;
+}
+
+.category-nav dt {
+    position: absolute;
+    top: 11px;
+    left: 0;
+    width: 65px;
+    font: bold 12px/18px "Arial";
+}
+.category-nav .current, .category-nav dd a:hover {
+    background: #e55600;
+    color: #ffffff;
+    text-decoration: none;
+}
+.category-nav dd a {
+    display: inline-block;
+    padding: 0 7px;
+    margin: 0 7px;
+    color: #333333;
+    white-space: nowrap;
+    font-size: 8px;
+
+}
+.all_coin_price {
+    float: left;
+    position: relative;
+    z-index: 90;
+}
+.logo {
+    float: left;
+    width: 190px;
+    height: 59px;
+}
+.wrapbody {
+    width: 100%;
+    overflow: hidden;
+}
+.main {
+    width: 1200px;
+    margin: 0px auto;
+}
+.wraphtml {
+    position: relative;
+}
+.pages {
+    clear: both;
+    margin: 15px 15px 0px;
+    text-align: center;
+}
+.ProductList ul li {
+    float: left;
+    position: relative;
+    margin: 20px -8px 0 0;
+    padding: 14px;
+    width: 279px;
+}
+.ProductList ul li .productListBox {
+    padding: 0px;
+    border: 1px solid #d9c7a7;
+    z-index: 10;
+    background: #ffffff;
+}
+.productListBox .listImg {
+    height: 230px;
+    overflow: hidden;
+    text-align: center;
+}
+.productListBox .listText {
+    line-height: 18px;
+    padding: 10px 5px 0;
+    text-align: left;
+    max-height: 36px;
+    overflow: hidden;
+    min-height: 36px;
+}
+.productListBox .listWrap {
+    height: 28px;
+    line-height: 28px;
+    padding-top: 8px;
+    padding-left: 5px;
+    text-align: left;
+}
+.productListBox .listWrap strong {
+    font-weight: bold;
+    color: #ed3f3f;
+}
+.productListBox .listStar {
+    height: 28px;
+    line-height: 28px;
+    text-align: left;
+}
+.productListBox .listStar span {
+    color: #707070;
+    padding: 0 5px;
+    font-size: 8px;
+}
+.productListBox .listStar span strong {
+    color: #c49173;
+    font-size: 8px;
+}
+.productListBox .listStar em {
+    color: #568396;
+    font-size: 8px;
+}
+.productListBox .listWrapBtn {
+    height: 52px;
+    padding: 5px 0 0 10px;
+}
+.pages a {
+    background: #ffffff;
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 3px;
+    border: 1px solid #e55600;
+    margin: 0 2px;
+    color: #e55600;
+}
+img{
+    border: 0;
+    max-width: 100%;
+}
+a {
+    text-decoration: none;
+    color: #999;
+}
+
+/*购物记录*/
+i, em {
+    font-style: normal;
+}
+
+.category-nav {
+    margin: 26px 0 0;
+    padding: 0 10px;
+    border: 1px solid #d9c7a7;
+    border-top: 2px solid #ffba00;
+    /*1e73d0*/
+    background: #ffffff;
+}
+
+
+.myright {
+    background: #ffffff;
+    width: 810px;
+    border: 1px solid #e8e8e8;
+    padding: 15px;
+    float: right;
+    box-shadow: 2px 2px 5px #eeeeee;
+    color: #666666;
+}
+
+.f_body {
+    clear: both;
+    overflow: hidden;
+}
+.mt5 {
+    margin-top: 5px;
+}
+.f_table {
+    border: 1px solid #ededed;
+    border-bottom: 0;
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+.pages {
+    clear: both;
+    margin: 15px 15px 0px;
+    text-align: center;
+}
+thead {
+    display: table-header-group;
+    vertical-align: middle;
+    border-color: inherit;
+}
+
+

@@ -1,0 +1,811 @@
+.assets_center {
+	position: relative;
+	padding-top: 20px;
+}
+.coin_menu{
+   float: left;
+    width:246px;
+    overflow:hidden;
+ /*   background-color: #fff;*/
+}
+.w900 {
+    width: 910px
+}
+
+.assets_content{
+	margin-left: 34px;
+	background-color: #fff;
+    min-height: 630px;
+   /* border:1px solid #1e73d0;*/
+    padding-bottom: 20px;
+}
+.assets_content1{
+    margin: 0 auto;
+}
+.assets_content .safe_center {
+	height: 40px;
+	line-height: 40px;
+    background: #ffba00;
+    margin-bottom: 25px;
+}
+.assets_content .safe_center h1 {
+	font-size: 18px;
+	padding-left: 20px;
+    color: #fff7e9;
+    font-weight: normal;
+}
+.coin_list .coin_name{
+    float:left;
+    padding-top:17px;
+    line-height:24px;
+    width:74px;
+    overflow:hidden;
+    text-align: center;
+}
+.coin_menu_box{
+   /* margin-bottom: 20px;
+    border: 1px solid #1e73d0;
+    background: #fff;*/
+}
+.coin_menu_box a {
+    color: #4e4c4c;
+  
+}
+.coin_menu ul, .coin_menu dl{
+}
+/*.coin_menu li, .coin_menu dt{
+    padding:0 30px;
+    height:42px;
+    line-height:42px;
+    overflow:hidden;
+}*/
+.coin_menu dt{
+    padding-left:22px;
+}
+.coin_menu li.active {
+    /*background-color: rgba(12, 128, 247, .1);*/
+}
+.coin_menu li.active:before,.coin_menu dl dt.here:before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    display: inline-block;
+    border-radius: 50%;
+    background: #1d72cf;
+}
+.coin_menu .active a,.coin_menu .here a {
+    /*color: #3498DB;*/
+}
+.coin_style_box {
+   margin-bottom: 20px;
+   padding-left: 60px;
+   margin-top: 24px;
+}
+.coin_style_box ul {
+	height: 40px;
+	line-height: 40px;
+}
+.coin_style_box li {
+    width: 181px;
+    float: left;
+    color: #333;
+    font-size: 14px;
+    overflow: hidden
+}
+.coin_style_box li img {
+    vertical-align: middle;
+    width: 30px;
+    height: 30px;
+    background-size: contain;
+}
+.coin_list_top {
+    height: 42px;
+    line-height: 42px;
+    background: #bfbfbf;
+    color: #fff;
+}
+.coin-scroll-box{
+    margin: 0 14px;
+}
+.coin_list_top li {
+    float: left;
+    width: 150px;
+    text-align: center;
+}
+.coin_list_top li:nth-child(1){
+	width: 170px;
+}
+.coin_list_top li:last-child{
+	width: 90px;
+}
+.coin_list {
+    width: 100%
+}
+.coin_list li {
+    width: 100%;
+    height: 70px;
+    line-height: 70px
+}
+.coin_list dt,.coin_list dd {
+    float: left;
+    width: 150px;
+    text-align: center;
+}
+.coin_list dt {
+    padding-left: 20px;
+    width: 150px;
+    overflow: hidden
+}
+.coin_list .coin_pic {
+    float: left;
+    width: 40px;
+    height: 40px;
+    margin-top: 8px;
+}
+.coin_list dd.last {
+    width: 80px;
+}
+.coin_list dd input {
+    color: #fff;
+    border: 0;
+    border-radius: 3px;
+    width: 90px;
+    height: 30px;
+    margin-top: 20px;
+    cursor: pointer;
+    background: #1d72cf;
+}
+.mytips{
+  /*  background:#FEFBF1;
+    border:1px solid #fec2b7;*/
+    padding:10px 12px 10px;
+    color:#e55600;
+    text-align:left;
+    font-size:12px;
+    border-radius:5px;
+    margin: 14px 15px 0px;
+}
+.mytips h6{
+    font-size:14px;
+    line-height:2.4;
+}
+.w_div{
+    margin-bottom:8px;
+}
+.w_div .w1 {
+        float:left;
+}
+.w_div .w1 label{
+    float: left;
+    height: 38px;
+    line-height:38px;
+    margin-right:12px;
+    text-align:right;
+    width: 160px;
+    overflow: hidden;
+}
+
+.w_div .w2{
+    float:left;
+    text-align:left;
+    line-height:36px;
+    color:#999999;
+    position: relative;
+    margin-left: 10px;
+}
+
+
+.w2 .bank{
+    width:680px;
+    margin-right:-26px;
+}
+.w2 #bizhong{
+    margin-top: 10px;
+}
+.f_table{
+    border:1px solid #ededed;
+    border-bottom:0;
+    width:100%;
+    border-collapse:collapse;
+    border-spacing:0;
+    font-size: 12px;
+}
+.f_table th{
+    background:#ededed;
+    font-weight:normal;
+  /*  height:36px;
+    line-height:36px;*/
+    text-align:center;
+}
+.f_table th #market-selectTest{
+    width: 70%;
+        height: 28px;
+    border-radius: 5px;
+    border: 1px solid #ededed;
+    line-height: 28px;
+}
+.f_table th #type-selectTest{
+        height: 28px;
+    border-radius: 5px;
+    border: 1px solid #ededed;
+    line-height: 28px;
+}
+#status-selectTest {
+    width: 70%;
+      height: 28px;
+    border-radius: 5px;
+    border: 1px solid #ededed;
+    line-height: 28px;
+}
+.f_table tr {
+    height: 40px;
+    line-height: 40px;
+}
+.f_table td{
+    border-bottom:1px solid #ededed;
+    font-size:12px;
+    color:#707070;
+    text-align:center;
+}
+.f_table td a {
+	color: #1d72cf;
+}
+
+.w2 .bank li{
+    width:160px;
+    height:46px;
+    float:left;
+    margin:0 10px 6px 0;
+}
+.w2 .bank li img{
+    border:1px solid #ededed;
+    border-radius:5px;
+    cursor:pointer;
+}
+.w2 .bank li.current img{
+    border:1px solid #55c931;
+}
+.w_div .cztxinput{
+    width: 200px;
+    height: 38px;
+    border:1px solid #d5d5d5;
+}
+.w_div .cztxinput.code-inp{
+    width: 100px;
+}
+.w_div .cztxselect{
+    width: 200px;
+    height: 38px;
+    border:1px solid #d5d5d5;
+}
+.w_div .cztxinput.code-input{
+    width: 100px;
+}
+.w_div .btn-cztx {
+    width: 202px;
+    height: 38px;
+    border: 0;
+    color: #fff;
+    background: #1d72cf;
+    font-size: 14px;
+}
+.w_div .getyzm {
+    border:0;
+    width: 88px;
+    height: 38px;
+    background: #1d72cf;
+    margin-left: 10px;
+    color: #fff;
+}
+.c-tab{
+    margin-top: 30px;
+    padding-left: 30px;
+    height: 30px;
+    line-height: 30px;
+    border-bottom: 1px solid #eee;
+}
+.c-tab ul li {
+    float: left;
+    margin-right: 20px;
+    padding: 0 20px;
+}
+.c-tab ul li.active {
+
+    border-bottom: 2px solid #1d72cf;
+}
+.qb_tishi {
+    line-height: 24px;
+    font-size: 12px;
+    margin-bottom: 12px
+}
+.qb_dizhi {
+    width: 82.5%;
+    border: 1px solid #fcdbc8;
+    background: #fffffa;
+    line-height: 40px;
+    height: 40px;
+    padding-left: 10px;
+    margin-left: 20px;
+}
+.qb_dizhi p {
+    font-size: 14px;
+    color: #e55600;
+}
+.qb_dizhi .copy {
+    float: left;
+    width: 74px;
+    height: 32px;
+    border-radius: 3px;
+    background: #e55600;
+    color: #fff;
+    line-height: 32px;
+    text-align: center;
+    font-size: 14px;
+    margin-top: 23px
+}
+/** 充值银行*/
+.choosepaymethod{
+    margin:20px;
+}
+.paymethod{
+    height:48px;
+    line-height:48px;
+    overflow:hidden;
+}
+.paymethod span{
+    width:130px;
+    height:47px;
+    line-height:48px;
+    border:1px solid #dddddd;
+    float:left;
+    display:block;
+    margin-right:12px;
+    cursor:pointer;
+    font-weight:100;
+    border-bottom:0;
+    color:#666666;
+}
+.paymethod span.current{
+    background:#ffffff;
+    color:#333333;
+    border-bottom:0;
+    font-weight:700;
+    height:48px;
+    cursor:default;
+}
+.choosebanks{
+}
+.methodway{
+}
+.methodway ul, .nobindbank{
+    width:100%;
+    margin-bottom:18px;
+    padding:8px 0;
+    border:1px solid #dddddd;
+    overflow:hidden;
+}
+.methodway li{
+    width:180px;
+    height:38px;
+    float:left;
+    margin:10px 32px;
+}
+.methodway li input[type=radio]{
+    margin-right:8px;
+    vertical-align:text-bottom;
+    margin-bottom:13px;
+    cursor:pointer;
+}
+.methodway li span{
+    width:154px;
+    height:38px;
+    border:1px solid #ededed;
+    display:inline-block;
+    *display:inline;
+    zoom:1;
+    cursor:pointer;
+}
+.methodway li span.checked{
+    border:2px solid #55c931;
+}
+.bindbanks{
+    background:#fffbe6;
+    border:1px solid #f5de71;
+    text-align:left;
+    margin:0 -11px;
+    padding:10px 14px;
+    line-height:1.6;
+    overflow:hidden;
+}
+.bindbanks a{
+    color:#ff8a00;
+}
+.morelimitknow{
+    display:block;
+    width:100%;
+    height:100%;
+    cursor:pointer;
+    color:#999999;
+}
+.chongzhiTable td.tdmore{
+    background:#f9f9f9;
+    padding:0;
+    height:38px;
+    line-height:38px;
+}
+.getjiangli{
+    position:absolute;
+    top:-16px;
+    right:0;
+    width:100px;
+    height:30px;
+}
+.getjiangli:hover{
+    opacity:.8;
+    filter:alpha(opacity=80);
+}
+.w_div .w2 .btn-cztx{
+    width:200px;
+    cursor:pointer;
+    font-size:18px;
+    background-color:#9751ff;
+    border:0;
+    color: #fff;
+    border-radius: 3px;
+}
+.changebank{
+    text-decoration:underline;
+    margin-left:16px;
+}
+/*财务中心*/
+.coin_menu_box .side-icon {
+    padding-left: 28px;
+    height: 48px;
+    line-height: 48px;
+   color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    background: #1e73d0;
+}
+.coin_menu_box .side-icon .iconfont{
+    margin-right: 10px;
+    font-size: 20px;
+     color: #3498DB;
+     font-weight: normal;
+}
+
+.tab-content{
+    margin-top: 30px;
+}
+.quink-wrap{
+    float: left;
+    margin-left: 44px;
+    width: 400px;
+}
+#qrcode-wallet{
+    float: right;
+    margin-right: 86px;
+}
+.quicklink{
+    margin-bottom: 20px;
+}
+.quicklink h4 {
+    font-size: 18px;
+    color: #55C931;
+    font-weight: normal;
+}
+.quicklink p.tip {
+    color: #999999;
+    line-height: 1.4;
+    margin-bottom: 14px;
+    font-size: 12px;
+}
+.quicklink .area {
+    background: #EDEDED;
+    width: 200px;
+    height: 40px;
+    line-height: 40px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border:1px solid #C5C5BC;
+}
+.btn-quick {
+    width: 90px;
+    height: 40px;
+    font-size: 18px;
+    color: #FFFFFF;
+    cursor: pointer;
+    margin-left: 16px;
+    background-color: #1d72cf;
+    border: none;
+}
+#invite-textarea{
+   /* width: 350px;
+    height: 100px;
+    line-height: 18px;*/
+}
+.reward-share{
+
+}
+.reward-share span.icon.icon-sina {
+    background-position: 0 0;
+}
+.reward-share span.icon.icon-douban {
+    background-position: 0 -105px;
+}
+.reward-share a {
+    display: inline-block;
+    margin-right: 30px;
+    text-align: center;
+    font-size: 14px;
+}
+.reward-share span.icon.icon-qzone {
+    background-position: 0 -175px;
+}
+.reward-share span.icon {
+    background: url(/Public/Home/images/icon-share.png) -9999px -9999px no-repeat;
+    width: 40px;
+    height: 35px;
+    display: block;
+    margin: 0 auto;
+}
+.cnyin_record {
+    margin: 0 10px;
+    margin-top: -18px;
+}
+.cnyin_record h4 {
+    line-height: 24px;
+    font-size: 14px;
+    color: #333;
+    font-weight: normal;
+    padding-left: 2px;
+    margin-bottom: 18px
+}
+#qianbao_type{
+    margin-top: 10px;
+}
+#myzc_type{
+    margin-top:8px;
+    width: 140px;
+    height: 24px;
+}
+/*新闻中心手机自适应*/
+
+.slide-toggle{
+    position: absolute;
+    right: 0;
+    top: -7%;
+    width: 80px;
+    height: 50px; z-index: 100;
+    display: none;
+	/*
+    background: url(../images/icon-home1.png);
+   
+    text-indent: -999px;*/
+    
+}
+.weituo_bizhong{
+        margin-left: 20px;
+}
+/*财务中心自适应*/
+.model{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 99;
+    height: 100%;
+    background: rgba(0,0,0,.7);
+    display: none;
+}
+.model-close {
+    margin-top: 200px;
+    color: #fff;
+    background: none;
+    border:0;
+    font-size: 18px;
+    width: 200px;
+    height: 200px;
+    display: none;
+}
+
+.ovfHiden{overflow: hidden;height: 100%;}
+@media (max-width: 768px) {
+    .model-close {
+        display: block;
+    }
+    .slide-toggle{
+        display: block;
+    }
+
+    .side-content{
+        position: fixed;
+        /*top: 118px;*/
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: 174px;
+        background-color: #fff;
+        z-index: 199;
+        display: none;
+        overflow-y: scroll;
+        
+        /*transition: all 2s;*/
+    }
+    .side-content .coin_menu_box {
+        border:0;
+    }
+     .side-list {
+        height: 672px;
+         overflow-y: hidden;
+        
+       
+
+    }
+    .assets_content {
+        width: 100%;
+        margin-left: 0;
+        border:0;
+    }
+    .w900{
+        width: 100%;
+    }
+    .div-pic {
+        display: none;
+    }
+    /*财务自适应*/
+    .coin_style_box{
+        padding-left: 10px;
+    }
+    .coin_style_box li img {
+        display: none;
+    }
+    .coin_style_box li {
+        width: 115px;
+    }
+    .coin_style_box li.total-zi{
+        display: none;
+    }
+    .coin_list_box{
+        overflow-x: auto;
+        margin: 0 10px;
+    }
+    .coin-scroll-box{
+        width: 910px;
+        margin: 0;
+    }
+    .coin_style_box ul{
+        height: 70px;
+    }
+    .f_table{
+        width: 1200px;
+    }
+    .f_body{
+        width: 100%;
+        overflow-x: auto;
+    }
+    .choosepaymethod {
+        
+    margin: 30px 10px;
+}
+    .now .now1-span {
+   
+    width: 288px;
+    overflow: hidden;
+    text-overflow:clip;
+    white-space: nowrap;
+}
+    .w_div{
+        width: 100%;
+        margin-bottom: 16px;
+    }
+    .w_div1{
+        height: 40px;
+    }
+    .w_div .w1 label {
+        width: 100px;
+    }
+    .w_div .w1 input{
+        width: 200px;
+    }
+    .w_div .w1 input.getyzm{
+        width: 88px;
+    }
+    .w_div .w1 {
+        float: none;
+    }
+    .w_div .w2{
+        float: none;
+        margin-left: 114px;
+    }
+    .quink-wrap{
+        width: 98%;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+    #qrcode-wallet{
+    }
+    .f_tab_body{
+        overflow-x: scroll;
+    }
+    .f_table tbody {
+        min-height: 300px;
+    }
+    .weituo_bizhong{
+            margin-left: 15px;
+    }
+    .bizhong_select {
+        width: 167px;
+    }
+    .qb_dizhi {
+        margin-left: 21px;
+    }
+    .bizhong_type {
+      width: 187px;
+    }
+    .cnyin_record {
+        margin: 29px 20px;
+        margin-bottom: 30px;
+        margin-top: 20px;
+    }
+    .qb_dizhi {
+           margin-left: 4px;
+    width: 96.5%;
+    }
+
+  
+}
+
+
+   
+@media (max-width:360px) {
+        .w_div .w2 input {
+        width: 91px;
+    }
+    .w_div .w2 .num1 {
+        right: -11px;
+        top: 2px;
+    }
+    .weituo_bizhong {
+        margin-left: 15px;
+        padding-top: 9px;
+        height: 40px
+    }
+    .bizhong_select {
+        width: 140px;
+    }
+    .bizhong_type {
+        width: 160px;
+    }
+
+    .qb_dizhi {
+        margin-left: 5px;
+        width: 95.5%;
+    }
+
+}
+@media (max-width:320px){
+    .coin_style_box li {
+        width: 96px;
+    }
+    .w_div .w1 {
+        margin-right: 0;
+    }
+    .w_div .getyzm {
+        width: 80px;
+    }
+    .w_div .w2 {
+        
+    }
+    .w_div .cztxinput{
+        width: 180px;
+    }
+    .w_div .cztxselect{
+        width: 180px;
+    }
+    .w_div .btn-cztx {
+        width: 180px;
+    }
+} 
+
+

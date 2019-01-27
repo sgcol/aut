@@ -102,54 +102,56 @@
       <li class="nav-item dropdown">
         <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-toggle="dropdown">
           <i class="mdi mdi-bell-outline"></i>
-          <span class="count-symbol bg-danger"></span>
+          <span class="count-symbol bg-danger" id="hasNewNotification"></span>
         </a>
         <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="notificationDropdown">
           <h6 class="p-3 mb-0">Notifications</h6>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item preview-item">
-            <div class="preview-thumbnail">
-              <div class="preview-icon bg-success">
-                <i class="mdi mdi-calendar"></i>
+          <div class="notifications">
+            <a class="dropdown-item preview-item">
+              <div class="preview-thumbnail">
+                <div class="preview-icon bg-success">
+                  <i class="mdi mdi-calendar"></i>
+                </div>
               </div>
-            </div>
-            <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
-              <h6 class="preview-subject font-weight-normal mb-1">Event today</h6>
-              <p class="text-gray ellipsis mb-0">
-                Just a reminder that you have an event today
-              </p>
-            </div>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item preview-item">
-            <div class="preview-thumbnail">
-              <div class="preview-icon bg-warning">
-                <i class="mdi mdi-settings"></i>
+              <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
+                <h6 class="preview-subject font-weight-normal mb-1">Event today</h6>
+                <p class="text-gray ellipsis mb-0">
+                  Just a reminder that you have an event today
+                </p>
               </div>
-            </div>
-            <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
-              <h6 class="preview-subject font-weight-normal mb-1">Settings</h6>
-              <p class="text-gray ellipsis mb-0">
-                Update dashboard
-              </p>
-            </div>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item preview-item">
-            <div class="preview-thumbnail">
-              <div class="preview-icon bg-info">
-                <i class="mdi mdi-link-variant"></i>
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item preview-item">
+              <div class="preview-thumbnail">
+                <div class="preview-icon bg-warning">
+                  <i class="mdi mdi-settings"></i>
+                </div>
               </div>
-            </div>
-            <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
-              <h6 class="preview-subject font-weight-normal mb-1">Launch Admin</h6>
-              <p class="text-gray ellipsis mb-0">
-                New admin wow!
-              </p>
-            </div>
-          </a>
-          <div class="dropdown-divider"></div>
-          <h6 class="p-3 mb-0 text-center">See all notifications</h6>
+              <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
+                <h6 class="preview-subject font-weight-normal mb-1">Settings</h6>
+                <p class="text-gray ellipsis mb-0">
+                  Update dashboard
+                </p>
+              </div>
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item preview-item">
+              <div class="preview-thumbnail">
+                <div class="preview-icon bg-info">
+                  <i class="mdi mdi-link-variant"></i>
+                </div>
+              </div>
+              <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
+                <h6 class="preview-subject font-weight-normal mb-1">Launch Admin</h6>
+                <p class="text-gray ellipsis mb-0">
+                  New admin wow!
+                </p>
+              </div>
+            </a>
+            <div class="dropdown-divider"></div>
+            <h6 class="p-3 mb-0 text-center">See all notifications</h6>
+          </div>
         </div>
       </li>
       <li class="nav-item nav-logout d-none d-lg-block">
@@ -203,51 +205,35 @@
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> <a class="nav-link" href="admin.html">管理员账号</a></li>
           <li class="nav-item"> <a class="nav-link" href="merchant.html">商户</a></li>
-          <li class="nav-item"> <a class="nav-link" href="pages/ui-features/typography.html">代理</a></li>
+          <li class="nav-item"> <a class="nav-link" href="agent.html">代理</a></li>
         </ul>
       </div>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="pages/icons/mdi.html">
+      <a class="nav-link" data-toggle="collapse" href="#ui-details" aria-expanded="false" aria-controls="ui-details">
         <span class="menu-title">明细</span>
+        <i class="menu-arrow"></i>
         <i class="mdi mdi-chart-bar menu-icon"></i>
       </a>
+      <div class="collapse" id="ui-details">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="fromuserlist.html">充值订单</a></li>
+          <li class="nav-item"> <a class="nav-link" href="tomerchantlist.html">清帐订单</a></li>
+        </ul>
+      </div>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="pages/forms/basic_elements.html">
-        <span class="menu-title">Forms</span>
+      <a class="nav-link" href="clearBalance.html">
+        <span class="menu-title">手动清帐</span>
         <i class="mdi mdi-format-list-bulleted menu-icon"></i>
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="pages/charts/chartjs.html">
-        <span class="menu-title">Charts</span>
-        <i class="mdi mdi-chart-bar menu-icon"></i>
+      <a class="nav-link" href="demoOrder.html">
+        <span class="menu-title">支付演示</span>
+        <i class="mdi mdi-book-open-variant menu-icon"></i>
       </a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" href="pages/tables/basic-table.html">
-        <span class="menu-title">Tables</span>
-        <i class="mdi mdi-table-large menu-icon"></i>
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" data-toggle="collapse" href="#general-pages" aria-expanded="false" aria-controls="general-pages">
-        <span class="menu-title">Sample Pages</span>
-        <i class="menu-arrow"></i>
-        <i class="mdi mdi-medical-bag menu-icon"></i>
-      </a>
-      <div class="collapse" id="general-pages">
-        <ul class="nav flex-column sub-menu">
-          <li class="nav-item"> <a class="nav-link" href="pages/samples/blank-page.html"> Blank Page </a></li>
-          <li class="nav-item"> <a class="nav-link" href="pages/samples/login.html"> Login </a></li>
-          <li class="nav-item"> <a class="nav-link" href="pages/samples/register.html"> Register </a></li>
-          <li class="nav-item"> <a class="nav-link" href="pages/samples/error-404.html"> 404 </a></li>
-          <li class="nav-item"> <a class="nav-link" href="pages/samples/error-500.html"> 500 </a></li>
-        </ul>
-        </div>
-    </li>
-
   </ul>
 </nav>
 
@@ -458,6 +444,9 @@
                               提供商单号
                             </th>
                             <th>
+                              金额
+                            </th>
+                            <th>
                               创建时间
                             </th>
                             <th>
@@ -543,22 +532,23 @@ function refreshOrderList() {
     var list=data.message;
     for (var i=0; i<list.length; i++) {
       var o=list[i];
-      var htmlstr=`<tr><td>${o.mername}<td>${o.merchantOrderId}<td>${o.provider||''}<td>${o.providerOrderId||''}<td>${timestring(o.time)}<td>${statusHtmlfy(o.status)}<td>${timestring(o.lasttime)}<td><button class="btn btn-outline-primary btn-icon-sm" title="重发通知" onclick="javascript:sendNotify('${o._id}')"><i class="mdi mdi-replay"></i></button>`;
-      if (me.acl=='admin') htmlstr+=`<button style="margin-left:5px" class="btn btn-outline-danger btn-icon-sm" title="强制结单" onclick="javascript:forceconfirm('${o._id}')"><i class="mdi mdi-archive"></i></button>`;
+      var htmlstr=`<tr><td>${o.mername}<td>${o.merchantOrderId}<td>${o.provider||''}<td>${o.providerOrderId||''}<td>${o.money}<td>${timestring(o.time)}<td>${statusHtmlfy(o.status)}<td>${timestring(o.lasttime)}<td><button class="btn btn-outline-primary btn-icon-sm tooltipfy" title="重发通知" onclick="javascript:sendNotify('${o._id}')"><i class="mdi mdi-replay"></i></button>`;
+      if (me.acl=='admin') htmlstr+=`<button style="margin-left:5px" class="btn btn-outline-danger btn-icon-sm tooltipfy" title="强制结单" onclick="javascript:forceconfirm('${o._id}')"><i class="mdi mdi-archive"></i></button>`;
       htmlstr+='</tr>'
       p.append(htmlstr);
     }
-    p.append(`<tr><td colspan="999999"><span style="float:right;margin-right:45px">more</span></td><tr>`)
+    p.append(`<tr><td colspan="999999"><a href="./fromuserlist.html" style="float:right;margin-right:45px">more</a></td><tr>`)
+    $('.tooltipfy').tooltip();
   })
 }
-$(()=>{
+window.initpage=()=>{
   accIntf('/admin/statistics', function(err, data) {
     $('#weeklyIncome').text(formatBigNumber(data.moneys));
     $('#weeklyOrders').text(formatBigNumber(data.bills));
     $('#merchantCount').text(formatBigNumber(data.merchants));
   });
   refreshOrderList();
-});
+};
   
 </script>
 </html>

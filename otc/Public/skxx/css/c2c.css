@@ -1,0 +1,450 @@
+	.autobox .c2cdiv{
+    width: 100%;
+    margin-left: 0;
+    background: #fff;
+    min-height: 700px;
+    overflow: hidden;
+}
+.c2cdiv .c2clist{
+	margin: 0 auto;
+
+}
+.c2cdiv .c2clist .c2cnav{
+	width: 100%;
+    background: #f7f7f7;
+    text-align: left;
+}
+.c2cnav .active{
+    background: #FFF;
+}
+a.btn.card-add{
+	/*float: right;
+    background: 0;
+    color: #d00;
+    font-size: 14px;
+    margin-right: 0;
+    padding: 0 10px;
+    min-width: auto;*/
+        float: right;
+    background: 0;
+    color: #d00;
+    font-size: 14px;
+    margin-right: 0;
+    padding: 0 10px;
+    min-width: auto;
+}
+.c2cnav a{
+	    text-align: center;
+    position: relative;
+    height: 50px;
+    line-height: 50px;
+    padding: 0 15px;
+    min-width: 130px;
+    font-size: 16px;
+    color: #4b4c4d;
+    display: block;
+    float: left;
+    margin-right: 20px;
+    background-color: #eee;
+    -ms-transition: all .2s linear;
+    -moz-transition: all .2s linear;
+    -webkit-transition: all .2s linear;
+    -o-transition: all .2s linear;
+    transition: all .2s linear;
+    cursor: pointer;
+}
+
+.c2clist .tabform{
+	    padding: 20px 20px 30px;
+}
+.c2clist .c2c-tabList.active{
+
+}
+.c2clist .no-usdt-w{
+	margin: 0 -20px;
+
+}
+.c2clist .c2c-bd{
+	margin: 20px 0 0 0;
+    text-align: left;
+}
+ #buyform .has-feedback {
+    position: relative;
+}
+ #sellform .has-feedback {
+    position: relative;
+}
+.has-feedback .control-label{
+	    font-family: "Microsoft YaHei";
+    margin-bottom: 4px;
+    color: #6d7b82;
+    position: absolute;
+    left: 10px;
+    top: 13px;
+    z-index: 90;
+    font-size: 12px;
+        font-weight: normal;
+            display: inline-block;
+    max-width: 100%;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+.c2c-bd #buyform .input-group {
+    width: 100%;
+        text-align: left;
+    color: #3c515e;
+    position: relative;
+    display: table;
+    border-collapse: separate;
+}
+.c2c-bd #sellform .input-group {
+    width: 100%;
+        text-align: left;
+    color: #3c515e;
+    position: relative;
+    display: table;
+    border-collapse: separate;
+}
+.has-feedback .form-second{
+	    color: #de211d;
+	        padding-right: 15px;
+    font-size: 14px;
+    text-align: right;
+    font-weight: bold;
+        height: auto;
+    padding: 6px 15px;
+    line-height: 30px;
+    border: none;
+        border-radius: 0!important;
+            box-shadow: inset 1px 1px 3px rgba(0,0,0,.075);
+                width: 95%;
+}
+
+.input-group {
+    position: relative;
+    display: table;
+    border-collapse: separate;
+} 
+.c2c-bd #buyUnitPrice, .c2c-bd #sellUnitPrice {
+    background: #f3f3f3;
+}
+
+
+.c2c-bd .c2c-two{
+	margin-left: -15px;
+	margin-right: -15px;
+}
+.c2c-bd .c2c-fl{
+	float: left;
+	position:relative;
+	min-height: 1px;
+	padding-left: 15px;
+	padding-right: 15px;
+	width: 45%;
+} 
+.c2c-bd .c2c-fr{
+	float: left;
+	position:relative;
+	min-height: 1px;
+	padding-left: 15px;
+	padding-right: 15px;
+	width: 45%;
+} 
+.c2c-two .b-title{
+	
+	    margin-bottom: 10px;
+    color: #333;
+    font-size: 14px;
+        margin-top: 0;
+}
+.c2c-two #buyfinish, #sellfinish {
+    font-size: 14px;
+    margin-bottom: 10px;
+    color: #ccc;
+}
+.c2c-two .btn-block{
+	    background-color: #de211d;
+    border-color: #de211d;
+        padding: 9px 12px;
+    border-radius: 3px;
+    white-space: normal;
+    box-shadow: none;
+    background-image: none;
+    text-shadow: none;
+        -ms-transition: all .2s linear;
+    -moz-transition: all .2s linear;
+    -webkit-transition: all .2s linear;
+    -o-transition: all .2s linear;
+    transition: all .2s linear;
+    font-size: 16px!important;
+        display: block;
+    width: 100%;
+        color: #fff;
+        text-align: center;
+        font-weight: normal;
+        vertical-align: middle;
+        touch-action: manipulation;
+    cursor: pointer;
+        border: 1px solid transparent;
+        user-select: none;
+}
+.c2c-two .sellbtn{
+	background-color: #3dc18e;
+    border-color: #3dc18e;
+    color: #fff;
+}
+.c2c-tabList-btc{
+	display: none;
+}
+.c2c-bd .rows{
+	    margin-left: -15px;
+    margin-right: -15px;
+}
+.rows .rowfl {
+    float: left;
+    position: relative;
+    min-height: 1px;
+    padding-left: 15px;
+    padding-right: 15px;
+    width: 45%;
+}
+.rows .rowfr{
+float: left;
+    position: relative;
+    min-height: 1px;
+    padding-left: 15px;
+    padding-right: 15px;
+    width: 45%;
+}
+.rowfl .exchangetlist {
+    width: 100%;
+    height: 105px;
+    margin-bottom: 20px;
+    color: #6d7b82;
+    overflow: hidden;
+    margin-top: 30px;
+    border: 1px solid #eee;
+}
+.rowfr .exchangetlist2 {
+    width: 100%;
+    height: 105px;
+    margin-bottom: 20px;
+    color: #6d7b82;
+    overflow: hidden;
+    margin-top: 30px;
+    border: 1px solid #eee;
+}
+.exchangetlist li, .exchangetlist .shd {
+    height: 32px;
+    line-height: 32px;
+    padding: 0 10px;
+}
+.exchangetlist2 li, .exchangetlist2 .shd2 {
+    height: 32px;
+    line-height: 32px;
+    padding: 0 10px;
+}
+.exchangetlist .shd {
+    overflow: hidden;
+    background: #fafafa;
+}
+.exchangetlist2 .shd2 {
+    overflow: hidden;
+    background: #fafafa;
+}
+.exchangetlist .shd * {
+    float: left;
+}
+.exchangetlist2 .shd2 * {
+    float: left;
+}
+.exchangetlist span {
+    width: 25%;
+    display: inline-block;
+}
+.exchangetlist2 span {
+    width: 25%;
+    display: inline-block;
+}
+.exchangetlist .shd b {
+    font-weight: 100;
+}
+.exchangetlist2 .shd2 b {
+    font-weight: 100;
+}
+
+.exchangetlist b {
+    width: 25%;
+    display: inline-block;
+    text-align: right;
+}
+.exchangetlist2 b {
+    width: 25%;
+    display: inline-block;
+    text-align: right;
+}
+.exchangetlist .shd .typeshow {
+    text-align: right;
+    color: #6d7b82!important;
+}
+.exchangetlist2 .shd2 .typeshow2 {
+    text-align: right;
+    color: #6d7b82!important;
+}
+.exchangetlist .shd a {
+    color: #444;
+}
+.exchangetlist2 .shd2 a {
+    color: #444;
+}
+.exchangetlist a {
+    width: 25%;
+    display: inline-block;
+    text-align: right;
+    color: #333;
+}
+.exchangetlist2 a {
+    width: 25%;
+    display: inline-block;
+    text-align: right;
+    color: #333;
+}
+.exchangetlist #usdtcnybuylist .typeshow {
+    color: #de211d;
+}
+.exchangetlist .typeshow {
+    text-align: right;
+    color: #ff0000;
+}
+.exchangetlist2 .typeshow2 {
+    text-align: right;
+    color: #ff0000;
+}
+.c2clist .usdtnote{
+	border: 4px #ffeae8 solid;
+    padding: 10px;
+    color: #3c515e;
+    font-size: 14px;
+    margin: 0 20px;
+    text-align: left;
+}
+.usdtnote .notecont {
+    background: #fcfcfc url(/Public/Home/images/lamp.png) no-repeat scroll 5px 8px;
+    display: block;
+    padding: 18px 40px;
+}
+.notecont p{
+
+    margin: 0 0 10px;
+
+}
+.c2cdiv .bk-pageTit {
+    margin: 10px 20px;
+}
+.bk-pageTit {
+    padding: 10px 0;
+    text-align: left;
+    font-family: "Microsoft YaHei","lato Regular",Arial,sans-serif;
+    border-bottom: 1px solid #e0e7ea;
+}
+.c2cdiv .bk-pageTit h4.pull-left {
+    background: #f5f5f5;
+    height: 40px;
+    line-height: 40px;
+    font-size: 16px;
+    color: #61727c;
+    text-align: left;
+    border-bottom: 1px solid #d5dadd;
+    display: block;
+    width: 100%;
+}
+.bk-pageTit h4 {
+    font-size: 18px;
+    padding-left: 10px;
+    color: #61727c;
+    line-height: 40px;
+    margin: 0;
+}
+.pull-left {
+    float: left!important;
+}
+.bk-ico.assetRecord {
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+    background-image: url(/Public/Home/images/ico-saferecord.png);
+    background-size: auto 95%;
+    vertical-align: text-bottom;
+}
+.bk-ico {
+    width: 30px;
+    height: 36px;
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: auto 100%;
+}
+.bk-tabList .table-responsive {
+    overflow: visible;
+}
+.table-responsive {
+    overflow-x: auto;
+    min-height: .01%;
+}
+.table-bordered, .table-bordered>tbody>tr>td, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>td, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>thead>tr>th {
+    border: 1px solid transparent;
+}
+.table {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 20px;
+    background-color: transparent;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+thead {
+    display: table-header-group;
+    vertical-align: middle;
+    border-color: inherit;
+}
+.table thead tr th {
+    color: #979ca0;
+    background-color: transparent;
+        height: 45px;
+    white-space: nowrap!important;
+    font-size: 12px;
+        vertical-align: middle;
+}
+.table thead tr th:first-child, .table tbody tr td:first-child {
+    text-align: left;
+}
+.table-bordered>thead>tr>td, .table-bordered>thead>tr>th {
+    border-bottom: 1px solid #eff0f0;
+}
+.c2cdiv .table tbody tr td:last-child {
+    text-align: center;
+}
+td>.bk-norecord {
+    margin: -15px -8px;
+}
+.bk-norecord {
+    min-height: 100px;
+    padding: 36px 0;
+    line-height: 2em;
+    background-color: #fdfdfd;
+    text-align: center;
+    color: #6d7b82;
+}
+.bk-norecord p {
+    margin-bottom: 0;
+    color: #6d7b82!important;
+    font-size: 12px!important;
+}
+.bk-ico.info {
+    width: 20px;
+    height: 20px;
+    background-image: url(/Public/Home/images/ico-info-aplan.png);
+    vertical-align: text-bottom;
+    margin-right: 10px;
+}

@@ -1,0 +1,907 @@
+/*安全中心*/
+/*左侧*/
+.side-icon{
+    
+/*padding-left: 22px;
+padding-bottom: 10px;*/
+}
+.safetyi{
+	    font-size: 26px;
+	    color: #1db7ff;
+}
+/*.coin_menu {
+    float: left;
+    width: 246px;
+    overflow: hidden;
+    background-color: #f7f7f7;
+}*/
+.col_pho-3 li {
+    padding: 1px 30px;
+    line-height: 42px;
+    white-space: nowrap;
+    overflow: hidden;
+    position: relative;
+}
+.current1{
+	    background: rgba(29, 183, 255, 0.3);
+}
+.col_pho-3 a{
+	color: #8b8989;
+}
+/*个人账户*/
+.sc_statu {
+    width: 708px;
+    height: 122px;
+    /*border: 1px solid #ffba00;*/
+    margin: 15px auto
+}
+.sc_statu .biank{
+    width: 210px;
+    height: 90px;
+    border: 1px solid #1c2953;
+    /* padding: 6px 7px; */
+    padding-top: 10px;
+    padding-left: 10px;
+    margin-top: -26px;
+}
+.sc_statu .bianks{
+    width: 210px;
+    height: 90px;
+    border: 1px solid #ffba00;
+    /* padding: 6px 7px; */
+    padding-top: 10px;
+    padding-left: 10px;
+    margin-top: -26px;
+}
+.sc_statu li {
+    float: left;
+    width: 217px;
+    padding-left: 18px;
+    /*border-right: 1px solid #ffba00;*/
+    padding-top: 32px;
+    height: 90px
+}
+.sc_statu em {
+    margin-top: 5px;
+    width: 60px;
+    height: 54px;
+    margin-right: 13px;
+    background: url(../images/safe_style.png) no-repeat left 0px;
+    float: left
+}
+.sc_statu .sc_statu_type_1 {
+    background-position: left -0px
+}
+.sc_statu .sc_statu_type_2 {
+    background-position: left -53px
+}
+.sc_statu .sc_statu_type_3 {
+    background-position: left -108px
+}
+.sc_statu .sc_statu_type_1_1 {
+    background-position: left -0px
+}
+.sc_statu .sc_statu_type_2_1 {
+    background-position: left -53px
+}
+.sc_statu .sc_statu_type_3_1 {
+    background-position: left -108px
+}
+.sc_statu dl {
+    float: left
+}
+.sc_statu dt {
+    height: 28px;
+    line-height: 28px;
+    font-size: 16px
+}
+.sc_statu dd {
+    font-size: 12px;
+    color: #888;
+    padding-left: 28px;
+    height: 24px;
+    line-height: 24px
+}
+.sc_statu dd a {
+    margin-left: 2px;
+    color: #e55600
+}
+.sc_statu dd a:hover {
+    text-decoration: underline
+}
+.sc_info_list {
+    margin: 19px auto 0px;
+    width: 710px;
+    border-top: 2px solid #d6d6d6
+}
+.sc_info_list dl {
+    height: 40px;
+    line-height: 40px;
+    font-size: 12px;
+}
+.sc_info_list dt {
+    padding-left: 17px;
+    width: 100px;
+    float: left
+}
+.sc_info_list dd {
+    float: left
+}
+.sc_info_list dd p {
+    width: 400px;
+    color: #888
+}
+.sc_info_list dd p span {
+    float: left;
+    padding-left: 22px;
+    margin-right: 50px;
+    color: #888;
+    line-height: 24px;
+    margin-top: 8px
+}
+.sc_info_list dd .changepw {
+    width: 174px;
+    padding-right: 19px;
+    text-align: right;
+    color: #888
+}
+.sc_info_list dd .changepw a {
+    color: #58bdf0;
+}
+.sc_info_list dd .changepw a:hover {
+    text-decoration: none;
+}
+.sc_level_info {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    width: 12px;
+    height: 12px;
+    overflow: hidden;
+    background: url(../images/icon.png) no-repeat left -215px
+}
+
+.alpass,.nopass {
+    background: url(../images/icon.png) no-repeat -84px -86px
+}
+.userbtns {
+    font-size: 14px;
+    width: 200px;
+    height: 34px;
+    line-height: 34px;
+    cursor: pointer;
+    border-radius: 4px;
+    background-color: #FFF;
+    border: 1px solid #4f94e7;
+    color: #4f94e7;
+}
+/*实名认证*/
+
+.band_succ {
+  line-height: 34px;
+    margin-top: 5px;
+    font-size: 16px;
+    color: #690;
+    /* padding-left: 414px; */
+    padding-top: 55px;
+    margin: 0 auto;
+    width: 384px;
+}
+/*.band_succ em {
+    margin-left: -48px;
+    height: 34px;
+    width: 34px;
+    float: left;
+    background: url(../images/icon.png) no-repeat left -116px
+}*/
+.set_verify {
+
+}
+.set_verify2 li{
+	height: 40px;
+    line-height: 40px;
+    font-size: 14px;
+    margin-bottom: 10px;
+   
+}
+
+.set_verify li {
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+.set_verify li span {
+    color: #888;
+    font-size: 12px;
+    margin-left: 12px
+}
+.set_verify li.div-pic {
+    float: left;
+}
+.set_verify li .upload-identity{
+    float: left;
+   /* width: 164px;
+    height: 100px;*/
+}
+.upload-identity .shen-img{
+    width: 194px;
+    height: 118px;
+    border: 1px solid #ccc;
+    text-align: center;
+    cursor: pointer;
+}
+.upload-identity .shen-box{
+    /* width: 164px;
+    height: 100px;
+    border: 1px solid #ccc;*/
+    text-align: center;
+    cursor: pointer;
+}
+.shen-img .iconfont {
+    font-size: 24px!important;
+    line-height: 100px;
+
+}
+.div-pic{
+    float: left;
+    margin-left: 32px;
+}
+.picture-example, .picture-example img {
+    width: 158px;
+    display: inline-block;
+}
+.example-intro {
+    display: inline-block;
+    margin-left: -20px;
+    padding-top: 30px;
+    color: #333;
+}
+.upload-example h4 {
+    color: #c8c8c8;
+    font-size: 14px;
+    font-weight: 700;
+    height: 20px;
+    line-height: 20px;
+}
+.upload-example p {
+    color: #c8c8c8;
+    height: 20px;
+    line-height: 20px;
+    margin-top: 5px;
+}
+.set_verify input{
+	width: 144px;
+   /* line-height: 40px;
+    height: 40px;*/
+    /* box-shadow: none; */
+    border: 1px solid #cccccc;
+    padding-left: 10px;
+}
+.set_verify .peizhi{
+        padding-left: 64px;
+    padding-top: 10px;
+}
+.set_verify .sv_input{
+        padding-left: 65px;
+}
+.set_verify select{
+    float: left;
+    width: 154px;
+    line-height: 40px;
+    height: 40px;
+    background-color:rgba(255,255,255,0) ;
+}
+.set_info{
+	float: left;
+    text-align: right;
+    width: 130px;
+    height: 42px;
+    line-height: 42px;
+}
+.set_verify .shen-btn {
+    float: left;
+    width: 156px;
+    height: 42px;
+    color: #fff;
+    background:#1e73d0;
+    border:0;
+}
+.set_btns{
+	    width: 100px;
+    height: 35px;
+    line-height: 34px;
+    background: #3dc1ff;
+    border-radius: 5px;
+    box-shadow: none;
+    border: 1px solid #3dc1ff;
+    margin-left: 200px;
+    color: #fff;
+}
+/*地址*/
+
+/*修改登录密码*/
+.pwtrade{
+
+	margin: 0 auto;
+     margin-top: 30px;
+    width: 520px;
+}
+
+.pwtrade dl {
+    width: 100%;
+    margin-bottom: 15px;
+    height: 40px;
+}
+/*.pwtrade dt {
+    float: left;
+    width: 223px;
+    text-align: right;
+    height: 40px;
+    line-height: 40px;
+    font-size: 14px;
+    color: #333
+}*/
+.pwtrade .updatepwdinfo{
+    height: 40px;
+    line-height: 40px;
+    font-size: 18px;
+    color: #4f94e7;
+    font-weight: normal;
+    margin-left: 160px;
+  
+}
+.pwtrade .updatepwd{
+    float: left;
+    width: 160px;
+    text-align: right;
+    height: 40px;
+    line-height: 40px;
+    font-size: 14px;
+    color: #333;
+    /*background: pink;*/
+}
+.pwtrade dd select {
+    width: 95px;
+    margin-right: 11px;
+    border: 1px solid #efefef;
+    height: 34px
+}
+.pwtrade dd input[type=password],.pwtrade dd input[type=text] {
+    width: 190px;
+    height: 12px;
+    border: 1px solid #D8D8D4;
+    padding: 10px 4px;
+    line-height: 12px;
+    vertical-align: middle
+}
+.pwtrade dd input[type=button] {
+    font-size: 14px;
+    width: 200px;
+    height: 34px;
+    background: #1d72cf;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+#tpwdsettinga{
+	width: 400px;
+    margin: 0 auto;
+    margin-top: 34px;
+}
+.save_verify {
+    width: 220px;
+    height: 35px;
+    cursor: pointer;
+    border-radius: 3px;
+    background: #1d72cf;
+    color: #fff;
+    border: none;
+    margin-left: 62px;
+    text-align: center;
+}
+.save_verify .baoc{
+    border: none!important;
+    color: #fff!important;
+    padding-top: 8px;
+}
+#qianbao_type{
+    width: 80%;
+}
+/*登录日志*/
+
+  .current{
+  	padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin: 0 10px;
+    background: rgba(29, 183, 255, 0.78);
+  }
+
+/*双重验证*/
+.dv_submit {
+    padding-left: 103px;
+
+}
+.dv_submit input {
+    width: 200px;
+    height: 35px;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    background: #1d72cf;
+}
+.dv_info {
+    width: 680px;
+    padding-left: 52px;
+    line-height: 20px;
+    padding-top: 12px;
+    margin-bottom: 14px
+}
+.dv-box{
+    position: relative;
+}
+.dv-box .dv_num {
+    position: absolute;
+    top: 0;
+    left: 24px;
+}
+.dv_info p {
+    /*margin-bottom: 10px;*/
+    color: #666;
+    font-size: 12px
+}
+.dv_title {
+    /*height: 32px;*/
+    line-height: 30px;
+    padding-left: 64px;
+    font-size: 14px;
+    margin-top: 22px
+}
+.dv-box  em {
+    width: 32px;
+    height: 32px;
+    background: url(../images/number.png) no-repeat left 0px
+}
+.dv-box  .dv_num_1 {
+    background-position: left 0px
+}
+.dv-box  .dv_num_2 {
+    background-position: left -35px
+}
+.dv-box  .dv_num_3 {
+    background-position: left -70px
+}
+.dv-box  .dv_num_4 {
+    background-position: left -105px
+}
+.dv_content {
+    margin-left: 39px;
+    border-left: 3px solid #e9e9e9;
+    padding-left: 21px;
+    width: 669px;
+}
+
+.mbphone_btn dl {
+    /*height: 30px;*/
+    line-height: 30px;
+    font-size: 12px
+}
+.mbphone_btn dt {
+    float: left;
+    width: 534px
+}
+.mbphone_btn dd {
+    float: left
+}
+.mbphone_btn dd a {
+    float: left;
+    width: 70px;
+    height: 20px;
+    border: 1px solid #e55600;
+    color: #e55600;
+    border-radius: 5px;
+    -webkit-transition: 0.3s ease all;
+    transition: 0.3s ease all;
+    -o-transition: 0.3s ease all;
+    -moz-transition: 0.3s ease all;
+    -ms-transition: 0.3s ease all;
+    margin-top: 8px;
+    text-align: center;
+    line-height: 20px
+}
+
+
+.dv_content p {
+    line-height: 22px;
+    font-size: 12px;
+    margin-bottom: 10px
+}
+.dv_content p b {
+    color: #e55600;
+    font-size: 18px;
+    font-weight: normal
+}
+.dv_content p span {
+    color: #e55600
+}
+.dv_ewm {
+    margin: 10px 0 12px 3px
+}
+.dv_ewm img {
+    display: block
+}
+.dv_input {
+    font-size: 14px;
+    line-height: 40px;
+    position: relative
+}
+.dv_title1{
+    float: left;
+}
+.dv_input input,.sv_input input,.off_fn_input input {
+    width: 188px;
+    height: 18px;
+    padding: 10px 5px;
+    border: 1px solid #d5d5d5;
+    line-height: 18px
+}
+.dv_ts {
+    float: left;
+    height: 24px;
+    line-height: 24px;
+    padding: 7px 14px 7px 13px;
+    border: 1px solid #c3c8c8;
+    background: #f9f9f9;
+    width: 240px;
+    font-size: 12px;
+    color: #666;
+    margin-right: 10px;
+}
+
+.dv_radio {
+    margin-top: 13px;
+    line-height: 22px;
+    font-size: 14px
+}
+.dv_radio label {
+    margin-right: 26px
+}
+.dialog_content {
+    border-radius: 4px;
+    width: 498px;
+    border: 1px solid #7f7f7f;
+    position: absolute;
+    left: 50%;
+    top: 300px;
+    margin-left: -250px;
+    box-shadow: 0 0 15px #7f7f7f;
+    background: #fff;
+    padding-top: 16px;
+    padding-bottom: 32px;
+    z-index: 1000;
+
+}
+#dialogBoxShadow{
+        position: absolute; 
+        top: 0px; 
+        left: 0px; 
+        z-index: 100; 
+        background-color: rgb(0, 0, 0); 
+        opacity: 0.4; 
+        width: 100%; 
+        display: none;
+}
+.dialog_title{
+    height: 30px;
+    line-height: 30px;
+    font-size: 18px;
+    margin-bottom: 19px;
+    padding: 0 10px;
+    border-bottom: 1px dotted #ccc;
+}
+.dialog_title span {
+    float: left;
+}
+.dialog_title a {
+    float: right;
+    color: #1d72cf;
+}
+.dialog_body{
+    padding-left: 45px;
+}
+.PopLayer li{
+    margin-bottom: 16px;
+}
+.PopLayer li .c2{
+    font-size: 14px;
+    color: #525252;
+    width: 118px;
+    height: 38px;
+    line-height: 38px;
+    display: inline-block;
+    text-align: right;
+}
+.PopLayer input{
+    border: 1px solid #eee;
+    width: 184px;
+    height: 36px;
+  
+    border-radius: 3px;
+}
+.PopLayer li .btn{
+    display: inline-block;
+    width: 186px;
+    height: 36px;
+    line-height: 36px;
+    text-align: center;
+    border-radius: 3px;
+    background-color: #1d72cf;
+    cursor: pointer;
+    color: #fff;
+}
+.btn {
+ 
+}
+.cnyin_record h4.zhi-tit{
+    font-size: 16px;
+    font-weight: bold;
+}
+.zhi-link{
+    color: #9751ff;
+}
+
+.tpwd .text {
+    width: 209px;
+    height: 12px;
+    border: 1px solid #efefef;
+    padding: 10px 4px;
+    line-height: 12px;
+    vertical-align: middle
+}
+/*手机端适应*/
+/*安全*/
+
+   @media screen and (max-width: 479px){
+    /*个人账户*/
+    .sc_statu {
+        width:60%;
+       border: none;
+    }
+
+    .sc_statu li {
+        border-top:  1px solid #efefef;
+        border-left:  1px solid #efefef;
+        border-bottom: 1px solid #efefef;
+    }
+
+    .sc_info_list {
+        margin: 268px auto 0px;
+        width: 100%;
+      
+    }
+    .sc_info_list dd p {
+      display: none;
+    }
+    .sc_info_list dt {
+        padding-left: 44px;
+        width: 120px;
+
+     }
+   .sc_info_list dl {
+       height: 30px;
+       line-height: 30px;
+       font-size: 16px;
+   }
+   /*实名认证*/
+
+    .pwtrade {
+        width: 100%;
+    }
+   .set_verify {
+         padding-left: 0; 
+        padding-bottom: 0; 
+    }
+
+     .set_verify input {
+        width: 200px;
+    }  
+    .set_verify select {
+        width: 212px;
+        } 
+        .band_succ {
+         /* width: 116px; */ 
+           width: 100%;
+           padding-left: 20px;
+        }
+        
+        .set_btns {
+
+        margin-left: 157px;
+        }
+        /*地址*/
+    .cnyin_record {
+        width: 100%;
+        margin:20px 0 0;
+    }
+    /*修改登录密码*/
+    .pwtrade .updatepwdinfo {
+        margin-left: 54px;
+    }
+
+    .pwtrade .updatepwd {
+        width: 148px;  
+    }
+    .pwtrade dd input[type=button] {
+        /*margin-left: 115px;*/
+        width: 154px;
+    }
+    /*双重验证*/
+    .dv_info{
+        width: 98%;
+        padding-left: 7px;
+    }
+    .dv-box .dv_num {
+        /*left: 12px;*/
+    }
+        
+
+    
+    .mbphone_btn dt {
+        width: 100%;
+}    
+    /* .mbphone_btn dt {
+         width: 100%;
+    }  */
+    .dv_content {
+        width: 82%;
+    }
+
+
+    .dv_input input, .sv_input input, .off_fn_input input {
+        width: 100px;
+    }
+    .dv_ts {
+            left: 29px;
+            top: 46px;        
+    }
+     .dv_title { 
+        /*margin-top: 137px;*/
+    }
+    .dv_radio {
+        /*margin-top: 86px;*/
+    }
+    .dv_title{
+
+    }
+    .dv_submit {
+        padding-left: 46px;
+    }
+    .f_table {
+        min-height: 300px;
+    }
+    .f_table tr {
+        height: 30px;
+        line-height: 30px;
+    }
+    .pwtrade dd input[type=password], .pwtrade dd input[type=text] {
+        width: 144px;
+    }
+    .dialog_content{
+            width: 96%;
+        margin-left: 0;
+        left: 2px;
+        top: 130px;
+        padding-left: 10px;
+
+    }
+    .dialog_body{
+        padding-left: 0;
+    }
+    .PopLayer input{
+        width: 128px;
+    }
+    .PopLayer li .btn{
+        width: 140px;
+    }
+    .sc_info_list{
+        height: 28px;
+        line-height: 28px;
+        font-size: 16px;
+    }
+     #tpwdsettinga{
+        margin: 20px auto;
+        padding-left: 12px;
+        width: 82%;
+     }
+    .set_verify2 li {
+        height: 44px;
+        line-height: 24px;
+    }
+    .sc_info_list dd .changepw {
+        width: 160px;
+        padding-right: 16px;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+   @media screen and (max-width:375px){
+        .PopLayer input {
+            width: 116px;
+        }
+        .dv_title {
+            /*margin-top: 253px;*/
+        }
+    .dv_content {
+        margin-top: 10px;
+       }
+}
+   @media screen and (max-width:360px){
+    /*双重验证*/
+        .dv_title {
+        /*margin-top: 244px;*/
+    }
+    .dv_ts {
+    left: 6px;
+   }
+   /*手机绑定*/
+       .pwtrade dd input[type=button] {
+        /*margin-left: 79px;*/
+    }
+        .sc_info_list dt {
+            /*padding-left: 37px;*/
+             width: 117px;
+        }
+    
+   
+    .PopLayer input {
+        width: 132px;
+    }
+}
+   @media screen and (max-width:320px){
+/*个人账户*/
+        .sc_info_list dt {
+            padding-left: 24px;
+        }
+        .sc_statu {
+        margin: 15px 44px;
+    }
+    /*实名认证*/
+        .set_verify input {
+            width: 152px;
+        }
+
+
+        .set_btns {
+            margin-left: 112px;
+        }
+        /*双重认证*/
+        .dv_title {
+        margin-top: 192px;
+    }
+        .dv_title {
+        padding-left: 47px;
+    }
+    .dv_content {
+            margin-left: 23px;
+        }
+        .dv_submit {
+            padding-left: 32px;
+        }
+        /*手机绑定*/
+        .pwtrade .updatepwd {
+            width: 102px;
+        }
+}
+

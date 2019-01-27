@@ -1,0 +1,751 @@
+/*交易*/
+.fast_tr {
+	width: 790px;
+	float: left;
+    border: 1px solid #efefef;
+   /* background: #fff;*/
+   background: #f7f7f7;
+    padding: 9px 0px 5px
+}
+.w390 {
+    width: 390px
+}
+
+.ft_box {
+    float: left;
+    width: 392px;
+    border-right: 1px dashed #d2d2d2;
+    padding-bottom: 24px;
+    padding-top: 10px;
+}
+.ft_box dl {
+    margin: 0 16px;
+}
+
+.ft_box dt {
+    margin-bottom: 16px;
+    font-size: 20px;
+    text-align: center;
+    font-weight: bold;
+ 
+ 
+}
+.buydd{
+	background: #fff;
+    border: 1px solid #eeeeee;
+    height: 28px;
+    padding: 0 10px;
+    line-height: 28px;
+    font-size: 12px;
+    margin: 0 auto;
+}
+.buydd .user-box1{
+    float: left;
+    width: 49%;
+    border-right: 1px solid #eee;
+}
+.buydd .user-box2{
+    float: left;
+    width: 44%;
+    margin-left: 20px;
+}
+.buyspan2{
+
+}
+.buyspan3{
+	    float: right;
+    margin-right: 6%;
+}
+.buydd2{
+	margin-top: 10px;
+    position: relative;
+}
+.buyinput{
+    float: left;
+	    width: 148px;
+    border: 1px solid #c3c3c3;
+    background: #fff;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 4px;
+}
+.buyinput2{
+    float: right;
+	width: 148px;
+    border: 1px solid #c3c3c3;
+    background: #fff;
+    margin-left: 10%;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 4px;
+}
+.buyspan4{
+	 font-size: 23px;
+    color: #eeeeee;
+    /* margin-left: 4%; */
+    top: 0px;
+    left: 47%;
+    position: absolute;
+}
+.ft_input{
+	width: 188px;
+    height: 20px;
+    line-height: 20px;
+    font-size: 14px;
+    padding: 6px 5px;
+}
+.ft_boxdd{
+    height: 34px;
+    line-height: 34px;
+    color: #999;
+    font-size: 14px;
+}
+
+.ft_boxdd3{
+     height: 34px;
+    line-height: 34px;
+    color: #999;
+    font-size: 14px;
+}
+.ft_p{
+	    /*margin-left: -83px;*/
+}
+.ft_input2{
+    box-sizing: border-box;
+    width: 100%;
+    height: 30px;
+    border: 1px solid #c3c3c3;
+    background: #fff;
+    padding-left: 10px;
+    color: #999;
+    font-size: 14px;
+    border-radius: 3px;
+}
+/*.ft_box dd {
+   
+}*/
+
+
+
+.ft_box dd input {
+    
+}
+.settings {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    position: relative;
+    left: -28px;
+    background: url(../images/mimashezhi.png)no-repeat;
+    top: 4px
+}
+.trader_btn {
+    width: 264px;
+    height: 35px;
+    margin: 20px auto 0px
+}
+.tan_btn {
+    position: absolute;
+    background: #fff;
+    display: none;
+    color: #669900;
+    font-size: 14px;
+    text-align: center;
+    margin-top: -100px;
+    width: 264px;
+    height: 73px;
+    box-shadow: 0px 0px 18px #ddd;
+    line-height: 73px
+}
+.trader_btn input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    /*background: #cccccc;*/
+    font-size: 16px;
+    color: #fff
+}
+.trader_btn .buy-btn {
+    background: #fc5d6a;
+}
+.trader_btn .sell-btn {
+    background: #1eae58;
+}
+.nobr {
+    border-right: none!important
+}
+.green {
+    color: #690!important
+}
+.col_333 {
+    color: #333!important
+}
+.bg_green {
+    /*background: #690!important*/
+}
+
+.bg_green:hover{
+
+    background:#88ca00 !important;
+
+}
+/* 内容切换 */
+
+.tradeBox{
+
+    text-align:left;
+
+    margin-bottom:20px;
+
+}
+
+
+
+
+.tradeBox .slideHd{
+
+    height:40px;
+
+    line-height:40px;
+
+    background:#f4f4f4;
+
+    border-bottom:1px solid #dddddd;
+
+}
+.tradeBox .slideHd ul{
+
+    float:left;
+
+}
+.tradeBox .slideHd ul li{
+
+    float:left;
+
+    width:95px;
+
+    text-align:center;
+
+    cursor:pointer;
+
+    border-left:1px #e1e1e1 solid;
+
+    font-size:14px;
+
+    font-weight:bold;
+
+}
+.tradeBox .slideHd ul li.on{
+
+    height:38px;
+
+    background:#ffffff;
+
+    border-top:2px #ff6d00 solid;
+
+    border-left:1px #e1e1e1 solid;
+
+    border-right:1px #e1e1e1 solid;
+
+    border-bottom:2px solid #ffffff;
+
+}
+.tradeBox .slideBd .slideBdItem{
+
+    display:none;
+
+}
+.tradeBox .slideBd ul{
+
+    padding:15px;
+
+    zoom:1;
+
+}
+.tradeBox .slideBd li{
+
+    height:24px;
+
+    line-height:24px;
+
+}
+.tradeBox .slideBd li .date{
+
+    float:right;
+
+    color:#999999;
+
+}
+.tradeBox .slideBd{
+
+    margin:30px;
+
+    zoom:1;
+
+}
+
+
+
+.tradeBox .slideBd .major{
+
+    font-size:14px;
+
+}
+
+
+
+.tradeBox .slideBd .major h6{
+
+    padding-left:10px;
+
+    height:40px;
+
+    line-height:40px;
+
+    border-bottom:1px #e1e1e1 dashed;
+
+    font-size:18px;
+
+    font-weight:normal;
+
+}
+
+
+
+.tradeBox .slideBd .major_info{
+
+    margin-top:12px;
+
+    margin-bottom:12px;
+
+    line-height:30px;
+
+}
+
+
+
+.tradeBox .slideBd .major .borrower{
+
+    overflow:hidden;
+
+    *zoom:1;
+
+    margin:15px 0;
+
+}
+
+
+
+.tradeBox .slideBd .major .borrower ul{
+
+    float:left;
+
+    width:254px;
+
+}
+
+
+
+.tradeBox .slideBd .major .borrower ul li{
+
+    line-height:38px;
+
+    height:38px;
+
+}
+.entrust {
+
+  /*  height: 732px;*/
+    border: 1px solid #efefef;
+    background: #fff;
+    padding-top: 8px;
+    overflow: hidden
+}
+.entrust_list {
+    width: 370px;
+    margin: 0 auto
+}
+.entrust ul {
+    height: 24px;
+    border-bottom: 1px solid #efefef;
+    line-height: 24px
+}
+.entrust .first {
+    text-align: center;
+    width: 40px;
+}
+.entrust .w40 {
+    width: 40px;
+    text-align: center;
+}
+.entrust .w80{
+    width: 80px;
+}
+.entrust .w110{
+    width: 110px;
+}
+.entrust .w120{
+    width: 120px;
+}
+
+.entrust li {
+    float: left;
+    font-size: 12px;
+    color: #666;
+    text-align: right;
+}
+.coinorderlist{
+    width: 398px;
+    height: 140px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /*border-bottom: 1px dotted #e55600;*/
+}
+/*.coinorderlist::-webkit-scrollbar{
+    width: 6px;
+    
+}*/
+/*滚动条默认显示样式*/
+/*.coinorderlist::-webkit-scrollbar-thumb {
+    background: #afd0f5;
+    border-radius: 6px;
+    height: 8px;
+
+}*/
+.el_dl dl {
+    height: 24px;
+    line-height: 24px;
+    font-size: 12px;
+    color: #666
+}
+.el_dl dd {
+    float: left;
+    text-align: right;
+}
+.el_dl dt {
+    float: left;
+    text-align: right;
+}
+
+.el_dl {
+    /*padding-top: 10px;
+    padding-bottom: 12px;*/
+}
+.hang-wrap {
+    margin-bottom: 60px;
+}
+
+
+.TitleBox{
+    width:100%;
+    height: 54px;
+    line-height: 54px;
+
+}
+
+.PlateTitle{
+    font-size:18px;
+    padding-left:15px;
+    text-align:left;
+    /*width: 174px;*/
+    height: 54px;
+    border-bottom: 1px solid #e2eaf3;;
+    margin: 0 10px;
+    color: #333;
+
+}
+
+.PlateTitle2 {
+    font-size: 18px;
+    padding-left: 15px;
+    text-align: left;
+    width: 140px;
+    height: 54px;
+    border-bottom: 2px solid #189fff;
+    margin: 0 10px;
+}
+.po_re {
+    position: relative
+}
+
+.record-wrap {
+    background: #fff;
+}
+.list-tab li {
+    float: left;
+    height: 32px;
+    /*width: 180px;*/
+    text-align: center;
+    position: relative;
+}
+.list-tab li>a {
+    width: 100%;
+    font-size: 16px
+}
+.list-tab-box {
+    width: 1200px;
+    padding-top: 34px;
+    margin:0 auto;
+}
+.list-tab {
+    width: 1200px;
+    height: 32px;
+    margin: 0 auto;
+    border-bottom: 2px solid #e3e3e3
+}
+.list-tab li.on {
+    border-bottom: 2px solid #1d72cf
+}
+
+/*.list-tab li.on>a {
+    color: #e55600
+}
+
+.list-tab li a:hover {
+    color: #e55600
+}*/
+table{
+     border-collapse:collapse;
+}
+.Transaction {
+    width: 100%;
+   
+}
+.tab-scroll{
+    height: 370px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    width: 1200px;
+}
+
+.over_tbody{
+	height: 508px; 
+	max-height: 508px; 
+	overflow-x: hidden;
+	 overflow-y: auto;
+}
+.Transaction tr {
+    cursor: pointer;
+}
+.Transaction thead {
+    /*border-bottom: 1px solid #cccccc;*/
+    height: 40px;
+    line-height: 40px;
+    background: #eaeaea;
+ 
+}
+
+.Transaction th {
+    text-align: center;
+    font-weight: normal;
+}
+.Transaction tbody tr{
+    height: 42px;
+    line-height: 42px;
+    text-align: center;
+}
+.no-border-left-right tr:hover{
+
+    background-color:#ffebd7;
+
+}
+/*登录*/
+.all_mask_loginbox {
+    border-radius: 4px;
+    width: 498px;
+    border: 1px solid #7f7f7f;
+    position: absolute;
+    left: 50%;
+    top: 300px;
+    margin-left: -250px;
+    box-shadow: 0 0 15px #7f7f7f;
+    background: #fff;
+    padding-top: 10px;
+    padding-bottom: 32px;
+    z-index: 1000
+}
+#Kline-change {
+    position: relative;
+}
+.hang-icon{
+    position: absolute;
+    top: -44px;
+    right: 12px;
+    display: none;
+    color: #a0a0a0;
+}
+.hang-icon .iconfont{
+    font-size: 24px;
+}
+.hang-wrap .tab{
+    height: 40px;
+    line-height: 40px;
+    display: none;
+}
+.hang-wrap .tab .tab-list{
+    float: left;
+    width: 50%;
+    background: #fff;
+    text-align: center;
+    color: #3e3e3e;;
+    box-sizing: border-box;
+}
+.hang-wrap .tab .tab-list.buy{
+    border-right: 1px solid #eee;
+}
+.hang-wrap .tab .tab-list.active {
+    border-bottom: 2px solid #9751ff;
+}
+.hang-wrap .tab .tab-list.sell{
+
+}
+/*手机端适应交易*/
+@media screen and (min-width: 320px) and (max-width : 479px){
+	body{
+		width: 100%;
+	}
+	.autobox {
+   			
+	}
+	.list-tab {
+	    overflow: auto;
+	}
+	.fast_tr {
+	   width: 100%;
+       float: none;
+       border: none;
+	}
+	.list-tab-box {
+    	display: none;
+	}
+	.ft_box {
+	    width: 100%;
+	    border-right: none;
+        float: none;
+	}
+	.buydd{
+	}
+	.buyspan2 {
+	}
+	.over_auto{
+		width: 100%;
+    	overflow-x:auto;
+	}
+	.Transaction {
+	    width: 600px;
+	}
+    .tab-scroll{
+        width: 600px;
+    }
+    .hang-icon{
+        display: block;
+        border:0;
+        background: none;
+    }
+    #kline{
+        display: none;
+    }
+    .hang-wrap .tab {
+        display: block;
+    }
+    #form-sell{
+        display: none;
+    }
+    .ft_box dt {
+        display: none;
+    }
+    .ft_box dl {
+        margin:  0 10px;
+    }
+    .entrust_list ul li.w62{
+        display: none;
+    }
+    .entrust_list{
+        width: 96%;
+        margin: 0;
+        padding: 0 10px;
+    }
+    .entrust_list .w120{
+        display: none;
+    }
+    .coinorderlist{
+        width: 101%;
+    }
+    .w390{
+        width: 98%;
+        float: none;
+        margin: 0 auto;
+    }
+    .entrust .first{
+        width: 10%;
+    }
+    .entrust .w40 {
+        width: 10%;
+    }
+    .entrust .w80 {
+        width: 30%;
+    }
+    .entrust .w110{
+        width: 50%;
+         padding-right: 5%;
+    
+    }
+
+
+
+}
+
+@media screen and (min-width:360px) and (max-width:375px){
+	.buydd {
+	}
+	.buyspan2 {
+	}
+	.buyinput {
+	    width: 148px;
+	}
+	.buyinput2 {
+	    width: 148px;
+	}
+	.ft_input2 {
+	    width: 90%;
+        height: 38px;
+	}
+}
+@media screen and (max-width:320px){
+
+	.buydd {
+	    width: 280px;
+		}
+		.buyinput {
+	    width: 128px;
+
+	}
+	.buyinput2 {
+	    width: 128px;
+	}
+	.ft_input2 {
+
+	    /*width: 256px;*/
+	}
+	
+	.w390{
+		    width: 100%;
+	}
+	.over_auto{
+		width: 100%;
+    	overflow: auto;
+	}
+	.Transaction {
+	    width: 1000px;
+		}
+		.over_tbody{
+		    overflow-x: auto;
+		    overflow-y: auto;
+    		width: 100%;
+		}
+    
+}

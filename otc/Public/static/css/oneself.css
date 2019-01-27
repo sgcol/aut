@@ -1,0 +1,162 @@
+		.header-box .lang-box{
+  position: relative;
+      padding-top: 22px;
+    font-size: 14px;
+
+}
+.header .nav {
+   width: 594px;
+}
+.lang-box .currL {
+    display: block;
+/*    border: 1px solid #999;*/
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+.lang-box ul {
+    background: #fff;
+    position: absolute;
+    left: 0;
+    top: 64px;
+    width: 100px;
+    z-index: 100;
+    display: none;
+}
+.lang-box ul li {
+    text-align: center;
+    line-height: 30px;
+    border-bottom: 1px solid #eee;
+}
+.goumai{
+	width:80%;
+	margin: 0 auto;
+}
+.real-name-cont .head .expand {
+    width: 106px;
+    }
+@media(max-width: 414px){
+	.header .nav {
+    width: auto;
+}
+	.header-box .lang-box {
+		 margin-left: -24px;
+}
+  .header .my-panel {
+    padding-top: 8px;
+}
+.goumai{
+	width:100%; 
+}
+.table tr.odd {
+    height: 180px;
+}
+.table td.pr-30 {
+    top: 126px;
+}
+.cont {
+	 width: 100%;
+}
+.cont .col-60 {
+    width: 65%;
+}
+.cont .col-60 .col-20 {
+    width: 35%;
+}
+.cont .col-60 .col-60 {
+    width: 60%;
+}
+.cont .col-40 {
+    width: 35%;
+}
+.col-40 .btn {
+    width: 100px;
+    margin-top: 3px;
+}
+.order-info .item-name {
+    margin-left: 26px;
+}
+.menu-c {
+    padding: 20px 0 20px 32px;
+}
+.real-name-cont .head {
+    padding: 0 2px;
+}
+.real-name-cont .head .expand {
+    width: 108px; 
+    right: 7px; 
+}
+.btn {
+    padding: 0 13px;
+}
+.setting-panel .input {
+    width: 265px;
+}
+.right-wrap .setting-panel {
+  
+   padding-left: 0;
+}
+.setting-panel .form-cont .btn.submit {
+    margin: 0 auto;
+}
+.setting-panel {
+    width: 100%;
+}
+.google-auth.setting-panel {
+    padding: 26px;
+}
+.table.order th {
+    text-align: center;
+}
+.table.order td {
+    text-align: center;
+}
+.table.order .ground{
+	margin-top: 3px;
+
+}
+}
+@media(max-width: 375px){
+.header-box .lang-box {
+    margin-left: -32px;
+}
+.header .user-action {
+    padding-left: 20px;
+}
+#codea{
+	margin-right: -12px;
+}
+.cont-title .cont-title-left, .cont-title .cont-title-right {
+    
+    width: 80px;
+    }
+    .cont-title .cont-title-right::before {
+    left: -42px;
+}
+.cont-title .cont-title-left::after {
+    right: -43px;
+}
+}
+@media(max-width: 360px){
+	.header-box .lang-box {
+    margin-left: -49px;
+}
+	.header .user-action {
+    padding-left: 0px;
+}
+#codea{
+	margin-right: -17px;
+}
+.cont-title .cont-title-left, .cont-title .cont-title-right {
+  
+    width: 72px;
+}
+.cont-title .cont-title-left::after, .cont-title .cont-title-right::before {
+right: -39px;
+}
+.cont-title .cont-title-right::before {
+    left: -40px;
+}
+}
+
+

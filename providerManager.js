@@ -1,23 +1,26 @@
-var external_provider ={};
+var external_provider ={}, providerNameMap={};
 const updateOrder=require('./order.js').updateOrder, path=require('path'), async=require('async');
 var tt = require('gy-module-loader')(path.join(__dirname, 'provider/*.pd.js'), function () {
     var keys = Object.keys(tt);
     for (var i = 0; i < keys.length; i++) {
         var prd=tt[keys[i]];
         external_provider[path.basename(keys[i], '.pd.js')] = prd;
-        if (prd.name) external_provider[prd.name]=prd;
+        if (prd.name) providerNameMap[prd.name]=path.basename(keys[i], '.pd.js');
     }
 });
 
 exports.getProvider=function(pid) {
     if (pid==null) return external_provider;
-    return external_provider[pid];
+    if (external_provider[pid]) return external_provider[pid];
+    if (providerNameMap[pid] && external_provider[providerNameMap[pid]]) return external_provider[providerNameMap[pid]] 
+    return null;
 }
 
 const filter = require('filter-object');
 function order(orderid, money,mer, host, callback) {
     if (!mer.providers) return callback('联系对接小伙伴，他忘记给商户配置渠道了');
     async.map(filter(external_provider, Object.keys(mer.providers)), function(prd, cb) {
+        if (!prd.bestPair) return cb(null, {gap:Number.MAX_VALUE, coinType:''});
         prd.bestPair(money, function(err, gap, coinType){
             if (err) return cb(null, {gap:Number.MAX_VALUE, coinType:''});
             return cb(null, {gap:gap, coinType:coinType, prd:prd});

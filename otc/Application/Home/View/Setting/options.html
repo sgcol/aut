@@ -1,0 +1,62 @@
+<include file="Public:header"/>
+<include file="Setting:left"/>
+ <link rel="stylesheet" href="__ROOT__/Public/static/css/oneself.css" >
+<div class="fr right-wrap">
+    <div class="setting-title">{$Think.lang.aqsz}</div>
+    <div class="setting-panel secity-box">
+        <ul class="safe-list">
+            <li class="safe-item money-pw  {$moneypwd?active:''}">
+                <div class="icon-money-pw"></div>
+                <div class="fl">
+                    <div class="opt-title">{$Think.lang.zjmm}</div>
+                    <div class="opt-decs">{$Think.lang.txxg}</div>
+                </div>
+                <div class="fr">
+
+                   <!-- <a href="" class="btn line hasset">忘记资金密码</a>-->
+                    <if condition="$moneypwd != null">
+                       <a href="{:U('Setting/moneypwd')}" class="btn line hasset">{$Think.lang.xiugai}</a>
+                    <else/>
+                        <a href="{:U('Setting/setmoneypwd')}" class="btn noset">{$Think.lang.ljsz}</a>
+                    </if>
+
+                </div>
+                <div class="clear"></div>
+            </li>
+
+
+
+            <li class="safe-item login-pw active">
+                <div class="icon-login-pw"></div>
+                <div class="fl">
+                    <div class="opt-title">{$Think.lang.dlmim}</div>
+                    <div class="opt-decs">{$Think.lang.dlsru}</div>
+                </div>
+                <div class="fr">
+                    <a href="{:U('Setting/loginpwd')}" class="btn line hasset">{$Think.lang.xiugai}</a>
+                </div>
+                <div class="clear"></div>
+            </li>
+
+            <!--<li class="safe-item google-auth {$google?active:''}">
+                <div class="icon-google-a"></div>
+                <div class="fl">
+                    <div class="opt-title">{$Think.lang.gugeyz}</div>
+                    <div class="opt-decs">{$Think.lang.gugebd}</div>
+                </div>
+                <div class="fr">
+
+                    <if condition="$google != null">
+                          <a href="{:U('setting/jcgoogle')}" class="btn line">{$Think.lang.jiechu}</a>
+                        <else/>
+                         <a href="{:U('setting/googleauth')}" class="btn noset">{$Think.lang.qiyong}</a>
+                    </if>
+                </div>
+            </li>-->
+        </ul>
+    </div>
+</div>
+
+</div>
+
+<include file="Public:footer"/>

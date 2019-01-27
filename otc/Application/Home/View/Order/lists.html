@@ -1,0 +1,70 @@
+<include file="Public:header"/>
+<link rel="stylesheet" href="__ROOT__/Public/static/css/order-list.css">
+<div class="container order-container">
+    <div class="page-title">{$Think.lang.ddgl}</div>
+    <div class="tabs clear-float mt-20">
+        <a href="{:U('Order/lists',array('type'=>'going'))}" class="tab actived">{$Think.lang.jxz}</a><span class="br"></span>
+        <div class="tab ">
+            <span class="down-arrow">{$Think.lang.yjs} </span>
+            <div class="more-item">
+                <a href="{:U('Order/lists',array('type'=>'ending'))}" class="item">USDT</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="order-list">
+        <div class="list-header clear-float mb-10">
+            <span class="header-text width-1">{$Think.lang.jyhb}</span>
+            <span class="header-text width-2">{$Think.lang.ddbh}</span>
+            <span class="header-text width-3">{$Think.lang.leixing}</span>
+            <span class="header-text width-4">{$Think.lang.jyje}</span>
+            <span class="header-text width-5">{$Think.lang.jysl}</span>
+            <span class="header-text width-6"> {$Think.lang.cjsj}</span>
+            <span class="header-text width-7">{$Think.lang.jyzt}</span>
+
+        </div>
+
+        <foreach name="list" item="v">
+        <div class="data-row clear-float">
+          <span class="width-1 data-text">
+            <a class="link" href="{:U('User/view',array('id'=>$v['yjhb']))}"><img class="avatar" src="__ROOT__{$v['ue_img']}" alt=""></a>
+            <a href="{:U('User/view',array('id'=>$v['yjhb']))}" class="username link">{$v.username}</a>
+          </span>
+            <span class="width-2 data-text">
+            <a href="{:U('Order/detail',array('id'=>$v['id']))}" class="link">{$v.id}</a>
+          </span>
+            <span class="width-3 data-text">
+                <if condition="$v.buyid eq $_SESSION['userid']">
+                      {$Think.lang.goumai}
+                 <else/>
+                      {$Think.lang.chushou}
+                </if>
+               {$v.coin|strtoupper}</span>
+            <span class="width-4 data-text">{$v.amount}</span>
+            <span class="width-5 data-text">{$v.num} {$v.coin|strtoupper}</span>
+            <span class="width-6 data-text">{$v.addtime|date='Y-m-d H:i:s',###}</span>
+            <span class="width-7 data-text red-text">
+                <switch name="v.status">
+                        <case value="0">{$Think.lang.wfk}</case>
+                        <case value="1">{$Think.lang.yfk}</case>
+                        <case value="2">{$Think.lang.ysf}</case>
+                        <case value="3">{$Think.lang.jywc}</case>
+                        <case value="4">{$Think.lang.qxjy}</case>
+                        <case value="5">{$Think.lang.sxz}</case>
+                        <case value="6">{$Think.lang.ddcs}</case>
+
+                </switch>
+            </span>
+            <span class="width-7 data-text red-text"><a class="btn btn-comment" href="{:U('Order/detail',array('id'=>$v['id']))}">{$Think.lang.jycz}</a></span>
+        </div>
+        </foreach>
+
+
+  </div>
+
+    <div class="page1">{$page}</div>
+  </div>
+
+
+</div>
+<include file="Public:footer"/>

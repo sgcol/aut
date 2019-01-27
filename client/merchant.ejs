@@ -59,10 +59,10 @@
               </div>
             </div>
             <div class="form-group">
-              <!-- <p class="card-description">请勾选提供商(otc平台)</p>
+              <p class="card-description">提供商(otc平台)</p>
               <div class="form-group" id="providers">
-              </div> -->
-              <button type="button" id="adjustMerchant" class="btn btn-gradient-primary mr-2">Submit</button>
+              </div>
+              <button type="button" id="adjustMerchant" class="btn btn-gradient-primary mr-2" data-dismiss="modal">Submit</button>
               <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
             </div>
           </div>
@@ -203,51 +203,60 @@
     }
     $('#addUser').toggle();
   }
-  function onListChanged() {
-    $(':checkbox').click((e)=>{
-      var obj=$(e.target);
-      accIntf('/admin/updateAccount', {id:obj.attr('id'), debugMode:obj.is(':checked')});
-    });
-  }
+
   var providers=$('#providers');
   
   $('#editMerchant').on('shown.bs.modal', function (e) {
-    providers && accIntf('/admin/providers', (err, ret) =>{
-      if (err) return showerr(err);
-      providers.empty();
-      var allp=ret.message;
-      for (var i=0; i<allp.length; i++) {
-        providers.append(`
-        <div class="form-check form-check">
-          <label class="form-check-label">
-            <input type="checkbox" class="form-check-input" checked="">
-            ${allp[i]}
-          <i class="input-helper"></i></label>
-        </div>
-        `)
-      }
-    })
+    $('#editMerchant form input').val('');
     var id=$(e.relatedTarget).data('id');
-    var idx=acclist.find((ele)=>{return ele._id==id});
-    var merchant=acclist[idx];
+    var merchant=acclist.find((ele)=>{return ele._id==id});
     if (merchant) {
-      $('#fee').attr("placeholder", ''+(1-merchant.share)*100+'%');
+      providers && accIntf('/admin/providers', (err, ret) =>{
+        if (err) return showerr(err);
+        providers.empty();
+        var allp=ret.message;
+        merchant.providers=merchant.providers||{};
+        for (var i=0; i<allp.length; i++) {
+          var activedProvider=merchant.providers[allp[i].id];
+          providers.append(`
+          <div class="form-check form-check">
+            <label class="form-check-label">
+              <input type="checkbox" class="form-check-input" ${(activedProvider && !activedProvider.disabled)?'checked':''} id="providers.${allp[i].id}" for="provider">
+              ${allp[i].name||allp[i].id}
+            <i class="input-helper"></i></label>
+            ${allp[i].params?(()=>{
+              var ret='';
+              for (var j=0; j<allp[i].params.length; j++) {
+                var p=allp[i].params[j];
+                ret+=`<div class="input-group"><div class="input-group-prepend"><span class="input-group-text">${p}</span></div><input class=" form-control" placeholder="${(activedProvider && activedProvider[p])||'必填'}" id="providers.${allp[i].id}.${p}"></div>`
+              }
+              return ret;
+            })():''}
+          </div>
+          `)
+        }
+      })
+      $('#fee').attr("placeholder", ''+((1-merchant.share)*100).toFixed(2)+'%');
       $('#parent').attr('placeholder', merchant.parent);
     }
     $('#adjustMerchant').off('click').click(function(e) {
       var params={};
-      $('#editMerchant form [id]').each(function(idx, ele) {
+      $('#editMerchant form input').each(function(idx, ele) {
+        var je=$(ele), jv=je.val();
+        if (jv=='') return;
         if (ele.id=='fee') {
-          var s=$(ele).val().trim(), v=parseFloat(s);
-          if (isNaN(v)) continue;
-          if (s[s.length-1]=='%') {
-            // this is a percentage
-            params.share=1-(v/100);
-          } else params.share=1-v;
-        } else params[ele.id]=$(ele).val();
+          var s=jv.trim(), v=parseFloat(s);
+          if (isNaN(v)) return;
+          params.share=(1-(v/100)).toFixed(5);
+        } else if (je.attr('for')=='provider') {
+          params[ele.id+'.disabled']=!ele.checked;
+        } else params[ele.id]=jv;
       });
-      params.merchantid=merchant.merchantid;
-      accIntf('/admin/updateAccount', params);
+      params.id=id;
+      accIntf('/admin/updateAccount', params, err=>{
+        if (err) return showerr(err);
+        getlist();
+      });
     })
 });
   

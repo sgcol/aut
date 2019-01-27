@@ -1,0 +1,78 @@
+<include file="Public:header"/>
+<include file="Setting:left"/>
+<link rel="stylesheet" href="__ROOT__/Public/static/css/oneself.css">
+<div class="fr right-wrap">
+<div class="setting-title">{$Think.lang.aqsz}>{$Think.lang.xgzj}</div>
+<div class="setting-panel secity-box">
+
+
+    <div class="form-cont" id="step1">
+        <div class="form-text">{$Think.lang.zjinfo}<font color="red">{$Think.lang.zjmim}</font></div>
+        <div class="input-cont">
+            <span class="icon form-password"></span>
+            <input class="input" onfocus="this.type='password'" validate check-type="password1" name="oldpassword" autocomplete="off" placeholder="{$Think.lang.yzjmima}">
+
+            <div class="form-tips"></div>
+            <div class="error-msg"></div>
+        </div>
+        <div class="input-cont">
+            <span class="icon form-password"></span>
+            <input class="input" onfocus="this.type='password'" validate check-type="password" name="password" autocomplete="off" placeholder="{$Think.lang.xzjmima}">
+
+            <div class="form-tips"></div>
+        </div>
+        <div class="input-cont">
+            <span class="icon form-password"></span>
+            <input class="input" onfocus="this.type='password'" validate check-type="password" name="password2" autocomplete="off" placeholder="{$Think.lang.zcmima}">
+            <div class="form-tips"></div>
+            <div class="error-msg">{$Think.lang.lcmima}</div>
+        </div>
+        <a id="btnChange" class="btn submit" onclick="modmoneypwd()">{$Think.lang.queding}</a>
+       <!-- <a href="" class="link forgot-pw">忘记资金密码</a>-->
+    </div>
+</div>
+</div>
+</div>
+
+<include file="Public:footer"/>
+
+<script>
+    function modmoneypwd() {
+        var rules = /^[a-zA-Z0-9]{6,16}$/;
+        if(!rules.test($('input[name=oldpassword]').val())){
+              layer.msg('原资金密码不正确');
+              return false;
+        }
+        if (!rules.test($("input[name=password]").val())) {
+            layer.msg('新密码格式不正确');
+            return false;
+        }
+
+        if ($("input[name=password]").val()!=$("input[name=password2]").val()) {
+            layer.msg('两次密码不一致');
+            return false
+        }
+
+        var moneypwd=$("input[name=oldpassword]").val();
+
+        var newpwd=$('input[name=password]').val();
+
+        var newpwd2=$('input[name=password2]').val();
+
+        $.post('{:U("Setting/moneypwd")}',{pwd:moneypwd,newpwd:newpwd,newpwd2:newpwd2},function (data) {
+            if(data.status==1){
+                layer.msg(data.info, {
+                    icon: 1
+                },function () {
+                    location.href="{:U('Setting/options')}";
+                });
+            } else{
+                layer.msg(data.info, {
+                    icon: 2
+                });
+            }
+        });
+
+    }
+
+</script>

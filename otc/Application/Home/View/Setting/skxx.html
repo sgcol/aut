@@ -1,0 +1,245 @@
+<include file="Public:header" />
+<link rel="shortcut icon" href=" /favicon.ico"/>
+
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/skxx/css/safety.css">
+
+<link rel="stylesheet" href="__PUBLIC__/skxx/css/slide-unlock.css">
+<link rel="stylesheet" href="__PUBLIC__/skxx/css/font-awesome.min.css"/>
+<include file="Setting:left"/>
+<style>
+    .setting-panel .tjxx{
+        background: #ffffff;
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 3px;
+        border: 1px solid #1798f2;
+        margin: 0 2px;
+        color: #1798f2;
+    }
+
+    .setting-panel .tjxx:hover{
+        background: #1798f2;
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 3px;
+        border: 1px solid #1798f2;
+        margin: 0 2px;
+        color: #ffffff;
+    }
+
+    .f_table{
+        border:1px solid #ededed;
+        border-bottom:0;
+        width:100%;
+        border-collapse:collapse;
+        border-spacing:0;
+        font-size: 12px;
+    }
+    .f_table th{
+        background:#ededed;
+        font-weight:normal;
+        /*  height:36px;
+          line-height:36px;*/
+        text-align:center;
+    }
+    .f_table th #market-selectTest{
+        width: 70%;
+        height: 28px;
+        border-radius: 5px;
+        border: 1px solid #ededed;
+        line-height: 28px;
+    }
+    .f_table th #type-selectTest{
+        height: 28px;
+        border-radius: 5px;
+        border: 1px solid #ededed;
+        line-height: 28px;
+    }
+
+    .f_table tr {
+        height: 40px;
+        line-height: 40px;
+    }
+    .f_table td{
+        border-bottom:1px solid #ededed;
+        font-size:12px;
+        color:#707070;
+        text-align:center;
+    }
+    .f_table td a {
+        color: #1d72cf;
+    }
+</style>
+<div class="fr right-wrap">
+    <div class="setting-title">收款方式</div>
+    <div class="setting-panel">
+        <notempty name="UserBank">
+            <table class="f_table" id="investLog_content">
+                <thead>
+                <tr>
+                    <th>真实姓名</th>
+                    <th>帐号类型	</th>
+                    <th>账号信息</th>
+                    <th>添加时间</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <volist name="UserBank" id="vo">
+                    <tr>
+                        <td>{$user['truename']}</td>
+                        <td>
+                            <if condition="$vo.type eq bank">
+                                银行卡
+                                <elseif condition="$vo.type eq weixin"/>
+                                微信
+                                <else/>
+                                支付宝
+                            </if>
+                        </td>
+                        <td>
+                            <if condition="$vo.type eq bank">
+                                {$vo.bank}-
+                            </if>{$vo.bankcard}
+                        </td>
+                        <td>{$vo.addtime|addtime}</td>
+                        <td><a onclick="del22({$vo.id})" style="color: red">删除</a></td>
+                    </tr>
+                </volist>
+                </tbody>
+            </table>
+        </notempty>
+        <div align="center">
+            <a class="tjxx" style="margin-top:20px;" onclick="showA()">添加收款信息</a>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="okcoinPop" id="withdrawCnyAddress" style="display: none;">
+    <div class="dialog_content" id="dialog_content_CnyAddress">
+        <div class="dialog_title" id="dialog_title_CnyAddress">
+            <span id="CnyAddressTitle">添加收款信息</span> <a href="javascript:closeAddress();" class="dialog_closed" title="关闭"><i class="fa fa-close"></i></a>
+        </div>
+        <div class="dialog_body center">
+            <ul class="PopLayer">
+                <form action="{:U('setting/upbank')}" id="submitform" method="post" enctype="multipart/form-data" onsubmit="return Update()">
+                <li style=""><span class="c2" id="lotteryAmountSpan1">备注名称:</span> <input name="name" id="bank_name" value="" type="text" class="cztxinput"></li>
+                <li style=""><span class="c2" id="lotteryAmountSpan12">收款类型:</span>
+                    <select id="type" name="type" style="width:186px;height:28px;">
+                        <option value="alipay">支付宝</option>
+                        <option value="bank">银行卡</option>
+                        <option value="weixin">微信</option>
+                    </select>
+                </li>
+                <li style="display: none" id="bank_d"><span class="c2" id="lotteryAmountSpan2">开户银行:</span>
+                    <select name="bank" id="bank_bank">
+                        <option value="0">--选择银行--</option>
+                        <volist name="UserBankType" id="vo">
+                            <option value="{$vo['title']}">{$vo['title']}</option>
+                        </volist>
+                    </select>
+                </li>
+                <li style="display: none" id="bra_d">
+                    <span class="c2" id="lotteryAmountSpan4">开户支行:</span>
+                    <input name="bankaddr" value="" id="bank_bankaddr" type="text" class="cztxinput">
+                    <span>（没有为空）</span>
+                </li>
+                <li><span class="c2" id="lotteryAmountSpan5">开户姓名:</span> {$user['truename']}</li>
+                <li><span class="c2" id="lotteryAmountSpan6">账户账号:</span> <input name="bankcard" id="bank_bankcard" type="text" class="cztxinput"></li>
+                <li><span class="c2" id="lotteryAmountSpan8">收款二维码:</span> <input name="qrcode" id="qrcode" type="file" class="cztxinput"></li>
+                <li><span class="c2"></span><button href="javascript:void(0)" type="submit"  class="btn" id="btn">立即添加</button></li>
+                </form>
+            </ul>
+
+        </div>
+    </div>
+</div>
+<div id="dialogBoxShadow" style="position: absolute; top: 0px; left: 0px; z-index: 100; background-color: rgb(0, 0, 0); opacity: 0.4; width: 100%; background-position: initial initial; background-repeat: initial initial; display: none;"></div>
+<br>
+<br>
+<script>
+
+    $('#dialogBoxShadow').height($(document).height());
+    function closeAddress(){
+        $("#withdrawCnyAddress").hide();
+        $("#dialogBoxShadow").hide();
+    }
+    function showA(){
+        $("#withdrawCnyAddress").show();
+        $("#dialogBoxShadow").show();
+    }
+    $(function () {
+        $("#type").change(function () {
+            var tp=$("#type option:selected").val();
+            if (tp=='bank')
+            {
+                $("#bank_d").show();
+                $("#city_d").show();
+                $("#bra_d").show();
+            }
+            else
+            {
+                $("#bank_d").hide();
+                $("#city_d").hide();
+                $("#bra_d").hide();
+            }
+        });
+    })
+    function Update(){
+        var type=$("#type option:selected").val();
+        var bank1=$('#bank_bank').val();
+        var name=$('#bank_name').val();
+        var bankcard=$('#bank_bankcard').val();
+        if(name==""||name==null){
+            layer.tips('请输入备注名称','#bank_name',{tips:3});
+            return false;
+        }
+        if (type=='bank')
+        {
+            if(bank1==""||bank1==0){
+                layer.tips('请选择银行','#bank_bank',{tips:3});
+                return false;
+            }
+        }
+
+        if(bankcard==""||bankcard==null){
+            layer.tips('请输入账号','#bank_bankcard',{tips:3});
+            return false;
+        }
+
+        if (type != 'bank') {
+            var fileInput = $('#qrcode').get(0).files[0];
+            if(!fileInput){
+                layer.tips('请上传二维码','#qrcode',{tips:3});
+                return false;
+            }
+        }
+
+    }
+
+    function del22(id){
+        layer.confirm('确定要删除么？', {
+            btn: ['确定','取消'] //按钮
+        }, function(){
+            $.post('__APP__/setting/delbank',{id:id},function(data){
+                if(data.status==1){
+                    layer.msg(data.info);
+                    location.reload();
+                } else {
+                    layer.msg(data.info);
+                }
+
+
+            });
+        });
+
+    }
+</script>
+<script>
+    //菜单高亮
+    $('#user_box').addClass('active');
+    $('#user_bank').addClass('active');
+    $('#user_bank i').attr('class','coin_menu_op_13');
+</script>
+<include file="Public:footer" />

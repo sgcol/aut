@@ -1,7 +1,17 @@
 const getDB=require('./db.js'), pify=require('pify'), getMerchant=require('./merchants.js').getMerchant,ObjectID = require('mongodb').ObjectID
     ,request=require('request'), notifySellSystem=require('./sellOrder.js').notifySellSystem, async=require('async')
     , sortObj=require('sort-object'), qs=require('querystring').stringify
-    , md5=require('md5'), getUser=require('./users.js').get;
+    , md5=require('md5');
+
+function getUser(id, cb) {
+    getDB((err, db)=>{
+        db.users.find({_id:id}).toArray((err, r)=>{
+            if (err) return cb(err);
+            if (r.length==0) return cb('no such user');
+            cb(null, r[0]);
+        })
+    })
+}
 
 function createOrder(merchantid, merchantOrderId, money, preferredPay, cb_url, callback) {
     if (typeof preferredPay=='function') {

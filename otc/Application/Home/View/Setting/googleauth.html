@@ -1,0 +1,93 @@
+<include file="Public:header"/>
+
+<include file="Setting:left"/>
+<link rel="stylesheet" href="__ROOT__/Public/static/css/oneself.css">
+<div class="fr">
+    <div class="setting-title">{$Think.lang.aqsz}>{$Think.lang.bdguge}</div>
+    <div class="setting-panel google-auth">
+        <div class="text mb-25">{$Think.lang.gugeinfo}</div>
+        <div class="text mb-25">{$Think.lang.zhanghu}: <span class="black">{$googlename}</span></div>
+        <div class="qrcode-cont mb-25">
+            <div id="qrcode" class="qrcode"></div>
+            <div class="qrcode-text">{$Think.lang.miyao}: <span class="key">{$Asecret}</span></div>
+        </div>
+        <div class="text">{$Think.lang.gugeyzm}</div>
+
+        <div class="gg-code-input mb-25">
+            <input type="number" maxlength="1" class="gg-input">
+            <input type="number" maxlength="1" class="gg-input">
+            <input type="number" maxlength="1" class="gg-input">
+            <input type="number" maxlength="1" class="gg-input">
+            <input type="number" maxlength="1" class="gg-input">
+            <input type="number" maxlength="1" class="gg-input">
+        </div>
+
+        <div class="text">{$Think.lang.azguge}</div>
+        <div class="text black"><span class='key'>{$Think.lang.azsj}</span>{$Think.lang.azyyong}</div>
+        <div class="text black mb-25"><span class='key'>{$Think.lang.azsj}</span>{$Think.lang.azinfo}</div>
+        <div class="line"></div>
+        <div class="btn submit">{$Think.lang.yzqy}</div>
+    </div>
+</div>
+</div>
+
+<include file="Public:footer"/>
+<script type="text/javascript" src="__PUBLIC__/Home/js/jquery.qrcode.min.js"></script>
+<script>
+    $(document).ready(function() {
+        var txts = $(".gg-code-input input");
+        for (var i = 0; i < txts.length; i++) {
+            var t = txts[i];
+            t.index = i;
+            t.setAttribute("readonly", true);
+            t.onkeyup = function() {
+                this.value = this.value.replace(/^(.).*$/, '$1');
+                var next = this.index + 1;
+                if (next > txts.length - 1) return;
+                txts[next].removeAttribute("readonly");
+                txts[next].focus();
+            }
+        }
+        txts[0].removeAttribute("readonly");
+    });
+
+    $('#qrcode').qrcode({
+
+        render: "table", //table方式
+
+        width: 100, //宽度
+
+        height: 100, //高度
+
+        text: "{$qrCodeUrl}" //任意内容
+
+    });
+
+    $('.submit').click(function () {
+        var code='';
+        $('.gg-input').each(function () {
+            if($(this).val() == ''){
+                layer.msg('请输入6位谷歌验证码', {
+                    icon: 2
+                });
+                throw SyntaxError();
+            } else {
+                code+=$(this).val();
+            }
+        });
+            $.post('{:U("Setting/googleauth")}',{code:code},function (data) {
+                 if(data.status){
+                     layer.msg(data.info, {
+                         icon: 1
+                     },function () {
+                         location.href="{:U('Setting/options')}";
+                     });
+                 } else {
+                     layer.msg(data.info, {
+                         icon: 2
+                     });
+                 }
+            });
+
+    })
+</script>

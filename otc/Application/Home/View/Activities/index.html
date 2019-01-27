@@ -1,0 +1,79 @@
+<include file="Public:header"/>
+<link rel="stylesheet" href="__ROOT__/Public/static/css/activities.css">
+<link rel="stylesheet" href="__ROOT__/Public/static/css/oneself.css">
+<div class="wrap" style="min-height: 700px;">
+    <div class="cont clear-float" >
+        <div class="col-60">
+            <div class="col-30">
+                <div class="data-h">USDT余额</div>
+                <div class="data-d">{$yue|number_format=###,2,'.',''}<span class="data-u">USDT</span></div>
+            </div>
+        </div>
+        <div class="col-40 ta-right">
+            <a class="btn btn-text">{$Think.lang.wzyq}</a>&nbsp;&nbsp;&nbsp;
+            <a id="codea" style="float: right"></a>
+        </div>
+
+    </div>
+
+    <div class="cont rule">
+        <div class="cont-title"><span class="cont-title-left"></span><span class="cont-title-text">{$Think.lang.hdgz}</span><span class="cont-title-right"></span></div>
+        <p>1.{$Think.lang.gz1}</p>
+        <p>2. {$Think.lang.gz2}{$yqr_fee}%；</p>
+        <p>3. {$Think.lang.gz3}</p>
+        <p>4. {$Think.lang.gz4}</p>
+        <br>
+        <p>{$Think.lang.jl}{$yqr_fee}%，{$Think.lang.jls}{$yqr_fee} USDT。</p>
+    </div>
+</div>
+
+
+
+<include file="Public:footer"/>
+<script type="text/javascript" src="__PUBLIC__/Home/js/jquery.qrcode.min.js"></script>
+<script>
+    $('.btn-text').click(function () {
+        layer.open({
+            type: 1,
+            skin: 'invite-text-cont', //样式类名
+            area: ['800px', '300px'],
+            title: false,
+            closeBtn: 0, //不显示关闭按钮
+            anim: 2,
+            shadeClose: true, //开启遮罩关闭
+            content: '<div class="invite-text-cont">\n' +
+            '        <br/><p class="p">复制下面这段文字给好友，好友通过你的专属链接注册成功，你就可以享受好友的交易提成了</p>\n' +
+            '        <textarea class="textarea">安全可信赖的比特币场外交易平台，百万比特币红包赶紧来注册领取吧！{$lianjie}</textarea>\n' +
+            '    </div>'
+        });
+    })
+
+    $('#codea').qrcode({
+
+        render: "table", //table方式
+
+        width: 100, //宽度
+
+        height: 100, //高度
+
+        text: "{$lianjie}" //任意内容
+
+    });
+
+    $('.btn-pic').click(function () {
+        layer.open({
+            type: 1,
+            skin: 'invite-text-cont', //样式类名
+            area: ['800px', '300px'],
+            title: false,
+            closeBtn: 0, //不显示关闭按钮
+            anim: 2,
+            shadeClose: true, //开启遮罩关闭
+            content: '<div class="invite-text-cont">\n' +
+            '<br/><p class="p">复制下面这段文字给好友，好友通过你的专属链接注册成功，你就可以享受好友的交易提成了</p>\n' +
+            '<textarea class="textarea">安全可信赖的比特币场外交易平台，百万比特币红包赶紧来注册领取吧！{$lianjie}</textarea>\n' +
+            '</div>'
+        });
+    })
+
+</script>

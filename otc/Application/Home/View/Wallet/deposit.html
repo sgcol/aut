@@ -1,0 +1,263 @@
+<include file="Public:header"/>
+<link rel="stylesheet" href="__ROOT__/Public/static/css/wallet_a67d39a6b6.css">
+<div class="container">
+    <div class="currency-tabs">
+        <a href="{:U('Wallet/deposit',array('type'=>'usdt'))}" class="tab {$xnb==usdt?'active':''}">usdt</a>
+    </div>
+    <div class="panel">
+        <div class="h3">{$Think.lang.qbye}: <span class="link available"> {$moneyinfo.$xnb}</span> {$xnb|strtoupper}</div>
+        <div class="wallet-view"><span class="s-text available">{$Think.lang.kyzc}: <span>{$moneyinfo.$xnb}</span> {$xnb|strtoupper}</span><span class="s-text locked">{$Think.lang.djzc}: <span>{$moneyinfo.$xnbd}</span> {$xnb|strtoupper}</span><span class="s-text total">{$Think.lang.zongzichan}: <span>{$moneyinfo[$xnb]+$moneyinfo[$xnbd]}</span> {$xnb|strtoupper}</span></div>
+</div>
+    <div class="tabs clear-float">
+        <div class="tab get actived">{$Think.lang.jieshou} {$xnb|strtoupper}</div>
+        <div class="tab send ">{$Think.lang.fasong} {$xnb|strtoupper}</div>
+    </div>
+
+    <div class="panel clear-float">
+        <div class="btc-get ">
+            <div class="address">{$Think.lang.jsdz}: <span>{$qianbao}</span><a class="icon-qrcode"></a>
+            </div>
+            <a id="codea"></a>
+            <div class="tips-panel">{$Think.lang.wxts}</div>
+            <div class="panel-head">{$Think.lang.jyjl}</div>
+            <div class="transactions-panel">
+                <table class="table">
+                    <tr>
+                        <td>{$Think.lang.shijian}</td>
+                        <td>{$Think.lang.leixing}</td>
+                        <td>{$Think.lang.jine}</td>
+                        <td>{$Think.lang.sxf}</td>
+                        <td>{$Think.lang.sjdz}</td>
+                        <td>{$Think.lang.zhangtai}</td>
+                    </tr>
+                    <foreach name="myzr" item="v">
+                        <tr>
+                            <td>{$v.addtime|date='Y-m-d H:i:s',###}</td>
+                            <td>{$Think.lang.wlzr}{$v.coinname|strtoupper}</td>
+                            <td>{$v.num}</td>
+                            <td>{$v.fee}</td>
+                            <td>{$v.mum}</td>
+                            <td>
+                                <eq name="v.status" value="1">
+
+                                    <font color="#23a800">{$Think.lang.zrcg} </font>
+
+                                    <else/>
+
+                                    {$Think.lang.zzcl}
+
+                                </eq>
+                            </td>
+                        </tr>
+                    </foreach>
+                </table>
+                <empty name="myzr">
+                    <div class="no-record">
+                        <span class="icon-address-no-record"></span><span>{$Think.lang.zhmx}</span>
+                    </div>
+                </empty>
+            </div>
+
+        </div>
+        <div class="btc-send  hidden">
+            <div class="tips-panel">{$Think.lang.wxtishi}{$coin.title}{$Think.lang.wlfs}
+            {$coin.title}，{$Think.lang.xy}，{$coin.title}{$Think.lang.wlf}<span class='block_chain_fee'>{$coin.zc_fee}%</span>；{$Think.lang.cb}{$coin.title}{$Think.lang.cbs}</div>
+
+            <div class="normal-form form-cont clear-float">
+                <div class="form-item input-cont">
+                    <div class="input-name">{$Think.lang.fsdz}: </div>
+                    <input  type="text" name="address" validate check-type="address" class="input" placeholder="{$Think.lang.fsdz}">
+                    <div class="form-tips"></div>
+                    <div class="error-msg">{$Think.lang.srdz}</div>
+                </div>
+                <div class="form-item input-cont">
+                    <div id="reserve" style="display: none"></div>
+                    <div class="input-name">{$Think.lang.sl}: </div>
+                    <input type="number" name="quantity" validate check-type="quantity" class="input" placeholder="{$Think.lang.fsl}">
+                    <div class="form-tips"></div>
+                    <div class="error-msg">{$Think.lang.fsls}</div>
+                </div>
+                <div class="form-item input-cont">
+                    <div class="input-name" type="password">{$Think.lang.zjmm}: </div>
+                    <input type="text" name="password" validate check-type="password1" class="input" onfocus="this.type='password'" placeholder="{$Think.lang.zjmm}">
+                    <div class="form-tips"></div>
+                    <div class="error-msg"></div>
+                </div>
+
+                <if condition="$ga neq null">
+                    <div class="form-item input-cont">
+                        <div class="input-name" type="ga">{$Think.lang.ggyz}: </div>
+                        <input type="text" name="ga" validate check-type="ga" class="input" onfocus="this.type='ga'" placeholder="{$Think.lang.ggmm}">
+                        <div class="form-tips"></div>
+                        <div class="error-msg"></div>
+                    </div>
+                </if>
+
+                <div class="form-item input-cont">
+                    <div class="input-name">{$Think.lang.beizhu}: </div>
+                    <input type="text" name="message" class="input">
+                    <div class="form-tips"></div>
+                    <div class="error-msg"></div>
+                </div>
+
+                <a  {$coin['zc_jz']?'id="sendBtc"':''} class="btn submit  {$coin['zc_jz']?'':'disable'}" >{$coin['zc_jz']?'提交':'当前禁止转出'}</a>
+
+            </div>
+            <div class="panel-head">{$Think.lang.jyjl}</div>
+            <div class="panel transactions-panel">
+                <table class="table table-hover">
+                    <tr>
+                       <td>{$Think.lang.shijian}</td>
+                       <td>{$Think.lang.leixing}</td>
+                       <td>{$Think.lang.jine}</td>
+                       <td>{$Think.lang.sxf}</td>
+                       <td>{$Think.lang.sjdz}</td>
+                       <td>{$Think.lang.zhangtai}</td>
+                    </tr>
+                    <foreach name="myzc" item="v">
+                        <tr>
+                            <td>{$v.addtime|date='Y-m-d H:i:s',###}</td>
+                            <td>{$Think.lang.wlzc}{$v.coinname|strtoupper}</td>
+                            <td>{$v.num}</td>
+                            <td>{$v.fee}</td>
+                            <td>{$v.mum}</td>
+                            <td>
+                              <eq name="v.status" value="1">
+
+                                <font color="#23a800">{$Think.lang.zccg} </font>
+
+                                <else/>
+
+                               {$Think.lang.zzcl}
+
+                            </eq>
+                            </td>
+                        </tr>
+                    </foreach>
+                </table>
+                <empty name="myzc">
+                    <div class="no-record">
+                        <span class="icon-address-no-record"></span><span>{$Think.lang.zwmx}</span>
+                    </div>
+                </empty>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<include file="Public:footer"/>
+<script type="text/javascript" src="__PUBLIC__/Home/js/jquery.qrcode.min.js"></script>
+<script>
+    $('.get').click(function () {
+         $('.send').removeClass('actived');
+         $('.btc-send').addClass('hidden');
+        $('.get').addClass('actived');
+        $('.btc-get').removeClass('hidden');
+    })
+
+    $('.send').click(function () {
+        $('.get').removeClass('actived');
+        $('.btc-get').addClass('hidden');
+        $('.send').addClass('actived');
+        $('.btc-send').removeClass('hidden');
+    })
+
+
+    $('#codea').qrcode({
+
+        render: "table", //table方式
+
+        width: 100, //宽度
+
+        height: 100, //高度
+
+        text: "{$qianbao}" //任意内容
+
+    }); //任意字符串
+
+    $('#sendBtc').click(function () {
+         var address=$('[name=address]').val();
+         var num=$('[name=quantity]').val();
+         var password=$('[name=password]').val();
+         var message=$('[name=message]').val();
+         if(address==''){
+             layer.msg('发送地址不能为空', {
+                 icon: 2
+             });
+             return false;
+         }
+        if(num==''){
+            layer.msg('数量不能为空', {
+                icon: 2
+            });
+            return false;
+        }
+        if(!/^(\d|[1-9]\d+)(\.\d+)?$/.test(num)){
+            layer.msg('数量不正确', {
+                icon: 2
+            });
+            return false;
+        }
+        if(password==''){
+            layer.msg('资金密码不能为空', {
+                icon: 2
+            });
+            return false;
+        }
+
+        <if condition="$ga neq null">
+            var code=$('[name=ga]').val();
+            if(code==''){
+                layer.msg('谷歌验证码不能为空', {
+                    icon: 2
+                });
+                return false;
+            }
+        </if>
+
+
+        $.post('{:U("Wallet/withdraw")}',{
+            address:address,
+            num:num,
+            password:password,
+            message:message,
+            coin:'{$xnb}',
+            <if condition="$ga neq null">
+                code:code
+           </if>
+        },function (data) {
+              if(data.status){
+                  layer.load();
+                  setTimeout(function(){
+                      layer.closeAll('loading');
+                      layer.msg(data.info, {
+                          icon: 1
+                      },function(){
+                          location.reload();
+                      });
+                  }, 2000);
+
+              } else {
+                  layer.load();
+                  setTimeout(function(){
+                      layer.closeAll('loading');
+                      layer.msg(data.info, {
+                          icon: 2
+                      });
+                  }, 2000);
+
+              }
+        });
+
+    });
+
+        $('.filter a').click(function () {
+            $('.filter a').removeClass('actived');
+            $(this).addClass('actived');
+            where=$(this).attr('type');
+        })
+
+
+</script>

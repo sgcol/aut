@@ -1,0 +1,120 @@
+<include file="Public:header"/>
+<link rel="stylesheet" href="__ROOT__/Public/static/css/manage.css">
+<link rel="stylesheet" href="__ROOT__/Public/static/css/oneself.css">
+<div class="container clear-float">
+    <div class="setting-leftmenu fl">
+        <div class="menu-head">{$Think.lang.gggl}</div>
+        <div class="menu-c">
+            <div class="icon-fold"></div>
+            <div class="menu-title">{$Think.lang.csgg}</div>
+            <div class="menu-item-cont">
+                <a href="__APP__/manage/adsell/type/usdt" class="menu-item ">USDT</a>
+            </div>
+        </div>
+        <div class="menu-c bt">
+            <div class="icon-fold"></div>
+            <div class="menu-title">{$Think.lang.gmgg}</div>
+            <div class="menu-item-cont">
+                <a href="__APP__/manage/adbuy/type/usdt" class="menu-item ">USDT</a>
+            </div>
+        </div>
+
+    </div>
+    <div class="fr adver-wrap">
+        <div class="setting-title">
+            {$Think.lang.gmgg} > {$coinname|strtoupper}
+        </div>
+        <div class="setting-panel">
+            <div class="tabs">
+                <span class="tab current" id="up">{$Think.lang.jxz}</span><span class="tab" id="down">{$Think.lang.yixiajia}</span>
+            </div>
+            <table class="table order" id="up_table" cellspacing="0" cellpadding="0">
+                <thead>
+                <tr class="order-head ">
+                    <th class="pl-30">{$Think.lang.bianhao}</th>
+                    <th>{$Think.lang.guanggao}</th>
+                    <th class="td-country">{$Think.lang.guojia}</th>
+                    <th>{$Think.lang.jiage}</th>
+                    <th class="td-time">{$Think.lang.cjsj}</th>
+                    <th>{$Think.lang.zhangtai}</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <foreach name="adbuy" item="v">
+                    <if condition="$v.status == 1">
+                        <tr>
+                            <td class="pl-30"><a href="{:U('Manage/editad',array('adid'=>$v['id']))}" class="link">{$v.id}</a></td>
+                            <td>{$Think.lang.goumai}{$v.coin|strtoupper=###}</td>
+                            <td class="td-country">{$v.country|strtoupper=###}</td>
+                            <td>{$v.price} {$v.currency|strtoupper=###}</td>
+                            <td class="td-time">{$v.addtime|date='Y-m-d H:i:s',###}</td>
+                            <td class="red-text">{$Think.lang.jxz}</td>
+                            <td class="pr-30 ta-r"><a href="{:U('Manage/editad',array('adid'=>$v['id']))}" class="btn ">{$Think.lang.bianji}</a><a class="btn ground" href="javascript:grounp({$v.id});">{$Think.lang.xiajia}</a></td>
+                        </tr>
+                    </if>
+                </foreach>
+                </tbody>
+            </table>
+            <table class="table order  hidden" id="down_table" cellspacing="0" cellpadding="0">
+                <thead>
+                <tr class="order-head ">
+                    <th class="pl-30">{$Think.lang.bianhao}</th>
+                    <th>{$Think.lang.guanggao}</th>
+                    <th class="td-country">{$Think.lang.guojia}</th>
+                    <th>{$Think.lang.jiage}</th>
+                    <th class="td-time">{$Think.lang.cjsj}</th>
+                    <th>{$Think.lang.zhangtai}</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <foreach name="adbuy" item="v">
+                    <if condition="$v.status == 0">
+                        <tr>
+                            <td class="pl-30"><a href="{:U('Manage/editad',array('adid'=>$v['id']))}" class="link">{$v.id}</a></td>
+                            <td>{$Think.lang.goumai} {$v.coin|strtoupper=###}</td>
+                            <td class="td-county">{$v.country|strtoupper=###}</td>
+                            <td>{$v.price} {$v.currency|strtoupper=###}</td>
+                            <td class="td-time">{$v.addtime|date='Y-m-d H:i:s',###}</td>
+                            <td class="red-text">{$Think.lang.yixiajia}</td>
+                            <td class="pr-30 ta-r"><a href="{:U('Manage/editad',array('adid'=>$v['id']))}" class="btn ">{$Think.lang.bianji}</a><a class="btn ground" href="javascript:grounp({$v.id});">{$Think.lang.cxsj}</a></td>
+                        </tr>
+                    </if>
+                </foreach>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+<include file="Public:footer"/>
+
+<script>
+    $('#up').click(function () {
+        $('#down').removeClass('current');
+        $('#down_table').addClass('hidden');
+        $('#up').addClass('current');
+        $('#up_table').removeClass('hidden');
+    })
+
+    $('#down').click(function () {
+        $('#up').removeClass('current');
+        $('#up_table').addClass('hidden');
+        $('#down').addClass('current');
+        $('#down_table').removeClass('hidden');
+    })
+
+    function grounp(adid) {
+        $.post('{:U("Manage/showorhide")}',{adid:adid},function (data) {
+            if(data.status){
+                layer.alert(data.info,{icon: 1});
+                setTimeout("location.reload()",1000);
+            } else {
+                layer.alert(data.info);
+                setTimeout("location.reload()",1000);
+            }
+        })
+    }
+</script>
