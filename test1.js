@@ -26,7 +26,10 @@ const server = require('http').createServer()
 	.boolean('dev')
 	.default('authtimeout', 3*60*1000)
 	.argv
-, debugout=require('debugout')(argv.debugout);
+, debugout=require('debugout')(argv.debugout)
+, _o=require('./order.js')
+, createOrder=_o.createOrder
+, confirmOrder=_o.confirmOrder;
 
 require('colors');
 
@@ -66,41 +69,52 @@ app.use('/r', function(req, res, next) {
 })
 
 getDB((err, db) =>{
-    var money=100, userid='m112';
-    var shares=[];
-    // shares.push((money*(r[0].share||0.985)).toFixed(2));
-    function getParent(user, cb) {
-        db.users.find({_id:user.parent}).toArray((err, r) =>{
-            if (err) return cb(err);
-            if (r.length==0) return cb('no such user');
-            cb(null, r[0]);
-        })
-    }
-    var findkey={_id:userid};
-    // if (r[0].userid) findkey.id=r[0].userid;
-    // else if (r[0].merchantid) findkey.merchantid=r[0].merchantid;
-    db.users.find(findkey).toArray()
-    .then((merchants)=>{
-        return new Promise((resolve, reject)=>{
-            (function getShare(user, cb) {
-                shares.push({m:Number((money*(user.share||0)).toFixed(2)), id:user._id});
-                if (!user.parent) return cb();
-                getParent(user, function(err, parent) {
-                    if (err || !parent) return cb();
-                    getShare(parent, cb);
-                })
-            })(merchants[0], resolve);
-        });
-    })
-    .then(()=>{
-        db.users.update({_id:shares[0].id}, {$inc:{total:shares[0].m}});
-        for (var i=1; i<shares.length; i++) {
-            db.users.update({_id:shares[i].id}, {$inc:{total:(shares[i].m-shares[i-1].m)}})
-        }
-        db.users.update({_id:'system'}, {$inc:{total:money-shares[shares.length-1].m}}, {upsert:true});                
-    })
-    .catch((e)=>{
+    // var money=100, userid='m112';
+    // var shares=[];
+    // // shares.push((money*(r[0].share||0.985)).toFixed(2));
+    // function getParent(user, cb) {
+    //     db.users.find({_id:user.parent}).toArray((err, r) =>{
+    //         if (err) return cb(err);
+    //         if (r.length==0) return cb('no such user');
+    //         cb(null, r[0]);
+    //     })
+    // }
+    // var findkey={_id:userid};
+    // // if (r[0].userid) findkey.id=r[0].userid;
+    // // else if (r[0].merchantid) findkey.merchantid=r[0].merchantid;
+    // db.users.find(findkey).toArray()
+    // .then((merchants)=>{
+    //     return new Promise((resolve, reject)=>{
+    //         (function getShare(user, cb) {
+    //             shares.push({m:Number((money*(user.share||0)).toFixed(2)), id:user._id});
+    //             if (!user.parent) return cb();
+    //             getParent(user, function(err, parent) {
+    //                 if (err || !parent) return cb();
+    //                 getShare(parent, cb);
+    //             })
+    //         })(merchants[0], resolve);
+    //     });
+    // })
+    // .then(()=>{
+    //     db.users.update({_id:shares[0].id}, {$inc:{total:shares[0].m}});
+    //     for (var i=1; i<shares.length; i++) {
+    //         db.users.update({_id:shares[i].id}, {$inc:{total:(shares[i].m-shares[i-1].m)}})
+    //     }
+    //     db.users.update({_id:'system'}, {$inc:{total:money-shares[shares.length-1].m}}, {upsert:true});                
+    // })
+    // .catch((e)=>{
 
-    });
+    // });
 
+    // var want=100;
+    // db.users.findOneAndUpdate({_id:'m112', total:{$gte:want}}, {$inc:{total:-want}}, {w:1},  console.log);
+    // db.users.findOne({_id:'m112'}, console.log);
+    // db.users.updateOne({_id:'m112'}, {$set:{locked:false}}, {w:1, session:s}, console.log);
+
+    // s.endSession();
+
+    createOrder('asdfg', '111', randomstring(), 100, (err, orderid)=>{
+        if (err) return console.log(err);
+        confirmOrder(orderid, 100, console.log);
+    })
 })

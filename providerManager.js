@@ -17,7 +17,7 @@ exports.getProvider=function(pid) {
 }
 
 const filter = require('filter-object');
-function order(orderid, money,mer, host, callback) {
+function order(orderid, money,mer, mer_userid, host, callback) {
     if (!mer.providers) return callback('联系对接小伙伴，他忘记给商户配置渠道了');
     async.map(filter(external_provider, Object.keys(mer.providers)), function(prd, cb) {
         if (!prd.bestPair) return cb(null, {gap:Number.MAX_VALUE, coinType:''});
@@ -26,13 +26,13 @@ function order(orderid, money,mer, host, callback) {
             return cb(null, {gap:gap, coinType:coinType, prd:prd});
         });
     }, function(err, r) {
-        r.sort((a, b)=>{return b.gap-a.gap});
+        r.sort((a, b)=>{return a.gap-b.gap});
         for (var i=0; i<r.length; i++) {
             if (r[i].coinType) break;
         }
         if (!r[i].coinType) return callback('没有可用的交易提供方');
         updateOrder(orderid, {provider:r[i].prd.name, providerOrderId:orderid, coin:r[i].coinType});
-        r[i].prd.order(orderid, money, mer, r[i].coinType, host, callback);
+        r[i].prd.order(orderid, money, mer, mer_userid, r[i].coinType, host, callback);
     });
 }
 

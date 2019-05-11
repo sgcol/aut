@@ -90,20 +90,13 @@
     $(()=>{
         var params = {orderid:'<%= orderid%>'};
         var retryNum=0;
-        function handleQR(err, ret) {
-            if (err) {
-                if (err=='签名错误') return alert(err);
-                showerr(err);
-                retryNum++;
-                if (retryNum>2) return alert('提供方无法完成订单');
-                return getAjax('/doOrder', params, handleQR);
-            }
+        function handleQR(err, url) {
             if (mobileAndTabletcheck()) {
-                location.href=ret.message;
+                location.href=url;
                 return;
             }
             var qrcode = new QRCode("qrcode", {
-                text: ret.message,
+                text: url,
                 width: 256,
                 height: 256,
                 colorDark : "#333",
@@ -113,7 +106,19 @@
             $('.wrap-login100').toggle();
             $('.sk-double-bounce').toggle();
         }
-        getAjax('/doOrder', params, handleQR);
+        function handleResult(err, ret) {
+            if (err) {
+                if (err=='签名错误') return alert(err);
+                showerr(err);
+                retryNum++;
+                if (retryNum>2) return alert('提供方无法完成订单');
+                return getAjax('/doOrder', params, handleResult);
+            }
+            if (ret.to) return (location.href=ret.to);
+            var url=ret.url||ret.message;
+            handleQR(err, url);
+        }
+        getAjax('/doOrder', params, handleResult);
     })
 })(jQuery)
 

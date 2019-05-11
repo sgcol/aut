@@ -229,6 +229,18 @@
       </a>
     </li>
     <li class="nav-item">
+      <a class="nav-link" href="reviewOfAlipay.html">
+        <span class="menu-title">支付宝出帐</span>
+        <i class="mdi mdi-format-list-bulleted menu-icon"></i>
+      </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="settingOfAlipay.html">
+          <span class="menu-title">支付宝设置</span>
+          <i class="mdi mdi-format-list-bulleted menu-icon"></i>
+        </a>
+      </li>
+    <li class="nav-item">
       <a class="nav-link" href="demoOrder.html">
         <span class="menu-title">支付演示</span>
         <i class="mdi mdi-book-open-variant menu-icon"></i>
@@ -501,12 +513,6 @@
   <!-- End custom js for this page-->
 </body>
 <script>
-function timestring(t) {
-  return new Date(t).toLocaleDateString()+' '+ new Date(t).toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");;
-}
-function formatBigNumber(s) {
-  return (''+s).replace(/(?=(?!^)(?:\d{4})+(?:\.|$))(\d{4}(\.\d+$)?)/g,',$1');
-}
 function statusHtmlfy(s) {
   if (s=='created') return `<label class="badge badge-gradient-info">创建</label>`;
   if (s=='completed') return `<label class="badge badge-gradient-success">完成</label>`

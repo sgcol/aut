@@ -13,9 +13,12 @@ var q=async.queue(function (extern_callback, queue_callback) {
         {bills:{index:['status', 'time', 'type' ]}},
         'knownCard',
         {users:{index:['acl', 'merchantid']}},
-        {monster:{index:['exOrderId'], capped:true, size:100*1024, max:100000}},
+        {monster:{index:'exOrderId', capped:true, size:100*1024, max:100000}},
         'stat',
-        'balance'
+        {'balance':{index:['user._id', 'orderid']}},
+        {'alipay_accounts':{index:['disable', 'occupied', 'in']}},
+        {'alipay_logs':{capped:true, size:200*1024*1024, max:3650000}},
+        {'withdrawals':{index:['userid', 'done']}},
         ]}, function(err, db) {
         if (err) return cb(err);
         __stored_db=db;

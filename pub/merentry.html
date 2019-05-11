@@ -16,6 +16,40 @@
 <link rel="shortcut icon" href="images/favicon.png" />
 </head>
 <body>
+  <!-- dialog  -->
+  <div class="modal fade" id="takeMoney" tabindex="-1" role="dialog" aria-labelledby="takeMoney" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
+        <div class="modal-header">
+          <h5 class="card-title">提现</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form>
+          <div class="card-body">
+            <div class="form-group">
+              <label for="password">账户余额</label>&nbsp;¥<span class="available">--</span>
+              
+              <label for="take">取出</label>
+              <div class="input-group">
+                <input type="text" class="form-control available" id="take">
+                <span for="take" class="input-group-append">
+                  <button class="btn btn-gradient-primary" type="button">全部</button>
+                </span>
+              </div>
+            </div>
+            <div class="form-group">
+              <button type="button" id="takeMoney" class="btn btn-gradient-primary mr-2" data-dismiss="modal" onclick="doTake();">Submit</button>
+              <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!------- dialog ends-------->
+
   <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
     <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
@@ -228,11 +262,22 @@
               <div class="card bg-gradient-danger card-img-holder text-white">
                 <div class="card-body">
                   <img src="images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image"/>
-                  <h4 class="font-weight-normal mb-3">总流水
+                  <h4 class="font-weight-normal mb-3">账户余额
                     <i class="mdi mdi-chart-line mdi-24px float-right"></i>
                   </h4>
-                  <h2 class="mb-5">¥ <spna id='totalIncome'>--</spna></h2>
-                  <h6 class="card-text">已到账<span id='arrivaled'>--</span></h6>
+                  <h2 class="mb-5">
+                    <div class="input-group">
+                      ¥ <spna class='available'>--</spna>
+                      <div class="input-group-append">
+                        <button class="btn bg-gradient-light float-right" data-toggle="modal" data-target="#takeMoney">提现</button>  
+                      </div>
+                    </div>
+                  </h2>
+                  <table style="width:100%">
+                    <td><h6 class="card-text">已提取<span class='arrivaled'>--</span></h6></td>
+                    <td><h6 class="card-text">总流水<span class='totalIncome'>--</span></h6></td>
+                  </table>
+                  <!-- <h6 class="card-text">已到账<span id='arrivaled'>--</span>&nbsp;可提取<span id='available'>--</span></h6> -->
                 </div>
               </div>
             </div>
@@ -266,7 +311,7 @@
               <div class="card">
                 <div class="card-body">
                   <div class="clearfix">
-                    <h4 class="card-title float-left">Visit And Sales Statistics</h4>
+                    <h4 class="card-title float-left">历史统计</h4>
                     <div id="visit-sale-chart-legend" class="rounded-legend legend-horizontal legend-top-right float-right"></div>                                     
                   </div>
                   <canvas id="visit-sale-chart" class="mt-4"></canvas>
@@ -276,7 +321,7 @@
             <div class="col-md-5 grid-margin stretch-card">
               <div class="card">
                 <div class="card-body">
-                  <h4 class="card-title">Traffic Sources</h4>
+                  <h4 class="card-title">成功率</h4>
                   <canvas id="traffic-chart"></canvas>
                   <div id="traffic-chart-legend" class="rounded-legend legend-vertical legend-bottom-left pt-4"></div>                                                      
                 </div>
@@ -354,7 +399,7 @@
   <script src="js/misc.js"></script>
   <!-- endinject -->
   <!-- Custom js for this page-->
-  <script src="js/dashboard.js"></script>
+  <!-- <script src="js/dashboard.js"></script> -->
   <script src="js/base.js"></script>
   <!-- End custom js for this page-->
 </body>
@@ -400,12 +445,19 @@ function refreshOrderList() {
 }
 window.initpage=()=>{
   accIntf('/merchant/balance', function(err, data) {
-    $('#totalIncome').text(formatBigNumber(data.total));
-    $('#arrivaled').text(formatBigNumber(data.arrivaled));
-    $('#totalOrders').text(formatBigNumber(data.orders||0));
+    $('.totalIncome').text(formatBigNumber(data.total));
+    $('.arrivaled').text(formatBigNumber(data.arrivaled));
+    $('.available').text(formatBigNumber(data.total-data.arrivaled));
+    $('.totalOrders').text(formatBigNumber(data.orders||0));
   });
   refreshOrderList();
 }
-  
+
+function doTake() {
+  accIntf('/merchant/take', {take:Number($('#take').text())}, (err, data)=>{
+    if (err) return alert(err);
+    alert('已提交，请等待系统处理，17点之前提交当日到账');
+  })
+}
 </script>
 </html>

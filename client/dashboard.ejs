@@ -282,12 +282,6 @@
   <!-- End custom js for this page-->
 </body>
 <script>
-function timestring(t) {
-  return new Date(t).toLocaleDateString()+' '+ new Date(t).toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");;
-}
-function formatBigNumber(s) {
-  return (''+s).replace(/(?=(?!^)(?:\d{4})+(?:\.|$))(\d{4}(\.\d+$)?)/g,',$1');
-}
 function statusHtmlfy(s) {
   if (s=='created') return `<label class="badge badge-gradient-info">创建</label>`;
   if (s=='completed') return `<label class="badge badge-gradient-success">完成</label>`

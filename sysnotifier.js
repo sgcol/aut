@@ -2,6 +2,7 @@ var notifymsg=[], count=0;
 
 function add(title, desc, priority, auth) {
     count++;
+    console.error(title, desc||'', priority||'', auth||'');
     return notifymsg.push({title:title, desc:desc, priority:priority, acl:auth, _id:count})-1;
 }
 

@@ -123,4 +123,11 @@
         setInterval(receiveNotifications, 1*30*1000);
     });
 
+    window.timestring =(t)=>{
+      return new Date(t).toLocaleDateString()+' '+ new Date(t).toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");;
+    }
+    window.formatBigNumber=(s)=>{
+      return (''+s).replace(/(?=(?!^)(?:\d{4})+(?:\.|$))(\d{4}(\.\d+$)?)/g,',$1');
+    }
+
 })(jQuery)

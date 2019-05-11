@@ -38,6 +38,7 @@ const server = require('http').createServer()
 	.boolean('debugout')
 	.boolean('dev')
 	.default('authtimeout', 3*60*1000)
+	.describe('host', 'bypass default host for testing alipay notification')
 	.argv
 , debugout=require('debugout')(argv.debugout);
 
@@ -189,57 +190,8 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		callback(null, {url:'alipay.com'});
 	}));
 
+	const _auth=require('./auth.js'), authedClients=_auth.authedClients, aclgt=_auth.aclgt, verifyManager=_auth.verifyManager, verifyAdmin=_auth.verifyAdmin, getAuth=_auth.getAuth, verifyAuth=_auth.verifyAuth, noAuthToLogin=_auth.verifyAuth;
 
-	var authedClients={};
-	function verifyAuth(req, res, next) {
-		if (!req.cookies || !req.cookies.a) return res.send({err:'no auth'});
-		var auth=authedClients[req.cookies.a];
-		if (!auth) return res.send({err:'no auth'});
-		var now=new Date();
-		if (auth.validUntil<now) {
-			delete authedClients[req.cookies.a]
-			return res.send({err:'no auth'});
-		}
-		auth.validUntil=new Date(now.getTime()+auth_timeout);
-		req.auth=auth;
-		next();
-	}
-	function getAuth(req, res, next) {
-		if (!req.cookies || !req.cookies.a) return res.send({err:'no auth'});
-		var auth=authedClients[req.cookies.a];
-		if (!auth) return res.send({err:'no auth'});
-		var now=new Date();
-		if (auth.validUntil<now) {
-			delete authedClients[req.cookies.a]
-			return res.send({err:'no auth'});
-		}
-		req.auth=auth;
-		next();		
-	}
-	const noAuthToLogin=verifyAuth;
-	function verifyAdmin(req, res, next) {
-		if (!req.auth) return res.send({err:'no auth'});
-		if (req.auth.acl=='admin') return next();
-		res.send({err:'无权访问'});
-	}
-	function verifyManager(req, res, next) {
-		if (!req.auth) return res.send({err:'no auth'});
-		if (req.auth.acl=='admin' || req.auth.acl=='manager') return next();
-		res.send({err:'无权访问'});
-	}
-
-	setInterval(function() {
-		var now =new Date();
-		for (var i in authedClients) {
-			if (authedClients[i].validUntil<now) delete authedClients[i];
-		}
-	}, 5*60*1000);
-	function aclgt(acl1, acl2) {
-		if(acl1=='admin' && acl2!='admin') return true;
-		if (acl1=='manager' && acl2!='admin' && acl2!='manager') return true;
-		if (acl1=='agent' && acl2=='merchant') return true;
-		return false;
-	}
 	const getMerchant=require('./merchants.js').getMerchant, verifySign=require('./merchants.js').verifySign;
 	process.on('message', function(pack) {
 		switch(pack.type) {
@@ -318,23 +270,24 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.all('/account/me', verifyAuth, httpf({}, function() {
 		return filter(this.req.auth, ['acl', 'name', 'merchantid', 'debugMode']);
 	}));
-	app.all('/order', verifySign, httpf({orderid:'string', money:'number', merchantid:'string', cb_url:'string', time:'string', no_return:true}, function(orderid, money, merchantid, cb_url, time) {
+	app.all('/order', verifySign, httpf({orderid:'string', money:'number', merchantid:'string', userid:'string', cb_url:'string', time:'string', no_return:true}, function(orderid, money, merchantid, userid, cb_url, time) {
 		var res=this.res;
-		createOrder(merchantid, orderid, money, 'alipay', cb_url, function(err, sysOrderId) {
+		createOrder(merchantid, userid, orderid, money, 'alipay', cb_url, function(err, sysOrderId) {
 			if (err) return res.render('error.ejs', {err:err});
 			return res.render('order.ejs', {orderid:sysOrderId, money:money, merchantid:merchantid});
 		});
 	}));
 	app.all('/doOrder', httpf({orderid:'string', callback:true}, function(sysOrderId, callback) {
 		var req=this.req;
-		var basepath=url.format({protocol:req.protocol, host:req.headers.host, pathname:url.parse(req.originalUrl).pathname});
-		getOrderDetail(sysOrderId, function(err, merchantid, money, cb_url) {
+		var basepath=argv.host||url.format({protocol:req.protocol, host:req.headers.host, pathname:url.parse(req.originalUrl).pathname});
+		if (basepath.slice(-1)!='/') basepath=basepath+'/';
+		getOrderDetail(sysOrderId, function(err, merchantid, money, mer_userid, cb_url) {
 			if (err) return callback(err);
 			// find a provider & create a provider order
 			pify(getMerchant)(merchantid).then(function(mer) {
-				return pify(paysys.order)(sysOrderId, money, mer, basepath);
+				return pify(paysys.order)(sysOrderId, money, mer, mer_userid, basepath);
 			}).then((payurl)=>{
-				if (payurl.url) return callback(null, payurl.url);
+				if (!payurl.img) return callback(null, payurl);
 				s2a(request({uri:payurl}))
 				.then(function (parts) {
 					return new Promise((resolve)=> {
@@ -614,7 +567,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.all('/merchant/balance', verifyAuth, httpf({userid:'?string', callback:true}, function(userid, callback) {
 		if (this.req.auth.acl=='admin' || this.req.auth.acl=='manager') {
 			//check merchantid
-			if (!userid) return callback('no merchantid specified');
+			if (!userid) return callback('no userid specified');
 		}
 		if (this.req.auth.acl=='merchant' || this.req.auth.acl=='agent') userid=this.req.auth._id;
 		// if agent, more condition
@@ -623,17 +576,93 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 				db.users.find({_id:userid}).toArray((err, r)=>{
 					if (err) return cb(err);
 					if (r.length==0) return cb('no such user');
-					return cb(null, r[0].total);
+					return cb(null, r[0].total||0, r[0].taken||0);
 				})
 			},
 			arrivaled:(cb)=>{
 				cb(null, 0);
 			},
 			orders:(cb)=>{
-				db.bills.count({}, cb);
+				db.bills.find({userid:userid}).count({}, cb);
 			}
-		}, callback);
+		}, (err, ret)=>{
+			callback(err, {total:ret.total[0], arrivaled:ret.total[1], orders:ret.orders});
+		});
 	}));
+	app.all('/merchant/take', verifyAuth, httpf({userid:'?string', take:'number', callback:true}, function(userid, want, callback) {
+		if (aclgt(this.req.auth.acl, 'manager')) {
+			if (!userid) return callback('no userid specified');
+		}
+		userid=this.req.auth._id;
+		db.users.findOneAndUpdate({_id:userid, profit:{$gte:want}}, {$inc:{profit:-want}}, {w:'majority'}, (err, r)=>{
+			if (err) return callback(err);
+			if (!r.value) {
+				// maybe no user or not enough money
+				return db.users.findOne({_id:userid}, (err, r)=>{
+					if (r) return callback('没有足够的现金');
+					return callback('没有这个用户');
+				});
+			}
+			var usrdata=r.value, total=0, lefts={};
+			for (var i in usrdata.in) {
+				lefts[i]=usrdata.in[i]-usrdata.out[i];
+				if (lefts[i]<0) {
+					// write a warning
+				}
+				total+=lefts[i];
+			}
+			var errmsg=null;
+			if (total<want) {
+				errmsg='取现时数据异常，profit小于in-out';
+				sysnotifier.add(errmsg+' '+userdata.name||userdata._id);
+			}
+
+			var takesop=[], now=new Date(), inc={};
+			for (var i in lefts) {
+				var d=Math.min(lefts[i],want);
+				takesop.push({userid:userid, name:r.value.name, _t:now, take:take, provider:i, done:false});
+				inc['out.'+i]=d;
+				if (d==want) break;
+				want-=d;
+			}
+			db.users.updateOne({_id:userid}, {$inc:inc});
+			db.withdrawals.insertMany(takesop, {w:1}, callback);
+		});
+	}))
+	app.all('/manager/withdrawals', verifyAuth, verifyManager, httpf({all:'?boolean', search:'?string', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, function(showall, search, sort, order, offset, limit, callback) {
+		var key={};
+		if (!showall) key={done:false};
+		var cur=db.withdrawals.find(key);
+		if (sort) {
+			var so={};
+			so[sort]=(order=='asc'?1:-1);
+			cur.sort(so);
+		}
+		if (offset) cur.skip(offset);
+		if (limit) cur.limit(limit);
+		// if (queries && queries.search) 
+		// if (userid) key.userid=userid;
+		cur.toArray()
+		.then(r=>{
+			cur.count((err, c)=>{
+				if (err) return callback(err);
+				callback(null, {total:c, rows:r});
+			});
+		})
+		.catch(e=>{
+			callback(e);
+		})
+	}))
+	app.all('/manager/approval', verifyAuth, verifyManager, httpf({all:'?boolean', ids:'?array', callback:true}, function(all, ids, callback) {
+		if (!all && !ids) all=true;
+		var key={done:false};
+		if (ids) key._id={$in:ids.map(id=>ObjectID(id))};
+		db.withdrawals.find(key).then((err,r)=>{
+			
+		}).catch(err=>{
+			callback(err);
+		})
+	}))
 	app.all('/admin/providers', verifyAuth, httpf(function() {
 		var external_provider=getProviders();
 		var ret=[];
