@@ -161,7 +161,7 @@ $(function () {
         }
     }
     function regusermobile() {
-        var mbtest_mobile = /^\w+@\w+\.\w+(\.\w+)*$/;
+        var mbtest_mobile = /^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/; ///^\w+@\w+\.\w+(\.\w+)*$/;
         if (mbtest_mobile.test($("input[name=mobile]").val())) {
             $("input[name=mobile]").next().next().css('display','none');
             return true;

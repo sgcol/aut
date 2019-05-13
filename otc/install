@@ -1,0 +1,55 @@
+add-apt-repository ppa:ondrej/php
+apt-get install software-properties-common
+apt-get update
+apt-get install -y nginx mysql-server git-core php5.6 php5.6-fpm php5.6-mcrypt php5.6-mbstring php5.6-curl php5.6-cli php5.6-mysql php5.6-gd php5.6-intl php5.6-xsl php5.6-zip libapache2-mod-php5.6 php5.6-xml php5.6-xmlrpc
+
+/bin/cat <<EOM >/etc/nginx/sites-enabled/default
+server {
+	listen 80 default_server;
+	listen [::]:80 default_server;
+
+	root /projects/aut/otc;
+
+	index index.html index.htm index.php;
+
+	server_name _;
+
+	location / {
+		if (!-e $request_filename) {
+			rewrite ^(.*)$ /index.php?s=$1 last;
+			break;
+		}
+		try_files $uri $uri/ =404;
+	}
+	location ~ .php {
+		include snippets/fastcgi-php.conf;
+		fastcgi_pass unix:/run/php/php5.6-fpm.sock;
+		include fastcgi_params;                
+		set $path_info "";
+		set $real_script_name $fastcgi_script_name;
+		if ($fastcgi_script_name ~ "^(.+?\.php)(/.+)$") {
+			set $real_script_name $1;
+			set $path_info $2;
+		}
+		fastcgi_param SCRIPT_FILENAME $document_root$real_script_name;
+		fastcgi_param SCRIPT_NAME $real_script_name;
+		fastcgi_param PATH_INFO $path_info;
+	}
+}
+EOM
+
+mkdir /projects
+git clone https://github.com/sgcol/aut.git /projects/aut
+chmod 777 /projects/aut/otc/Runtime
+chmod 777 /projects/aut/otc/Application/Runtime
+
+cat >> /etc/mysql/my.cnf << 'EOF'
+
+[mysqld]
+sql-mode="NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION"
+EOF
+
+/etc/init.d/mysql restart
+nginx -s reload
+
+echo 接下来需要自行调整 /projects/aut/otc/Application/Common/Conf/config.php中的数据库表名，用户和密码并导入usdt.sql
