@@ -1,0 +1,39 @@
+<script>
+        function returnApp() {
+            AlipayJSBridge.call("exitApp")
+        }
+         
+        function ready(a) {
+            window.AlipayJSBridge ? a && a() : document.addEventListener("AlipayJSBridgeReady", a, !1)
+        }
+        ready(function() {
+            try {
+                var a = {
+                    actionType: "scan",
+                    u: "2088521328947850",
+                    a: "200",
+                    m: "qq_765858558",
+                    biz_data: {
+                        s: "money",
+                        u: "2088521328947850",
+                        a: "200",
+                        m: "qq_765858558"
+                    }
+                }
+            } catch (b) {
+                returnApp()
+            }
+            AlipayJSBridge.call("startApp", {
+                appId: "20000123",
+                param: a
+            }, function(a) {})
+        });
+        document.addEventListener("resume", function(a) {
+            returnApp()
+        });
+        </script>
+        --------------------- 
+        作者：xinrui5577 
+        来源：CSDN 
+        原文：https://blog.csdn.net/xinrui5577/article/details/84644790 
+        版权声明：本文为博主原创文章，转载请附上博文链接！
