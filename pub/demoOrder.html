@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="images/favicon.png" />
     <link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+    <link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
     <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
     <!-- endinject -->
     <!-- inject:css -->
@@ -223,23 +225,26 @@
       </div>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="clearBalance.html">
-        <span class="menu-title">手动清帐</span>
+      <a class="nav-link" href="checkBalance.html">
+        <span class="menu-title">对账</span>
         <i class="mdi mdi-format-list-bulleted menu-icon"></i>
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="reviewOfAlipay.html">
-        <span class="menu-title">支付宝出帐</span>
-        <i class="mdi mdi-format-list-bulleted menu-icon"></i>
+      <a class="nav-link" data-toggle="collapse" href="#ui-alipay" aria-expanded="false" aria-controls="ui-details">
+        <span class="menu-title">支付宝</span>
+        <i class="menu-arrow"></i>
+        <i class="fab fa-alipay menu-icon"></i>
       </a>
+      <div class="collapse" id="ui-alipay">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="settingOfAlipay.html">账号管理</a></li>
+          <li class="nav-item"> <a class="nav-link" href="statementOfAlipay.html">流水详单</a></li>
+          <li class="nav-item"> <a class="nav-link" href="reviewOfAlipay.html">审核出账</a></li>
+        </ul>
+      </div>
     </li>
-    <li class="nav-item">
-        <a class="nav-link" href="settingOfAlipay.html">
-          <span class="menu-title">支付宝设置</span>
-          <i class="mdi mdi-format-list-bulleted menu-icon"></i>
-        </a>
-      </li>
+    
     <li class="nav-item">
       <a class="nav-link" href="demoOrder.html">
         <span class="menu-title">支付演示</span>
@@ -254,13 +259,18 @@
         <div class="content-wrapper">
           <div class="page-header">
             <h3 class="page-title">
+              <span class="page-title-icon bg-gradient-primary text-white mr-2">
+                <i class="mdi mdi-cash-multiple"></i>                 
+              </span>
               支付演示
             </h3>
             <nav aria-label="breadcrumb">
-              <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">支付演示</a></li>
-                <li class="breadcrumb-item active" aria-current="page">基本功能</li>
-              </ol>
+              <ul class="breadcrumb">
+                <li class="breadcrumb-item active" aria-current="page">
+                  <span></span>Demo
+                  <i class="mdi mdi-cash-multiple icon-sm text-primary align-middle"></i>
+                </li>
+              </ul>
             </nav>
           </div>
           <div class="row">
@@ -272,6 +282,10 @@
                     <div class="form-group">
                       <label for="merchantid">商户号</label>
                       <input type="text" class="form-control" id="merchantid" placeholder="merchantid">
+                    </div>
+                    <div class="form-group">
+                      <label for="key">玩家id</label>
+                      <input type="text" class="form-control" id="userid" placeholder="userid">
                     </div>
                     <div class="form-group">
                       <label for="key">商户key</label>
@@ -311,7 +325,6 @@
   <!-- inject:js -->
   <script src="js/off-canvas.js"></script>
   <script src="js/misc.js"></script>
-  <script src="js/dashboard.js"></script>
   <script src="js/md5.js"></script>
   <script src="js/qs.js"></script>
   <script src="js/base.js"></script>
@@ -326,6 +339,7 @@ $(()=>{
         cb_url:'http://127.0.0.1',
         merchantid:$('#merchantid').val(),
         money:Number($('#money').val()),
+        userid:$('#userid').val(),
         orderid:'TESTORDER'+now.getTime(),
         time:now.getTime(),
     };

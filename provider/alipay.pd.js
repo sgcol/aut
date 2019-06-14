@@ -69,17 +69,33 @@ function tableSizeFor(cap) {
 }
 
 // get which those accounts availble
-var allaccounts=[];
+var allaccounts=[], alipayLimitation, alipayFee;
 (function start(cb) {
 	getDB((err, db)=>{
 		if (err) return cb(err);
-		db.bills.find({status:'待支付', 'provider.name':'支付宝'}).toArray((err, r)=>{
-			if (err) return cb(err);
-			for (var i=0; i<r.length; i++) {
-				usedAccount[r[i]._id.toHexString()]=r[i].alipay_account;
+		async.parallel([
+			function fillUsedAccount(cb){
+				db.bills.find({status:'待支付', 'provider.name':'支付宝'}).toArray((err, r)=>{
+					if (err) return cb(err);
+					for (var i=0; i<r.length; i++) {
+						usedAccount[r[i]._id.toHexString()]=r[i].alipay_account;
+					}
+					cb(null, db);
+				});		
+			},
+			function getSetting(cb) {
+				db.alipay_settings.findOne({}, (err, r)=>{
+					cb(err, r||{});
+				})
 			}
-			cb(null, db);
-		});
+		],
+		function (err, results) {
+			if (!err) {
+				alipayLimitation=results[1].limitation||200000;
+				alipayFee=results[1].fee||0.006;
+			}
+			cb(err, results[0]);
+		})
 	});
 })(init);
 function init(err, db) {
@@ -89,96 +105,196 @@ function init(err, db) {
 	// 	allaccounts=r.sort((a, b)=>{return a.disable?1:a.usedCount-b.usedCount});
 	// 	allaccounts.forEach(ele=>{ele.appId=ele._id});
 	// });
-	router.all('/updateAccount', verifyAuth, verifyManager, httpf({appId:'string', privateKey:'?string', alipayPublicKey:'?string', name:'?string', pwd:'?string', disable:'?boolean', callback:true}, function(appId, privateKey, alipayPublicKey, name, pwd, disable, callback) {
-		var upd=allaccounts.find((ele)=>{return ele.appId==appId});
-		var needadd=false;
-		if (!upd) {
-			upd={};
-			needadd=true;
-		}
+	router.all('/updateAccount', verifyAuth, verifyManager, httpf({appId:'string', privateKey:'?string', alipayPublicKey:'?string', name:'?string', pwd:'?string', disable:'?boolean', limitation:'?number', fee:'?number', callback:true}, function(appId, privateKey, alipayPublicKey, name, pwd, disable, limitation, fee, callback) {
+		var upd={}
 		privateKey &&(upd.privateKey=privateKey);
 		alipayPublicKey && (upd.alipayPublicKey=alipayPublicKey);
 		name && (upd.name=name);
 		pwd && (upd.pwd=pwd);
 		disable!=null && (upd.disable=disable);
-		if (needadd) allaccounts.push({appId:appId, privateKey:privateKey, alipayPublicKey:alipayPublicKey, createTime:new Date(), disable:false, name:name, pwd:pwd});
-		db.alipay_accounts.update({_id:appId}, {$set:upd,$setOnInsert:{createTime:new Date()}}, {upsert:true, w:1}, callback);
+		limitation!=null && (upd.limitation=limitation);
+		fee!=null && (upd.fee=normalizeFee(fee));
+		var defaultValue={createTime:new Date()};
+		if (fee==null) defaultValue.fee=alipayFee;
+		db.alipay_accounts.update({_id:appId}, {$set:upd,$setOnInsert:defaultValue}, {upsert:true, w:1}, callback);
 	}))
-	router.all('/listAccounts', verifyAuth, verifyManager, httpf({appId:'?string', page:'?number', perPage:'?number', sorts:'?object', queries:'?object', callback:true}, function(appId, page, perPage, sorts, queries, callback) {
+	router.all('/listAccounts', verifyAuth, verifyManager, httpf({appId:'?string', page:'?number', perPage:'?number', sorts:'?object', queries:'?object', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, function(appId, page, perPage, sorts, queries, sort, order, offset, limit, callback) {
+		var key={};
 		if (appId) {
-			var acc=allaccounts.find(ele=>{return ele.appId==appId});
-			if (acc) return callback(null, acc);
-			else return callback('no such appId');
+			key._id=appId;
 		}
-		if (sorts) {
-			var sortBySucc=sorts['成功率'];
-			if (sortBySucc!=null) {
-				allaccounts.sort((a, b)=>{
-					var valueOfA, valueOfB;
-					if (!a.log) a.log={success:0};
-					if (!a.usedCount) valueOfA=0;
-					else valueOfA=a.log.success/a.usedCount;
-
-					if (!b.log) b.log={success:0};
-					if (!b.usedCount) valueOfB=0;
-					else valueOfB=b.log.success/b.usedCount;
-
-					return sortBySucc*valueOfA-sortBySucc*valueOfB;
-				})
-			} else {
-				var map={'账号':'name', 'AppID':'appId', '创建时间':'createTime', 'appId':'appId'};
-				var key=Object.keys(sorts)[0];
-				var sortBy=map[key], dir=sorts[key];
-				if (sortBy) {
-					allaccounts.sort((a, b)=>{
-						var ret;
-						if (a[sortBy]<b[sortBy]) ret=-1;
-						else if (a[sortBy]==b[sortBy]) ret=0;
-						else ret=1;
-						return dir*ret;
-					})
-				}
+		var cur=db.alipay_accounts.find(key);
+		if (!appId) {
+			if (sort) {
+				var so={};
+				so[sort]=(order=='asc'?1:-1);
+				cur=cur.sort(so);
 			}
+			if (offset) cur=cur.skip(offset);
+			if (limit) cur=cur.limit(limit);
 		}
-		var copy;
-		if (perPage) {
-			page=page||1;
-			if (page<1) page=1;
-			copy=allaccounts.slice((page-1)*perPage, page*perPage);
-		} else copy=allaccounts;
-		return callback(null, {records:copy, queryRecordCount:copy.length, totalRecordCount:allaccounts.length});
+		cur.toArray()
+		.then(r=>{
+			cur.count((err, c)=>{
+				if (err) return callback(err);
+				callback(null, {total:c, rows:r});
+			});
+		})
+		.catch(e=>{
+			callback(e);
+		})
+		// if (sorts) {
+		// 	var sortBySucc=sorts['成功率'];
+		// 	if (sortBySucc!=null) {
+		// 		allaccounts.sort((a, b)=>{
+		// 			var valueOfA, valueOfB;
+		// 			if (!a.log) a.log={success:0};
+		// 			if (!a.usedCount) valueOfA=0;
+		// 			else valueOfA=a.log.success/a.usedCount;
+
+		// 			if (!b.log) b.log={success:0};
+		// 			if (!b.usedCount) valueOfB=0;
+		// 			else valueOfB=b.log.success/b.usedCount;
+
+		// 			return sortBySucc*valueOfA-sortBySucc*valueOfB;
+		// 		})
+		// 	} else {
+		// 		var map={'账号':'name', 'AppID':'appId', '创建时间':'createTime', 'appId':'appId'};
+		// 		var key=Object.keys(sorts)[0];
+		// 		var sortBy=map[key], dir=sorts[key];
+		// 		if (sortBy) {
+		// 			allaccounts.sort((a, b)=>{
+		// 				var ret;
+		// 				if (a[sortBy]<b[sortBy]) ret=-1;
+		// 				else if (a[sortBy]==b[sortBy]) ret=0;
+		// 				else ret=1;
+		// 				return dir*ret;
+		// 			})
+		// 		}
+		// 	}
+		// }
+		// var copy;
+		// if (perPage) {
+		// 	page=page||1;
+		// 	if (page<1) page=1;
+		// 	copy=allaccounts.slice((page-1)*perPage, page*perPage);
+		// } else copy=allaccounts;
+		// return callback(null, {records:copy, queryRecordCount:copy.length, totalRecordCount:allaccounts.length});
 	}));
 	router.all('/removeAccount', httpf({appId:'string', callback:true}, function(appId, callback) {
-		db.alipay_accounts.deleteOne({_id:appId});
-		var pos=allaccounts.findIndex(ele=>{return ele.appId==appId});
-		if (pos<0) return callback('no such account');
-		allaccounts.splice(pos, 1);
-		return callback();
+		db.alipay_accounts.deleteOne({_id:appId}, {w:1}, (err, r)=>{
+			if (err) return callback(err);
+			if (r.deletedCount<1) return callback('no such account');
+			callback();
+		});
+		// var pos=allaccounts.findIndex(ele=>{return ele.appId==appId});
+		// if (pos<0) return callback('no such account');
+		// allaccounts.splice(pos, 1);
 	}));
+	router.all('/alipaySettings', httpf({settings:'?object', callback:true}, function(settings, callback) {
+		if (!settings) return db.alipay_settings.findOne({}, (err, r)=>{
+			if (err) return callback(err);
+			callback(null, r?r.settings:{});
+		});
+		db.alipay_settings.update({_id:'settings'}, {$set:settings}, {w:1, upsert:true}, (err, r)=>{
+			if (err) return callback(err);
+			if (settings.limitation) alipayLimitation=settings.limitation;
+			if (settings.fee) alipayFee=normalizeFee(settings.fee);
+			callback();
+		});
+	}))
+	router.all('/statements', httpf({account:'string', startTime:'?date', endTime:'?date', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, function(account, start, end, sort, order, offset, limit, callback) {
+		var key={provider:'支付宝', 'alipay_account.name':account};
+		if (startTime) key.lasttime={'&gte':startTime}
+		if (endTime) {
+			if (key.lasttime) key.lasttime['&lte']=endTime;
+			else key.lasttime={'&lte':endTime}
+		}
+		var cur=db.bills.find(key);
+		if (sort) {
+			var so={};
+			so[sort]=(order=='asc'?1:-1);
+			cur=cur.sort(so);
+		}
+		if (offset) cur=cur.skip(offset);
+		if (limit) cur=cur.limit(limit);
+
+		cur.toArray()
+		.then(r=>{
+			cur.count((err, c)=>{
+				if (err) return callback(err);
+				db.bills.aggregate([
+					{$match:key},
+					{$group:{_id:null, totalMoney:{$sum:'$paidmoney'}, net:{$sum:'$net'}}}
+				]).toArray((err, tm)=>{
+					var totalmoney, totalnet;
+					if (!err && tm.length>0) {
+						totalmoney=tm[0].totalMoney; 
+						totalnet=tm[0].net;
+					}
+					callback(null, {total:c, rows:r, totalmoney:totalmoney, totalnet:totalnet});
+				})
+			});
+		})
+		.catch(e=>{
+			callback(e);
+		})
+	}))
 	router.all('/echo', (req, res)=>{
 		res.send({q:req.query, b:req.body});
 	})
 	router.all('/done', httpf({out_trade_no:'string', total_amount:'number', trade_status:'string', passback_params:'?string', callback:true}, function(orderid, total_amount, status, passback_params, callback) {
-		confirmOrder(orderid, total_amount, (err)=>{
+		makeItDone(orderid, total_amount, callback);
+		// var acc=usedAccount[orderid], net, succrate;
+		// if (acc) {
+		// 	if (!acc.log) acc.log={};
+		// 	if (acc.log.success) acc.log.success++;
+		// 	else acc.log.success=1;
+		// 	if (!acc.used) acc.used=1;
+		// 	else acc.used++;
+		// 	var fee=Math.ceil(total_amount*(acc.fee||alipayFee)*100)/100;
+		// 	net=Number(Number(total_amount-fee).toFixed(2));
+		// 	succrate=acc.log.success/acc.used;
+		// }
+		// confirmOrder(orderid, total_amount, net, (err)=>{
+		// 	if (!err) {
+		// 		db.alipay_accounts.update({_id:acc.appId}, {$set:{'log.success':acc.log.success, 'succrate':succrate}, $inc:{daily:net, total:net, used:1}});
+		// 		delete usedAccount[orderid];
+		// 	}
+		// 	if (err && err!='used order') return callback(err);
+		// 	callback(null, httpf.text('success'));
+		// })
+	}));
+	function makeItDone(orderid, callback) {
+		callback=callback||function(){};
+		var acc=usedAccount[orderid], net, succrate;
+		if (acc) {
+			if (!acc.log) acc.log={};
+			if (acc.log.success) acc.log.success++;
+			else acc.log.success=1;
+			if (!acc.used) acc.used=1;
+			else acc.used++;
+			var fee=Math.ceil(total_amount*(acc.fee||alipayFee)*100)/100;
+			net=Number(Number(total_amount-fee).toFixed(2));
+			succrate=acc.log.success/acc.used;
+		}
+		confirmOrder(orderid, total_amount, net, (err)=>{
 			if (!err) {
-				var acc=usedAccount[orderid];
-				if (acc) {
-					if (!acc.log) acc.log={};
-					if (acc.log.success) acc.log.success++;
-					else acc.log.success=1;
-					var fee=Math.ceil(total_amount*(acc.fee||0.006)*100)/100;
-					var incoming=Number(Number(total_amount-fee).toFixed(2));
-					db.alipay_accounts.update({_id:acc.appId}, {$set:{'log.success':acc.log.success}, $inc:{daily:incoming, total:incoming}});
-					delete usedAccount[orderid];
-				}
+				db.alipay_accounts.update({_id:acc.appId}, {$set:{'log.success':acc.log.success, 'succrate':succrate}, $inc:{daily:net, total:net, 'gross.daily':total_amount, 'gross.total':total_amount, used:1}});
+				delete usedAccount[orderid];
 			}
 			if (err && err!='used order') return callback(err);
 			callback(null, httpf.text('success'));
 		})
-	}));
+	}
+	function normalizeFee(f) {
+		f=Number(f);
+		if (f>=1) return f/1000;
+		return f;
+	}
 	function nextAccount(merchantdata, mer_userid, callback) {
 		var merid=merchantdata._id.toHexString()+'.'+mer_userid;
-		db.alipay_accounts.findOne({occupied:merid, in:{$lt:40000}}, {sort:{in:1}}).then((acc)=>{
+		db.alipay_accounts.findOne({occupied:merid, daily:{$lt:alipayLimitation}}, {sort:{daily:1}}).then((acc)=>{
 			if (acc) return callback(null, acc);
 			// 商户没有足够的alipayAccount了
 			// 增加商户的alipayAccount
@@ -191,8 +307,8 @@ function init(err, db) {
 						// send a notify that accounts not enough;
 						notifier.add('支付宝账号不足');
 					}
-					db.alipay_accounts.updateOne({_id:{$in:freeAccounts.map(acc=>acc._id)}}, {occupied:merid, in:0}, {w:1}).then(()=>{
-						return db.alipay_accounts.find({occupied:merid}, {sort:{in:1}, limit:1}).toArray();
+					db.alipay_accounts.updateOne({_id:{$in:freeAccounts.map(acc=>acc._id)}}, {occupied:merid, daily:0}, {w:1}).then(()=>{
+						return db.alipay_accounts.find({occupied:merid}, {sort:{daily:1}, limit:1}).toArray();
 					})
 					.then((accArr)=>{
 						if (accArr.length==0) {
@@ -277,7 +393,7 @@ function init(err, db) {
 			today=now;
 			// log all [in] in the accounts
 			db.alipay_accounts.find({daily:{$lt:0}}).toArray().then((r)=>{
-				var logs=r.map((ele)=>{return {in:ele.daily, t:today, accId:ele._id, accName:ele.name}});
+				var logs=r.map((ele)=>{return {net:ele.daily, gross:ele.gross.daily, t:today, accId:ele._id, accName:ele.name}});
 				db.alipay_accounts.updateOne({daily:{$lt:0}}, {$set:{daily:0}});
 				db.alipay_logs.insertMany(logs);
 			})
@@ -304,18 +420,13 @@ var usedAccount=[];
 						op['log.'+errcode]=acc.log[errcode];
 						acc.usedCount+=10;
 						op.usedCount=acc.usedCount;
+						if (!acc.used) acc.used=1;
+						else acc.used++;
+						op.succrate=(acc.log.success||0)/acc.used;
+						op.used=acc.used;
 						db.alipay_accounts.update({_id:acc.appId}, {$set:op});
 					} else {
-						confirmOrder(orderid, result.alipay_trade_query_response.total_amount, err=>{
-							if (!err) {
-								if (!acc.log) acc.log={};
-								if (!acc.log.success) acc.log.success=1;
-								else acc.log.success++;
-								var fee=Math.ceil(total_amount*(acc.fee||0.006)*100)/100;
-								var incoming=Number(Number(total_amount-fee).toFixed(2));
-								db.alipay_accounts.update({_id:acc.appId}, {$set:{'log.success':acc.log.success}, $inc:{daily:incoming, total:incoming}});
-							}
-						});
+						makeItDone(orderid, result.alipay_trade_query_response.total_amount);
 					}
 					delete usedAccount[orderid];
 				}

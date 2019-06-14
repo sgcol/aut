@@ -8,6 +8,8 @@
 <!-- plugins:css -->
 <link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
 <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
 <!-- endinject -->
 <!-- inject:css -->
@@ -47,11 +49,11 @@
               <div class="card bg-gradient-danger card-img-holder text-white">
                 <div class="card-body">
                   <img src="images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image"/>
-                  <h4 class="font-weight-normal mb-3">周流水
+                  <h4 class="font-weight-normal mb-3">月流水
                     <i class="mdi mdi-chart-line mdi-24px float-right"></i>
                   </h4>
-                  <h2 class="mb-5">¥ <spna id='weeklyIncome'>--</spna></h2>
-                  <h6 class="card-text"><span id='weeklyIncomeChanging'>Increased by 60%</span></h6>
+                  <h2 class="mb-5">¥ <spna id='monthlyIncoming'>--</spna></h2>
+                  <h6 class="card-text"><span id='monthlyIncomingChanging'>--</span></h6>
                 </div>
               </div>
             </div>
@@ -59,11 +61,11 @@
               <div class="card bg-gradient-info card-img-holder text-white">
                 <div class="card-body">
                   <img src="images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image"/>                  
-                  <h4 class="font-weight-normal mb-3">周订单
+                  <h4 class="font-weight-normal mb-3">月订单
                     <i class="mdi mdi-bookmark-outline mdi-24px float-right"></i>
                   </h4>
-                  <h2 class="mb-5"><span id="weeklyOrders">--</span></h2>
-                  <h6 class="card-text"><span id="weeklyOrdersChanging">Decreased by 10%</span></h6>
+                  <h2 class="mb-5"><span id="monthlyOrders">--</span></h2>
+                  <h6 class="card-text"><span id="monthlyOrdersChanging">--</span></h6>
                 </div>
               </div>
             </div>
@@ -75,7 +77,7 @@
                     <i class="mdi mdi-diamond mdi-24px float-right"></i>
                   </h4>
                   <h2 class="mb-5"><span id="merchantCount">--</span></h2>
-                  <h6 class="card-text"><span id="merchantCountChanging">Increased by 5%</span></h6>
+                  <h6 class="card-text"><span id="merchantCountChanging">--</span></h6>
                 </div>
               </div>
             </div>
@@ -85,7 +87,7 @@
               <div class="card">
                 <div class="card-body">
                   <div class="clearfix">
-                    <h4 class="card-title float-left">Visit And Sales Statistics</h4>
+                    <h4 class="card-title float-left">充值流水</h4>
                     <div id="visit-sale-chart-legend" class="rounded-legend legend-horizontal legend-top-right float-right"></div>                                     
                   </div>
                   <canvas id="visit-sale-chart" class="mt-4"></canvas>
@@ -95,7 +97,7 @@
             <div class="col-md-5 grid-margin stretch-card">
               <div class="card">
                 <div class="card-body">
-                  <h4 class="card-title">Traffic Sources</h4>
+                  <h4 class="card-title">分账/充值比对</h4>
                   <canvas id="traffic-chart"></canvas>
                   <div id="traffic-chart-legend" class="rounded-legend legend-vertical legend-bottom-left pt-4"></div>                                                      
                 </div>
@@ -108,101 +110,20 @@
                 <div class="card-body">
                   <h4 class="card-title">接入商户</h4>
                   <div class="table-responsive">
-                    <table class="table">
+                    <table id="recentMerchant" class="table table-hover"
+                     data-toggle="table"
+                     data-classes="table-no-bordered table-hover"
+                     data-pagination="false"
+                     data-ajax="queryRecentMerchantAccounts"
+                     data-show-footer="true"
+                     data-footer-style="footerStyle">
                       <thead>
-                        <tr>
-                          <th>
-                            商户
-                          </th>
-                          <th>
-                            Subject
-                          </th>
-                          <th>
-                            状态
-                          </th>
-                          <th>
-                            改变日期
-                          </th>
-                          <th>
-                            Tracking ID
-                          </th>
-                        </tr>
+                        <th data-field="name">商户</th>
+                        <th data-field="problem">Subject</th>
+                        <th data-field="debugMode" data-formatter="merchantStatus">状态</th>
+                        <th data-field="createTime" data-formatter="timestring" data-footer-formatter="showMoreMerchant">改变日期</th>
                       </thead>
-                      <tbody>
-                        <tr>
-                          <td>
-                            <img src="images/faces/face1.jpg" class="mr-2" alt="image">
-                            David Grey
-                          </td>
-                          <td>
-                            Fund is not recieved
-                          </td>
-                          <td>
-                            <label class="badge badge-gradient-success">DONE</label>
-                          </td>
-                          <td>
-                            Dec 5, 2017
-                          </td>
-                          <td>
-                            WD-12345
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <img src="images/faces/face2.jpg" class="mr-2" alt="image">
-                            Stella Johnson
-                          </td>
-                          <td>
-                            High loading time
-                          </td>
-                          <td>
-                            <label class="badge badge-gradient-warning">PROGRESS</label>
-                          </td>
-                          <td>
-                            Dec 12, 2017
-                          </td>
-                          <td>
-                            WD-12346
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <img src="images/faces/face3.jpg" class="mr-2" alt="image">
-                            Marina Michel
-                          </td>
-                          <td>
-                            Website down for one week
-                          </td>
-                          <td>
-                            <label class="badge badge-gradient-info">ON HOLD</label>
-                          </td>
-                          <td>
-                            Dec 16, 2017
-                          </td>
-                          <td>
-                            WD-12347
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <img src="images/faces/face4.jpg" class="mr-2" alt="image">
-                            John Doe
-                          </td>
-                          <td>
-                            Loosing control on server
-                          </td>
-                          <td>
-                            <label class="badge badge-gradient-danger">REJECTED</label>
-                          </td>
-                          <td>
-                            Dec 3, 2017
-                          </td>
-                          <td>
-                            WD-12348
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                    </table>  
                   </div>
                 </div>
               </div>
@@ -214,36 +135,41 @@
                   <div class="card-body">
                     <h4 class="card-title">充值订单</h4>
                     <div class="table-responsive">
-                      <table class="table" id="orderlist">
+                      <table id="orderlist" class="table table-hover"
+                       data-classes="table-no-bordered table-hover"
+                       data-pagination="false"
+                       data-ajax="queryRecentOrders"
+                       data-show-footer="true"
+                       data-footer-style="footerStyle">
                         <thead>
                           <tr>
-                            <th>
+                            <th data-field="mername">
                               商户
                             </th>
-                            <th>
+                            <th data-field="merchantOrderId">
                               商户单号
                             </th>
-                            <th>
+                            <th data-field="provider" data-formatter="showProvider">
                               提供商
                             </th>
-                            <th>
+                            <th data-field="providerOrderId" >
                               提供商单号
                             </th>
-                            <th>
+                            <th data-field="money">
                               金额
                             </th>
-                            <th>
+                            <th data-field="time" data-formatter="timestring">
                               创建时间
                             </th>
-                            <th>
+                            <th data-field="status" data-formatter="statusHtmlfy">
                               状态
                             </th>
-                            <th>
+                            <th data-field="lasttime" data-formatter="timestring">
                               改变时间
                             </th>
-                            <th>
+                            <th data-formatter="showOp" data-footer-formatter="showMoreOrder">
                               操作
-                            </th>        
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
@@ -279,6 +205,7 @@
   <!-- Custom js for this page-->
   <script src="js/dashboard.js"></script>
   <script src="js/base.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
   <!-- End custom js for this page-->
 </body>
 <script>
@@ -301,28 +228,56 @@ function sendNotify(orderid) {
   });
 }
 function refreshOrderList() {
-  accIntf('/admin/listOrders', {count:10}, function(err, data) {
-    var p=$('#orderlist tbody');
-    if (err) p.append('<tr><td colspan="9999">'+errstr(err)+'</td></tr>');
-    var list=data.message;
-    for (var i=0; i<list.length; i++) {
-      var o=list[i];
-      var htmlstr=`<tr><td>${o.mername}<td>${o.merchantOrderId}<td>${o.provider||''}<td>${o.providerOrderId||''}<td>${o.money}<td>${timestring(o.time)}<td>${statusHtmlfy(o.status)}<td>${timestring(o.lasttime)}<td><button class="btn btn-outline-primary btn-icon-sm tooltipfy" title="重发通知" onclick="javascript:sendNotify('${o._id}')"><i class="mdi mdi-replay"></i></button>`;
-      if (me.acl=='admin') htmlstr+=`<button style="margin-left:5px" class="btn btn-outline-danger btn-icon-sm tooltipfy" title="强制结单" onclick="javascript:forceconfirm('${o._id}')"><i class="mdi mdi-archive"></i></button>`;
-      htmlstr+='</tr>'
-      p.append(htmlstr);
-    }
-    p.append(`<tr><td colspan="999999"><a href="./fromuserlist.html" style="float:right;margin-right:45px">more</a></td><tr>`)
-    $('.tooltipfy').tooltip();
+  $('#orderlist').bootstrapTable('refresh');
+}
+function footerStyle() {
+  return {css: {'font-weight': 'normal'}};
+}
+function showMoreMerchant() {
+  return `<a style="margin-right:45px; float:right" href="merchant.html">more</a>`
+}
+function merchantStatus(isDebugging) {
+  if (isDebugging) return `<label class="badge badge-gradient-info">对接中</label>`;
+  return `<label class="badge badge-gradient-success">已完成</label>`;
+}
+function queryRecentMerchantAccounts(params) {
+  accIntf('/admin/listAccount', {identity:'merchant', offset:0, limit:4, sort:'createTime', order:'des'}, (err, r)=>{
+    if (err) return params.fail(err);
+    params.success(r);
+  })
+}
+
+function showMoreOrder() {
+  return `<a style="margin-right:45px; float:right" href="fromuserlist.html">more</a>`
+}
+function showProvider(v) {
+  return v||'unknown';
+}
+function showProviderOrderId(v, record) {
+  return v||record.merchantOrderId;
+}
+function showOp(v, o) {
+  var ret=`<button class="btn btn-outline-primary btn-icon-sm tooltipfy" title="重发通知" onclick="javascript:sendNotify('${o._id}')"><i class="mdi mdi-replay"></i></button>`;
+  if (me.acl=='admin'||me.acl=='manager') ret+=`<button style="margin-left:5px" class="btn btn-outline-danger btn-icon-sm tooltipfy" title="强制结单" onclick="javascript:forceconfirm('${o._id}')"><i class="mdi mdi-archive"></i></button>`;
+  return ret;
+}
+function queryRecentOrders(params) {
+  accIntf('/admin/listOrders', {offset:0, limit:10, sort:'time', order:'des'}, (err, r)=>{
+    if (err) return params.fail(err);
+    params.success(r);
   })
 }
 window.initpage=()=>{
-  accIntf('/admin/statistics', function(err, data) {
-    $('#weeklyIncome').text(formatBigNumber(data.moneys));
-    $('#weeklyOrders').text(formatBigNumber(data.bills));
-    $('#merchantCount').text(formatBigNumber(data.merchants));
+  accIntf('/admin/getMerchantCountByMonth', function(err, data) {
+    $('#merchantCount').text(formatBigNumber(data.thisMonth+data.previous));
+    if (data.previous==0) {
+      if (data.thisMonth>0) $('#merchantCountChanging').text('Increased by 100%');
+      else $('#merchantCountChanging').text('Increased by 0%');
+    } else {
+      $('#merchantCountChanging').text('Increased by '+Math.round(data.thisMonth/data.previous*10000)/100+'%');
+    }
   });
-  refreshOrderList();
+  $('#orderlist').bootstrapTable();
 };
   
 </script>

@@ -5,3 +5,5 @@ client/
 
 otc/.env
 otc/Application/Common/Conf/config.php
+
+outsource/

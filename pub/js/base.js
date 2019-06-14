@@ -127,7 +127,16 @@
       return new Date(t).toLocaleDateString()+' '+ new Date(t).toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");;
     }
     window.formatBigNumber=(s)=>{
-      return (''+s).replace(/(?=(?!^)(?:\d{4})+(?:\.|$))(\d{4}(\.\d+$)?)/g,',$1');
+      return (''+s).replace(/(?=(?!^)(?:\d{3})+(?:\.|$))(\d{3}(\.\d+$)?)/g,',$1');
+    }
+    window.addAllFields=(o)=>{
+        var ret=0;
+        for (var k in o) {
+            var v=Number(o[k]);
+            if (isNaN(v)) continue;
+            ret+=v;
+        }
+        return ret;
     }
 
 })(jQuery)

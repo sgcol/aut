@@ -23,6 +23,10 @@ function createOrder(merchantid, userid, merchantOrderId, money, preferredPay, c
             if (err) return callback(err);
             if (r.length>0) return callback('orderid重复');
             pify(getMerchant)(merchantid).then((mer)=>{
+                if ((mer.daily||0)+money>(mer.limitation||2000000)) throw '超出每日收款上限';
+                var start=mer.validfrom||'08:00', end=mer.validend||'21:00';
+                var nowtime=(new Date().toGMTString().match(/((?:\d){2}(?:\:(?:\d){2}){1,2})/))[1];
+                if (nowtime<start || nowtime>end) throw '本时段不开放充值';
                 return db.bills.insert({merchantOrderId:merchantOrderId, userid:mer._id, merchantid:merchantid, mer_userid:userid, provider:'', providerOrderId:'', share:mer.share, money:money, paidmoney:-1, time:new Date(), lasttime:new Date(), lasterr:'', preferredPay:preferredPay, cb_url:cb_url, status:'created'}, {w:1});
             })
             .then((r)=>{
@@ -66,10 +70,15 @@ function cancelOrder(orderid, callback) {
         })
     });
 }
-function confirmOrder(orderid, money, callback) {
+function confirmOrder(orderid, money, net, callback) {
     if (typeof money=='function') {
         callback=money;
         money=null;
+        net=null;
+    }
+    if (typeof net=='function') {
+        callback=net;
+        net=money;
     }
     callback=callback||function(){};
     getDB((err, db)=>{
@@ -82,88 +91,87 @@ function confirmOrder(orderid, money, callback) {
                 })
             }
             r=r.value;
-            (function(callback) {
-                if (!money) money=r.money;
-                r.paidmoney=money;
-                var provider=r.provider||'unknown';
-                callback();
-                var shares=[];
-                // shares.push((money*(r[0].share||0.985)).toFixed(2));
-                function getParent(user, cb) {
-                    db.users.findOne({_id:user.parent}, (err, r) =>{
-                        if (err) return cb(err);
-                        if (!r) return cb('no such user');
-                        cb(null, r);
-                    })
-                }
-                var findkey={};
-                if (r.userid) findkey._id=r.userid;
-                else if (r.merchantid) findkey.merchantid=r.merchantid;
-                db.users.findOne(findkey)
-                .then(function (user) {
-                    return new Promise((resolve, reject)=>{
-                        if (!user) return reject('no such merchant');
-                        (function getShare(user, cb) {
-                            shares.push({m:Number((money*(user.share||1)).toFixed(2)), user:user});
-                            if (!user.parent) return cb();
-                            getParent(user, function(err, parent) {
-                                if (err || !parent) return cb();
-                                getShare(parent, cb);
-                            })
-                        })(user, resolve);
-                    });
+
+            if (!money) money=r.money;
+            if (!net) net=money;
+            r.paidmoney=money;
+            var provider=r.provider||'unknown';
+            callback();
+            var shares=[];
+            // shares.push((money*(r[0].share||0.985)).toFixed(2));
+            function getParent(user, cb) {
+                db.users.findOne({_id:user.parent}, (err, r) =>{
+                    if (err) return cb(err);
+                    if (!r) return cb('no such user');
+                    cb(null, r);
                 })
-                .then(()=>{
-                    var last=0;
-                    var upds=[];
-                    for (var i=0; i<shares.length; i++) {
-                        var ele=shares[i];
-                        var inc={};
-                        var delta=Number((ele.m-last).toFixed(2));
-                        if (delta<0) {
-                            sysnotifier.add(`${ele.user.name||ele.user._id}的分成小于他的下级，请修改`);
-                            shares.splice(i);
-                            break;
-                        }
-                        inc[`in.${provider.name||provider}`]=delta;
-                        inc.profit=delta;
-                        last=delta;
-                        upds.push({updateOne:{filter:{_id:ele.user._id}, update:{$inc:inc}}});
-                    }
-                    db.users.bulkWrite(upds, {ordered:false});
-                    var now=new Date();
-                    var firstOne=true;
-                    db.balance.insertMany(shares.map((ele=>{
-                        var r={user:ele.user, delta:ele.m, orderid:orderid, desc:firstOne?'充值收入':'充值分账', t:now}
-                        firstOne=false;
-                        return r;
-                    })))
-                    updateWithLog('system', Number((money-shares[shares.length-1].m).toFixed(2)), '充值利润', orderid,provider);
-                })
-                .catch((e)=>{
-                    console.log(e);
+            }
+            var findkey={};
+            if (r.userid) findkey._id=r.userid;
+            else if (r.merchantid) findkey.merchantid=r.merchantid;
+            db.users.findOne(findkey)
+            .then(function (user) {
+                return new Promise((resolve, reject)=>{
+                    if (!user) return reject('no such merchant');
+                    (function getShare(user, cb) {
+                        shares.push({m:Number((money*(user.share||1)).toFixed(2)), user:user});
+                        if (!user.parent) return cb();
+                        getParent(user, function(err, parent) {
+                            if (err || !parent) return cb();
+                            getShare(parent, cb);
+                        })
+                    })(user, resolve);
                 });
-                // async.parallel([
-                //     db.users.update.bind(db.users, {merchantid:r[0].merchantid}, {$inc:{total:delta}}, {w:1}),
-                //     db.stat.update.bind(db.stat, {_id:r[0].merchantid}, {$inc:{incoming:r[0].paidmoney, profit:r[0].paidmoney-delta}, $set:{provider:r.provider}}, {upsert:true, w:1})
-                // ], (err)=>{
-                //     notifySellSystem(r[0]);
-                // })    
-            })(function(err) {
-                if (err) var upd={locked:false};
-                else var upd={status:'已支付', paidmoney:money, lasttime:new Date()};
-                db.bills.update({_id:ObjectID(orderid)}, {$set:upd}, {w:1}, function(_e) {
-                    if (_e || err) return callback(_e||err);
-                    notifyMerchant(r);
-                    callback();
-                })
+            })
+            .then(()=>{
+                var last=0;
+                var upds=[];
+                for (var i=0; i<shares.length; i++) {
+                    var ele=shares[i];
+                    var inc={};
+                    var delta=Number((ele.m-last).toFixed(2));
+                    if (delta<0) {
+                        sysnotifier.add(`${ele.user.name||ele.user._id}的分成小于他的下级，请修改`);
+                        shares.splice(i);
+                        break;
+                    }
+                    inc[`in.${provider.name||provider}`]=delta;
+                    inc.profit=delta;
+                    inc.daily=delta;
+                    last=delta;
+                    upds.push({updateOne:{filter:{_id:ele.user._id}, update:{$inc:inc}}});
+                }
+                db.users.bulkWrite(upds, {ordered:false});
+                var now=new Date();
+                var firstOne=true;
+                db.balance.insertMany(shares.map((ele=>{
+                    var r={user:ele.user, delta:ele.m, orderid:orderid, desc:firstOne?'充值收入':'充值分账', t:now}
+                    firstOne=false;
+                    return r;
+                })))
+                updateWithLog('system', Number((net-shares[shares.length-1].m).toFixed(2)), '充值利润', orderid,provider);
+            })
+            .catch((e)=>{
+                console.log(e);
             });
+            // async.parallel([
+            //     db.users.update.bind(db.users, {merchantid:r[0].merchantid}, {$inc:{total:delta}}, {w:1}),
+            //     db.stat.update.bind(db.stat, {_id:r[0].merchantid}, {$inc:{incoming:r[0].paidmoney, profit:r[0].paidmoney-delta}, $set:{provider:r.provider}}, {upsert:true, w:1})
+            // ], (err)=>{
+            //     notifySellSystem(r[0]);
+            // })    
+            var upd={status:'已支付', paidmoney:money, net:net, lasttime:new Date()};
+            db.bills.update({_id:ObjectID(orderid)}, {$set:upd}, {w:1}, function(_e) {
+                if (_e || err) return callback(_e||err);
+                notifyMerchant(r);
+                callback();
+            })
         });
     })
 }
 function merSign(merchantData, o) {
     if (o.sign) delete o.sign;
-    o.sign=md5(merchantData.key+qs(sortObj(o)));
+    o.sign=md5(merchantData.key+qs(sortObj(o,{sort:(a, b)=>{return a>b?1:-1}})));
     return o;
 }
 function notifyMerchant(orderdata) {
@@ -177,7 +185,7 @@ function notifyMerchant(orderdata) {
                 } catch(e) {
                     return reject(e);
                 }
-                if (body.err) return reject(e);
+                if (body.err) return reject(body.err);
                 resolve(ret);
             });
         }).then(()=>{
@@ -246,7 +254,7 @@ function updateWithLog(user, delta, desc, orderid, provider) {
     (function check(cb) {
         if (typeof user=='object') return cb(null, user);
         // get from db
-        getUser(user, cb);
+        cb(null, {_id:user});
     })((err, userdata) =>{
         getDB((err, db)=>{
             db.balance.insert({user:userdata, delta:delta, desc:desc, orderid:orderid, t:new Date()});
@@ -263,6 +271,17 @@ function updateWithLog(user, delta, desc, orderid, provider) {
         })
     });    
 }
+var today=new Date();
+setInterval(()=>{
+    var now=new Date();
+    if (now.getDate()!=today.getDate()) {
+        today=now;
+        getDB((err, db)=>{
+            !err && db.users.updateMany({}, {$set:{daily:0}});
+        })
+    }
+}, 30*60*1000);
+
 module.exports={
     updateOrder:updateOrder,
     createOrder:createOrder,
@@ -270,5 +289,6 @@ module.exports={
     confirmOrder:confirmOrder,
     notifyMerchant:notifyMerchant,
     createSellOrder:createSellOrder,
-    cancelOrder:cancelOrder
+    cancelOrder:cancelOrder,
+    merSign:merSign
 }

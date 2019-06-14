@@ -18,12 +18,14 @@ var q=async.queue(function (extern_callback, queue_callback) {
         {'balance':{index:['user._id', 'orderid']}},
         {'alipay_accounts':{index:['disable', 'occupied', 'in']}},
         {'alipay_logs':{capped:true, size:200*1024*1024, max:3650000}},
+        'alipay_settings',
         {'withdrawals':{index:['userid', 'done']}},
-        ]}, function(err, db) {
-        if (err) return cb(err);
-        __stored_db=db;
-        cb(null, db, easym);
-    });  
+        ]}, 
+        function(err, db) {
+          if (err) return cb(err);
+          __stored_db=db;
+          cb(null, db, easym);
+      });  
   })(function() {
     extern_callback.apply(null, arguments);
     queue_callback();

@@ -8,7 +8,9 @@
 <!-- plugins:css -->
 <link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
 <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
 <!-- endinject -->
 <!-- inject:css -->
 <link rel="stylesheet" href="css/style.css">
@@ -22,7 +24,7 @@
 </head>
 <body>
   <!-- dialog  -->
-  <div class="modal fade" id="editAgent" tabindex="-1" role="dialog" aria-labelledby="editAgent" aria-hidden="true">
+  <div class="modal fade" id="editMerchant" tabindex="-1" role="dialog" aria-labelledby="editMerchant" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
         <div class="modal-header">
@@ -30,12 +32,12 @@
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
-          <p class="card-description">
-            以下所有内容不填不作修改
-          </p>
         </div>
         <form>
           <div class="card-body">
+            <p class="card-description">
+              以下所有内容不填不作修改
+            </p>
             <div class="form-group">
               <label for="password">重设密码</label>
               <input type="text" class="form-control" id="password" placeholder="新密码">
@@ -274,23 +276,26 @@
       </div>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="clearBalance.html">
-        <span class="menu-title">手动清帐</span>
+      <a class="nav-link" href="checkBalance.html">
+        <span class="menu-title">对账</span>
         <i class="mdi mdi-format-list-bulleted menu-icon"></i>
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="reviewOfAlipay.html">
-        <span class="menu-title">支付宝出帐</span>
-        <i class="mdi mdi-format-list-bulleted menu-icon"></i>
+      <a class="nav-link" data-toggle="collapse" href="#ui-alipay" aria-expanded="false" aria-controls="ui-details">
+        <span class="menu-title">支付宝</span>
+        <i class="menu-arrow"></i>
+        <i class="fab fa-alipay menu-icon"></i>
       </a>
+      <div class="collapse" id="ui-alipay">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="settingOfAlipay.html">账号管理</a></li>
+          <li class="nav-item"> <a class="nav-link" href="statementOfAlipay.html">流水详单</a></li>
+          <li class="nav-item"> <a class="nav-link" href="reviewOfAlipay.html">审核出账</a></li>
+        </ul>
+      </div>
     </li>
-    <li class="nav-item">
-        <a class="nav-link" href="settingOfAlipay.html">
-          <span class="menu-title">支付宝设置</span>
-          <i class="mdi mdi-format-list-bulleted menu-icon"></i>
-        </a>
-      </li>
+    
     <li class="nav-item">
       <a class="nav-link" href="demoOrder.html">
         <span class="menu-title">支付演示</span>
@@ -319,9 +324,6 @@
                   <div class="card">
                     <div class="card-body">
                       <h4 class="card-title">代理</h4>
-                      <p class="card-description">
-                        <a class="text-muted" href="javascript:showAddacc();">点击此处添加</a>
-                      </p>
                       <div class="col-12 grid-margin" style="display:none" id="addUser">
                           <div class="card">
                             <div class="card-body">
@@ -344,29 +346,45 @@
                             </div>
                           </div>
                         </div>
+                      <div class="buttons-toolbar">
+                        <button class="btn btn-sm btn-secondary" onclick="showAddacc()"><i class="mdi mdi-account-plus"></i></button>
+                      </div>    
                       <div class="table-responsive">
-                      <table class="table">
+                        <table id="accounts"
+                          class="table table-hover"
+                          data-classes="table-no-bordered table-hover"
+                          data-pagination="true"
+                          data-side-pagination="server"
+                          data-pagination="true"
+                          data-show-refresh="true"
+                          data-show-columns="true"
+                          data-show-pagination-switch="true"
+                          data-page-size="25"
+                          data-buttons-class=" btn-sm btn-secondary"
+                          data-ajax="queryAccounts"
+                          data-toolbar=".buttons-toolbar">
                         <thead>
                           <tr>
-                            <th>
-                              姓名
+                            <th data-field="name" data-sortable="true">
+                              显示名
                             </th>
-                            <th>
-                              账号
+                            <th data-field="_id" data-sortable="true">
+                              登录名
                             </th>
-                            <th>
+                            <th data-field="createTime" data-formatter="timestring" data-sortable="true">
                               创建时间
                             </th>
-                            <th>
+                            <th data-field="acl" data-formatter="showAcl" data-visible="false">
                               权限
                             </th>
-                            <th>
+                            <th data-field="daily" data-formatter="addAllFields">当日收入</th>
+                            <th data-field="in" data-formatter="addAllFields">收入</th>
+                            <th data-field="out" data-formatter="addAllFields" data-visible="false">提现</th>
+                            <th data-formatter="showOp">
                               操作
                             </th>
                             </tr>
                         </thead>
-                        <tbody id="list">
-                        </tbody>
                       </table>
                       </div>
                     </div>
@@ -404,10 +422,10 @@
   <script src="js/misc.js"></script>
   <!-- endinject -->
   <!-- Custom js for this page-->
-  <script src="js/dashboard.js"></script>
   <script src="js/base.js"></script>
   <script src="js/ejs.js"></script>
   <script src="js/admin.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
   <!-- End custom js for this page-->
 </body>
 <script>
@@ -427,18 +445,17 @@
     }
     $('#addUser').toggle();
   }
-  $('#editAgent').on('shown.bs.modal', function (e) {
-    var agentid=$(e.relatedTarget).data('id');
-    var idx=acclist.find((ele)=>{return ele.agentid==agentid});
-    var agent=acclist[idx];
+  $('#editMerchant').on('shown.bs.modal', function (e) {
+    var idx=$(e.relatedTarget).data('id');
+    var agent=$('#accounts').bootstrapTable('getData', {useCurrentPage:true})[idx];
     if (agent) {
       $('#fee').attr("placeholder", ''+(1-agent.share)*100+'%');
       $('#parent').attr('placeholder', agent.parent);
-      $('#subordinates').attr('placeholder', agent.subordinates.join(','))
+      $('#subordinates').attr('placeholder', agent.subordinates?agent.subordinates.join(','):'-')
     }
     $('#adjustAgent').off('click').click(function(e) {
       var params={};
-      $('#editAgent form [id]').each(function(idx, ele) {
+      $('#editMerchant form [id]').each(function(idx, ele) {
         if (ele.id=='fee') {
           var s=$(ele).val().trim(), v=parseFloat(s);
           if (isNaN(v)) continue;
@@ -452,6 +469,9 @@
       accIntf('/admin/updateAccount', params);
     })
 });
-  
+
+window.initpage=()=>{
+  $('#accounts').bootstrapTable();
+}
 </script>
 </html>

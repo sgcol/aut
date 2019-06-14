@@ -8,7 +8,11 @@
 <!-- plugins:css -->
 <link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
 <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<link href="css/bootstrap-editable.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 <!-- endinject -->
 <!-- inject:css -->
 <link rel="stylesheet" href="css/style.css">
@@ -37,6 +41,8 @@
               以下所有内容不填不作修改
             </p>
             <div class="form-group">
+              <label for="name">显示名</label>
+              <input type="text" class="form-control" id="name" placeholder="新名字">
               <label for="password">重设密码</label>
               <input type="text" class="form-control" id="password" placeholder="新密码">
               <label for="key">重设key</label>
@@ -58,6 +64,12 @@
                 <input type="text" class="form-control" id="parent" placeholder="上级代理id">
               </div>
             </div>
+            <div class="form-group">
+              <label for="limitation">每日限额</label>
+              <input type="text" class="form-control" id="limitation" placeholder="200w">
+              <label for="valid">每日限时</label>
+              <input type="text" class="form-control" id="valid" placeholder="08:00-21:00">
+            </div>  
             <div class="form-group">
               <p class="card-description">提供商(otc平台)</p>
               <div class="form-group" id="providers">
@@ -97,9 +109,6 @@
                   <div class="card">
                     <div class="card-body">
                       <h4 class="card-title">商户</h4>
-                      <p class="card-description">
-                        <a class="text-muted" href="javascript:showAddacc();">点击此处添加</a>
-                      </p>
                       <div class="col-12 grid-margin" style="display:none" id="addUser">
                           <div class="card">
                             <div class="card-body">
@@ -122,26 +131,44 @@
                             </div>
                           </div>
                         </div>
-                      <div class="table-responsive">
-                      <table class="table">
+                        <div class="buttons-toolbar">
+                          <button class="btn btn-sm btn-secondary" onclick="showAddacc()"><i class="mdi mdi-account-plus"></i></button>
+                        </div>    
+                        <div class="table-responsive">
+                          <table id="accounts"
+                            class="table table-hover"
+                            data-classes="table-no-bordered table-hover"
+                            data-pagination="true"
+                            data-side-pagination="server"
+                            data-pagination="true"
+                            data-show-refresh="true"
+                            data-show-columns="true"
+                            data-show-pagination-switch="true"
+                            data-page-size="25"
+                            data-buttons-class=" btn-sm btn-secondary"
+                            data-ajax="queryAccounts"
+                            data-toolbar=".buttons-toolbar">
                         <thead>
                           <tr>
-                            <th>
-                              姓名
+                          <th data-field="name" data-sortable="true">
+                              显示名
                             </th>
-                            <th>
-                              账号
+                            <th data-field="_id" data-sortable="true" data-editable="true">
+                              登录名
                             </th>
-                            <th>
+                            <th data-field="createTime" data-formatter="timestring" data-sortable="true">
                               创建时间
                             </th>
-                            <th>
+                            <th data-field="acl" data-formatter="showAcl" data-visible="false">
                               权限
                             </th>
-                            <th>key</th>
-                            <th>merchantid</th>
-                            <th>调试</th>
-                            <th>
+                            <th data-field="key" data-visible="false">key</th>
+                            <th data-field="merchantid" data-visible="false">merchantid</th>
+                            <th data-field="debugMode" data-formatter="showDebugging" data-visible="false">调试</th>
+                            <th data-field="daily" data-formatter="addAllFields">当日收入</th>
+                            <th data-field="in" data-formatter="addAllFields">收入</th>
+                            <th data-field="out" data-formatter="addAllFields" data-visible="false">提现</th>
+                            <th data-formatter="showOp">
                               操作
                             </th>
                             </tr>
@@ -180,10 +207,12 @@
   <script src="js/misc.js"></script>
   <!-- endinject -->
   <!-- Custom js for this page-->
-  <script src="js/dashboard.js"></script>
   <script src="js/base.js"></script>
   <script src="js/ejs.js"></script>
   <script src="js/admin.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
   <!-- End custom js for this page-->
 </body>
 <script>
@@ -208,8 +237,8 @@
   
   $('#editMerchant').on('shown.bs.modal', function (e) {
     $('#editMerchant form input').val('');
-    var id=$(e.relatedTarget).data('id');
-    var merchant=acclist.find((ele)=>{return ele._id==id});
+    var idx=$(e.relatedTarget).data('id');
+    var merchant=$('#accounts').bootstrapTable('getData', {useCurrentPage:true})[idx];
     if (merchant) {
       providers && accIntf('/admin/providers', (err, ret) =>{
         if (err) return showerr(err);
@@ -247,18 +276,31 @@
         if (ele.id=='fee') {
           var s=jv.trim(), v=parseFloat(s);
           if (isNaN(v)) return;
-          params.share=(1-(v/100)).toFixed(5);
+          params.share=NUmber((1-(v/100)).toFixed(5));
         } else if (je.attr('for')=='provider') {
           params[ele.id+'.disabled']=!ele.checked;
+        } else if (ele.id=='valid') {
+          var timerange=jv.match(/((?:\d){2}(?:\:(?:\d){2}){1,2})\s*[-~]\s*((?:\d){2}(?:\:(?:\d){2}){1,2})/);
+          if (!timerange && jv) return alert('请这样输入 08:00-19:00');
+          params[validfrom]=timerange[1];
+          params[validend]=timerange[2];
         } else params[ele.id]=jv;
       });
-      params.id=id;
+      params.id=merchant._id;
       accIntf('/admin/updateAccount', params, err=>{
         if (err) return showerr(err);
         getlist();
       });
     })
 });
-  
+window.initpage=()=>{
+  var list=$('#accounts');
+  list.bootstrapTable();
+  list.on('load-success.bs.table column-switch.bs.table', function (e, name, args) {
+    $('#accounts :checkbox').off('click').click(function() {
+      accIntf('admin/updateAccount',{id:$(this).data('id'), debugMode:$(this).prop('checked')})
+    });
+  })
+}
 </script>
 </html>

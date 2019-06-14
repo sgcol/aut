@@ -8,6 +8,8 @@
 <!-- plugins:css -->
 <link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
 <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
 <!-- endinject -->
 <!-- inject:css -->
@@ -81,22 +83,11 @@
               <div class="card bg-gradient-danger card-img-holder text-white">
                 <div class="card-body">
                   <img src="images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image"/>
-                  <h4 class="font-weight-normal mb-3">账户余额
+                  <h4 class="font-weight-normal mb-3">月流水
                     <i class="mdi mdi-chart-line mdi-24px float-right"></i>
                   </h4>
-                  <h2 class="mb-5">
-                    <div class="input-group">
-                      ¥ <spna class='available'>--</spna>
-                      <div class="input-group-append">
-                        <button class="btn bg-gradient-light float-right" data-toggle="modal" data-target="#takeMoney">提现</button>  
-                      </div>
-                    </div>
-                  </h2>
-                  <table style="width:100%">
-                    <td><h6 class="card-text">已提取<span class='arrivaled'>--</span></h6></td>
-                    <td><h6 class="card-text">总流水<span class='totalIncome'>--</span></h6></td>
-                  </table>
-                  <!-- <h6 class="card-text">已到账<span id='arrivaled'>--</span>&nbsp;可提取<span id='available'>--</span></h6> -->
+                  <h2 class="mb-5">¥ <spna id='monthlyIncoming'>--</spna></h2>
+                  <h6 class="card-text"><span id='monthlyIncomingChanging'>--</span></h6>
                 </div>
               </div>
             </div>
@@ -104,11 +95,11 @@
               <div class="card bg-gradient-info card-img-holder text-white">
                 <div class="card-body">
                   <img src="images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image"/>                  
-                  <h4 class="font-weight-normal mb-3">总订单
+                  <h4 class="font-weight-normal mb-3">月订单
                     <i class="mdi mdi-bookmark-outline mdi-24px float-right"></i>
                   </h4>
-                  <h2 class="mb-5"><span id="totalOrders">--</span></h2>
-                  <h6 class="card-text"><span id="totalOrdersChanging">Decreased by 10%</span></h6>
+                  <h2 class="mb-5"><span id="monthlyOrders">--</span></h2>
+                  <h6 class="card-text"><span id="monthlyOrdersChanging">--</span></h6>
                 </div>
               </div>
             </div>
@@ -126,23 +117,14 @@
             </div> -->
           </div>
           <div class="row">
-            <div class="col-md-7 grid-margin stretch-card">
+            <div class="col-md-12 grid-margin stretch-card">
               <div class="card">
                 <div class="card-body">
                   <div class="clearfix">
-                    <h4 class="card-title float-left">历史统计</h4>
+                    <h4 class="card-title float-left">充值流水</h4>
                     <div id="visit-sale-chart-legend" class="rounded-legend legend-horizontal legend-top-right float-right"></div>                                     
                   </div>
                   <canvas id="visit-sale-chart" class="mt-4"></canvas>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-5 grid-margin stretch-card">
-              <div class="card">
-                <div class="card-body">
-                  <h4 class="card-title">成功率</h4>
-                  <canvas id="traffic-chart"></canvas>
-                  <div id="traffic-chart-legend" class="rounded-legend legend-vertical legend-bottom-left pt-4"></div>                                                      
                 </div>
               </div>
             </div>
@@ -153,39 +135,47 @@
                   <div class="card-body">
                     <h4 class="card-title">充值订单</h4>
                     <div class="table-responsive">
-                      <table class="table" id="orderlist">
-                        <thead>
-                          <tr>
-                            <th>
-                              商户
-                            </th>
-                            <th>
-                              商户单号
-                            </th>
-                            <th>
-                              提供商
-                            </th>
-                            <th>
-                              提供商单号
-                            </th>
-                            <th>
-                              创建时间
-                            </th>
-                            <th>
-                              状态
-                            </th>
-                            <th>
-                              改变时间
-                            </th>
-                            <th>
-                              操作
-                            </th>        
-                          </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                      </table>
-                    </div>
+                        <table id="orderlist" class="table table-hover"
+                        data-classes="table-no-bordered table-hover"
+                        data-pagination="false"
+                        data-ajax="queryRecentOrders"
+                        data-show-footer="true"
+                        data-footer-style="footerStyle">
+                         <thead>
+                           <tr>
+                             <th data-field="mername">
+                               商户
+                             </th>
+                             <th data-field="merchantOrderId">
+                               商户单号
+                             </th>
+                             <th data-field="provider" data-formatter="showProvider">
+                               提供商
+                             </th>
+                             <th data-field="providerOrderId" >
+                               提供商单号
+                             </th>
+                             <th data-field="money">
+                               金额
+                             </th>
+                             <th data-field="time" data-formatter="timestring">
+                               创建时间
+                             </th>
+                             <th data-field="status" data-formatter="statusHtmlfy">
+                               状态
+                             </th>
+                             <th data-field="lasttime" data-formatter="timestring">
+                               改变时间
+                             </th>
+                             <th data-formatter="showOp" data-footer-formatter="showMoreOrder">
+                               操作
+                             </th>
+                           </tr>
+                         </thead>
+                         <tbody>
+                         </tbody>
+                       </table>
+                     </div>
                   </div>
                 </div>
               </div>
@@ -213,8 +203,10 @@
   <script src="js/misc.js"></script>
   <!-- endinject -->
   <!-- Custom js for this page-->
-  <!-- <script src="js/dashboard.js"></script> -->
+  <script src="js/dashboard.js"></script>
+  <!-- -->
   <script src="js/base.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
   <!-- End custom js for this page-->
 </body>
 <script>
@@ -243,28 +235,48 @@ function sendNotify(orderid) {
   });
 }
 function refreshOrderList() {
-  accIntf('/admin/listOrders', {count:10}, function(err, data) {
-    var p=$('#orderlist tbody');
-    if (err) p.append('<tr><td colspan="9999">'+errstr(err)+'</td></tr>');
-    var list=data.message;
-    for (var i=0; i<list.length; i++) {
-      var o=list[i];
-      var htmlstr=`<tr><td>${o.mername}<td>${o.merchantOrderId}<td>${o.provider||''}<td>${o.providerOrderId||''}<td>${timestring(o.time)}<td>${statusHtmlfy(o.status)}<td>${timestring(o.lasttime)}<td><button class="btn btn-outline-primary btn-icon-sm" title="重发通知" onclick="javascript:sendNotify('${o._id}')"><i class="mdi mdi-replay"></i></button>`;
-      if (me.acl=='admin') htmlstr+=`<button style="margin-left:5px" class="btn btn-outline-danger btn-icon-sm" title="强制结单" onclick="javascript:forceconfirm('${o._id}')"><i class="mdi mdi-archive"></i></button>`;
-      htmlstr+='</tr>'
-      p.append(htmlstr);
-    }
-    p.append(`<tr><td colspan="999999"><a href="./fromuserlist.html" style="float:right;margin-right:45px">more</a></td><tr>`)
+  $('#orderlist').bootstrapTable('refresh');
+}
+function footerStyle() {
+  return {css: {'font-weight': 'normal'}};
+}
+function showMoreMerchant() {
+  return `<a style="margin-right:45px; float:right" href="merchant.html">more</a>`
+}
+function merchantStatus(isDebugging) {
+  if (isDebugging) return `<label class="badge badge-gradient-info">对接中</label>`;
+  return `<label class="badge badge-gradient-success">已完成</label>`;
+}
+function queryRecentMerchantAccounts(params) {
+  accIntf('/admin/listAccount', {identity:'merchant', offset:0, limit:4, sort:'createTime', order:'des'}, (err, r)=>{
+    if (err) return params.fail(err);
+    params.success(r);
+  })
+}
+
+function showMoreOrder() {
+  return `<a style="margin-right:45px; float:right" href="fromuserlist.html">more</a>`
+}
+function showProvider(v) {
+  return v||'unknown';
+}
+function showProviderOrderId(v, record) {
+  return v||record.merchantOrderId;
+}
+function showOp(v, o) {
+  var ret=`<button class="btn btn-outline-primary btn-icon-sm tooltipfy" title="重发通知" onclick="javascript:sendNotify('${o._id}')"><i class="mdi mdi-replay"></i></button>`;
+  if (me.acl=='admin'||me.acl=='manager') ret+=`<button style="margin-left:5px" class="btn btn-outline-danger btn-icon-sm tooltipfy" title="强制结单" onclick="javascript:forceconfirm('${o._id}')"><i class="mdi mdi-archive"></i></button>`;
+  return ret;
+}
+function queryRecentOrders(params) {
+  accIntf('/admin/listOrders', {offset:0, limit:10, sort:'time', order:'des'}, (err, r)=>{
+    if (err) return params.fail(err);
+    params.success(r);
   })
 }
 window.initpage=()=>{
-  accIntf('/merchant/balance', function(err, data) {
-    $('.totalIncome').text(formatBigNumber(data.total));
-    $('.arrivaled').text(formatBigNumber(data.arrivaled));
-    $('.available').text(formatBigNumber(data.total-data.arrivaled));
-    $('.totalOrders').text(formatBigNumber(data.orders||0));
-  });
-  refreshOrderList();
+  // refreshOrderList();
+  $('#orderlist').bootstrapTable();
 }
 
 function doTake() {

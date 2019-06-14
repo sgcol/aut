@@ -33,6 +33,7 @@ const server = require('http').createServer()
 , md5 = require('md5')
 , sysnotifier =require('./sysnotifier.js')
 , verifyOTC =require('./otc.js').verifyOTC
+, chokidar =require('chokidar')
 , argv = require('yargs')
 	.default('port', 80)
 	.boolean('debugout')
@@ -90,6 +91,11 @@ function prepareNeighbors(callback) {
 		})
 	});	
 }
+
+chokidar.watch(path.join(__dirname, 'pub/views'), {ignored: /[\/\\]\./})
+.on('change', (p)=>{delete app.cache[path.basename(p)]})
+.on('unlink', p =>{delete app.cache[path.basename(p)]});
+
 function checkAdminAccountExists(cb) {
 	getDB((err, db)=>{
 		if (err) return cb(err);
@@ -98,6 +104,18 @@ function checkAdminAccountExists(cb) {
 			return cb(null, r.length);
 		})
 	});
+}
+function plusall(obj1, obj2) {
+	for (var k in obj2) {
+		obj1[k]=(obj1[k]||0)+obj2[k];
+	}
+	return obj1;
+}
+function firstDayInPreviousMonth(yourDate) {
+    return new Date(yourDate.getFullYear(), yourDate.getMonth() - 1, 1);
+}
+function firstDayInThisMonth(yourDate) {
+    return new Date(yourDate.getFullYear(), yourDate.getMonth(), 1);
 }
 function startsys(callback) {
 	async.parallel([prepareNeighbors, getDB, checkAdminAccountExists], function(err, results) {
@@ -192,6 +210,10 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 
 	const _auth=require('./auth.js'), authedClients=_auth.authedClients, aclgt=_auth.aclgt, verifyManager=_auth.verifyManager, verifyAdmin=_auth.verifyAdmin, getAuth=_auth.getAuth, verifyAuth=_auth.verifyAuth, noAuthToLogin=_auth.verifyAuth;
 
+	function verifyDebugMode(req, res, next) {
+		if (req.auth.debugMode) return next();
+		res.send({err:'该接口已停止使用'});
+	}
 	const getMerchant=require('./merchants.js').getMerchant, verifySign=require('./merchants.js').verifySign;
 	process.on('message', function(pack) {
 		switch(pack.type) {
@@ -210,22 +232,65 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.all('/admin/clearBalance', verifyAuth, verifyManager, httpf({merchantid:'?string', callback:true}, function(merchantid, callback) {
 		require('./sellOrder.js').checkPlatformBalance(merchantid, callback);
 	}));
-	app.all('/admin/listOrders', verifyAuth, httpf({from:'?date', to:'?date', count:'?number', pageno:'?number', type:'?string', callback:true}, function(from, to, count, pageno, type, callback) {
+	app.all('/adapter/balance', verifySign, httpf({merchantid:'string', callback:true}, function(merchantid, callback) {
+		db.users.findOne({merchantid:merchantid}, (err, r)=>{
+			if (err) return callback(err);
+			callback(null, {balance:r.profit});
+		});
+	}))
+	app.all('/adapter/listOrders', verifySign, httpf({merchantid:'string', orderid:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, function(merchantid, orderid, from, to, sort, order, count, offset, callback) {
+		var times=[];
+		if (from) times.push({$gte:from});
+		if (to) times.push({$lte:to});
+		var query={merchantid:merchantid};
+		if (orderid) {
+			query.merchantOrderId=orderid;
+		}
+		var cursor=db.bills.find(query, {merchantOrderId:1, merchantid:1, providerOrderId:1, status:1, lasterr:1, paidmoney:1});
+		if (sort) {
+			var so={};
+			so[sort]=(order=='asc'?1:-1);
+			cursor=cursor.sort(so);
+		}
+		if (offset) {
+			cursor=cursor.skip(offset);
+		}
+		if (count) cursor=cursor.limit(count);
+		cursor.toArray()
+		.then((r)=>{
+			r.forEach((ele)=>{
+				ele.orderid=ele.merchantOrderId;
+				ele.merchantOrderId=undefined;
+				ele.money=ele.paidmoney;
+				ele.paidmoney=undefined;
+			})
+			cursor.count(false, (err, c)=>{
+				if (err) return callback(err);
+				callback(null, {total:c, rows:r});
+			});
+		})
+		.catch((e)=>{
+			callback(e);
+		})
+	}))
+	app.all('/admin/listOrders', verifyAuth, httpf({from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, function(from, to, sort, order, count, offset, callback) {
 		var times=[];
 		if (from) times.push({$gte:from});
 		if (to) times.push({$lte:to});
 		var query={};
-		if (times.length) query.time={$and:times};
 		if (this.req.auth.acl!='admin' && this.req.auth.acl!='manager') {
 			query.merchantid=this.req.auth.merchantid;
 		}
-		if (type=='sell') query.type=type;
-		else query.type=null;
-		var cursor=db.bills.find(query).sort({time:-1});
-		if (count) cursor=cursor.limit(count);
-		if (pageno) {
-			cursor.skip(pageno*count);
+		var cursor=db.bills.find(query);
+		if (sort) {
+			var so={};
+			so[sort]=(order=='asc'?1:-1);
+			cursor=cursor.sort(so);
 		}
+		if (offset) {
+			cursor=cursor.skip(offset);
+		}
+		if (count) cursor=cursor.limit(count);
 		cursor.toArray()
 		.then((r)=>{
 			var merids=new Set();
@@ -246,8 +311,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 				}
 				cursor.count(false, (err, c)=>{
 					if (err) return callback(err);
-					r.total=c;
-					callback(null, r);
+					callback(null, {total:c, rows:r});
 				});
 			})
 			.catch((e)=>{
@@ -268,7 +332,12 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		});
 	}));
 	app.all('/account/me', verifyAuth, httpf({}, function() {
-		return filter(this.req.auth, ['acl', 'name', 'merchantid', 'debugMode']);
+		var arr=['!password', '!salt'];
+		var ret=filter(this.req.auth, arr);
+		ret.validUntil=undefined;
+		if (!this.req.auth.debugMode) ret.key=undefined;
+		
+		return ret;
 	}));
 	app.all('/order', verifySign, httpf({orderid:'string', money:'number', merchantid:'string', userid:'string', cb_url:'string', time:'string', no_return:true}, function(orderid, money, merchantid, userid, cb_url, time) {
 		var res=this.res;
@@ -353,17 +422,51 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}
 		if (offset) cur.skip(offset);
 		if (limit) cur.limit(limit);
-		cur.toArray().then(r=>{
-			cur.count((err, c)=>{
-				if (err) return callback(err);
-				r.forEach(item=>{
-					item.money=item.total-(item.used||0);
-					item.leftusdt=item.usdt-item.usedusdt||0;
+		async.waterfall([
+			(cb)=>{
+				async.parallel([(cb)=>{cur.toArray(cb)}, (cb)=>{cur.count(cb)}], cb);
+			}, 
+			(rs, cb)=>{
+				var r=rs[0];
+				var agent_ids=[], agents={};
+				r.forEach((ele)=>{
+					if (ele.acl=='agent') {
+						agent_ids.push(ele._id);
+						agents[ele._id]=ele;
+					}
 				})
-				callback(null, {total:c, rows:r});
-			})
-		}).catch(e=>{
-			callback(e);
+				if (!agent_ids.length) return cb(null, rs);
+				db.users.find({parent:{$in:agent_ids}}).toArray((err, mers)=>{
+					if (err) return cb(err);
+					mers.forEach((mer)=>{
+						if (!agents[mer.parent].subordinates) agents[mer.parent].subordinates=[mer.name];
+						else agents[mer.parent].subordinates.push(mer.name);
+					})
+					cb(null, rs);
+				})
+			},
+			(rs, cb)=>{
+				var r=rs[0];
+				var pids=[], pidMap={};
+				r.forEach((ele)=>{
+					if (ele.parent) {
+						pids.push(ele.parent);
+						pidMap[ele.parent]=ele;
+						ele.parent=null;
+					}
+				});
+				if (!pids.length) return cb(null, rs);
+				db.users.find({_id:{$in:pids}}).toArray((err, r)=>{
+					if (err) return cb(err);
+					r.forEach((ele)=>{
+						pidMap[ele._id].parent=ele.name;
+					})
+					cb(null, rs);
+				})
+			}
+		], (err, rs)=>{
+			if (err) return callback(err);
+			callback(null, {total:rs[1], rows:rs[0]});
 		})
 	}));
 	app.all('/admin/getSalt', httpf({u:'string', callback:true}, function(username, callback) {
@@ -391,7 +494,8 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			o.name=o.name||o._id;
 			res.cookie('a',rstr);
 			if (o.acl=='admin'||o.acl=='manager') return callback(null, {to:'/dashboard.html', token:rstr});
-			else return callback(null, {to:'/merentry.html', token:rstr});
+			else if (o.acl=='merchant') return callback(null, {to:'/merentry.html', token:rstr});
+			else return callback(null, {to:'/agententry.html', token:rstr});
 		})
 	}));
 	app.all('/admin/addAccount', verifyAuth, verifyAdmin, httpf({name:'string', account:'string', password:'string', identity:'string', callback:true}, function(name, account, password, identity, callback) {
@@ -410,7 +514,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 					o.providers[k]={};
 				}
 				o.debugMode=true;
-				o.share=0.985;
+				o.share=0.98;
 			}
 			db.users.insert(o, {w:1}, function(err) {
 				callback(err);
@@ -448,17 +552,37 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			params.salt=randomstring();
 			params.password=md5(params.salt+params.password);
 		}
-		db.users.updateOne(useid, {$set:params}, {w:1}, function(err) {
-			if (err) return callback(err);
-			// if (merchantid) {
-			// 	return getMerchant(merchantid, function(err, mer) {
-			// 		if (err) return callback(err);
-			// 		merge(mer, params);
-			// 		callback();
-			// 	});	
-			// }
-			callback();
-		});
+		if (params.share) {
+			params.share=Number(params.share);
+			if (isNaN(params.share)) delete params.share;
+		}
+		((next)=>{
+			if (!params.parent) return next();
+			db.users.find({$or:[{_id:params.parent}, {name:params.parent}]}).toArray((err, r)=>{
+				if (err) return callback(err);
+				if (r.length==0) params.parent=undefined;
+				for (var i=0; i<r.length; i++) {
+					if (r[i]._id==params.parent) break;
+					if (r[i].name==params.parent) {
+						params.parent=r[i]._id;
+						break;
+					}
+				}
+				next();
+			})
+		})(()=>{
+			db.users.updateOne(useid, {$set:params}, {w:1}, function(err) {
+				if (err) return callback(err);
+				// if (merchantid) {
+				// 	return getMerchant(merchantid, function(err, mer) {
+				// 		if (err) return callback(err);
+				// 		merge(mer, params);
+				// 		callback();
+				// 	});	
+				// }
+				callback();
+			});	
+		})
 	}));
 	// app.all('/admin/changePassword', verifyAuth, httpf({account:'string', password:'string', callback:true}, function(account, password, callback) {
 	// 	var myacl=this.req.auth.acl;
@@ -546,50 +670,105 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			callback(null, {usdt:(t/ret.pageSize).toFixed(2)});
 		});
 	}));
-	app.all('/admin/getallbalances', verifyAuth, verifyManager, httpf({search:'?string', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, function(search, sort, order, offset, limit, callback) {
-		var cur=db.users.find({acl:{$in:['agent', 'merchant']}}, {total:1, usdt:1, name:1, merchantid:1});
-		if (sort) {
-			var so={};
-			so[sort]=(order=='asc'?1:-1);
-			cur.sort(so);
-		}
-		if (offset) cur.skip(offset);
-		if (limit) cur.limit(limit);
-		cur.toArray().then(r=>{
-			cur.count((err, c)=>{
-				if (err) return callback(err);
-				callback(null, {total:c, rows:r});
-			})
-		}).catch(e=>{
-			callback(e);
-		})
-	}));
-	app.all('/merchant/balance', verifyAuth, httpf({userid:'?string', callback:true}, function(userid, callback) {
-		if (this.req.auth.acl=='admin' || this.req.auth.acl=='manager') {
-			//check merchantid
-			if (!userid) return callback('no userid specified');
-		}
-		if (this.req.auth.acl=='merchant' || this.req.auth.acl=='agent') userid=this.req.auth._id;
-		// if agent, more condition
-		async.parallel({
-			total:(cb) =>{
-				db.users.find({_id:userid}).toArray((err, r)=>{
-					if (err) return cb(err);
-					if (r.length==0) return cb('no such user');
-					return cb(null, r[0].total||0, r[0].taken||0);
-				})
-			},
-			arrivaled:(cb)=>{
-				cb(null, 0);
-			},
-			orders:(cb)=>{
-				db.bills.find({userid:userid}).count({}, cb);
-			}
-		}, (err, ret)=>{
-			callback(err, {total:ret.total[0], arrivaled:ret.total[1], orders:ret.orders});
+	app.all('/admin/getMerchantCountByMonth', verifyAuth, verifyManager, httpf({callback:true}, function(callback) {
+		var today=new Date();
+		async.parallel([
+			(cb)=>{db.users.find({acl:'merchant', createTime:{$gte:firstDayInThisMonth(today)}}).count(cb)},
+			(cb)=>{db.users.find({acl:'merchant', createTime:{$lt:firstDayInThisMonth(today)}}).count(cb)}
+		], (err, rs)=>{
+			if (err) return callback(err);
+			callback(null, {thisMonth:rs[0], previous:rs[1]});
 		});
 	}));
-	app.all('/merchant/take', verifyAuth, httpf({userid:'?string', take:'number', callback:true}, function(userid, want, callback) {
+	app.all('/admin/getIncomingByMonth', verifyAuth, httpf({callback:true}, function(callback) {
+		if (this.req.auth.acl=='admin' || this.req.auth.acl=='manager') {
+			var query={used:true};
+		}else {
+			var query={userid:this.req.auth._id, used:true};
+		}
+		db.bills.aggregate([{$match:query}, {$group:{
+			_id:{
+				month:{$dateToString:{format:'%Y-%m', date:'$time'}},
+				provider:'$provider'
+			},
+			money:{$sum:'$money'},
+			net:{$sum:'$net'},
+			count:{$sum:1}
+		}}]).toArray().then((r)=>{
+			callback(null, httpf.json(r));
+		}).catch(callback);
+	}));
+	app.all('/admin/getBalanceOverview', verifyAuth, verifyManager, httpf({callback:true}, function(callback) {
+		async.parallel([
+			(cb)=>{db.bills.aggregate([{$match:{used:true}}, {$group:{_id:'$provider', money:{$sum:'$money'}, paid:{$sum:'$paidmoney'}, net:{$sum:'$net'}}}]).toArray(cb)},
+			(cb)=>{db.users.find({}, {total:1, acl:1, name:1, in:1}).toArray(cb)}
+		], function(err, res) {
+			if (err) return callback(err);
+			var source_incoming=res[0], source_outgoing=res[1];
+			var incoming={};
+			source_incoming.forEach((ele)=>{
+				incoming[ele._id||'unknown']=ele;
+			});
+			var outgoing={system:{}, merchant:{}, agent:{}};
+			source_outgoing.forEach((ele)=>{
+				plusall(outgoing[ele.acl||'system'], ele.in);
+			})
+			callback(null, {in:incoming, out:outgoing});
+		})		
+	}));
+	app.all('/merchant/debug/callback', verifyAuth, verifyDebugMode, httpf({cb_url:'string', orderid:'string', money:'number', callback:true}, function(url, orderid, money, callback) {
+		var mer=this.req.auth;
+		if (mer.acl!='merchant') return callback('无权调用这个接口');
+		request({uri:url, form:_orderFunc.merSign(mer, {orderid:orderid, money:money})}, (err, header, body)=>{
+			if (err) return callback(err);
+			try {
+				var ret=JSON.parse(body);
+			} catch(e) {
+				return callback(e);
+			}
+			if (body.err) return callback(body.err);
+			callback();
+		});
+	}));
+	app.all('/merchant/debug/stopDebug', verifyAuth, verifyDebugMode, httpf({callback:true}, function(callback) {
+		var mer=this.req.auth;
+		if (mer.acl!='merchant') return callback('无权调用这个接口');
+		db.users.updateOne({_id:mer._id}, {$set:{debugMode:false}}, {w:1}, (err)=>{
+			if (err) return callback(err);
+			mer.debugMode=false;
+			callback();
+		});
+	}));
+	// app.all('/merchant/balance', verifyAuth, httpf({userid:'?string', callback:true}, function(userid, callback) {
+	// 	if (this.req.auth.acl=='admin' || this.req.auth.acl=='manager') {
+	// 		//check merchantid
+	// 		if (!userid) return callback('no userid specified');
+	// 	}
+	// 	if (this.req.auth.acl=='merchant' || this.req.auth.acl=='agent') userid=this.req.auth._id;
+	// 	// if agent, more condition
+	// 	async.parallel({
+	// 		total:(cb) =>{
+	// 			db.users.find({_id:userid}).toArray((err, r)=>{
+	// 				if (err) return cb(err);
+	// 				if (r.length==0) return cb('no such user');
+	// 				return cb(null, r[0].total||0, r[0].taken||0);
+	// 			})
+	// 		},
+	// 		arrivaled:(cb)=>{
+	// 			cb(null, 0);
+	// 		},
+	// 		orders:(cb)=>{
+	// 			db.bills.find({userid:userid}).count({}, cb);
+	// 		}
+	// 	}, (err, ret)=>{
+	// 		callback(err, {total:ret.total[0], arrivaled:ret.total[1], orders:ret.orders});
+	// 	});
+	// }));
+	app.all('/user/setextradata', verifyAuth, httpf({callback:true}, function(callback){
+		var userid=this.req.auth._id;
+		db.users.updateOne({_id:userid}, {$set:Object.assign(this.req.body, this.req.query)}, {w:1}, callback);
+	}))
+	app.all('/user/take', verifyAuth, httpf({userid:'?string', take:'number', callback:true}, function(userid, want, callback) {
 		if (aclgt(this.req.auth.acl, 'manager')) {
 			if (!userid) return callback('no userid specified');
 		}
@@ -636,10 +815,10 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		if (sort) {
 			var so={};
 			so[sort]=(order=='asc'?1:-1);
-			cur.sort(so);
+			cur=cur.sort(so);
 		}
-		if (offset) cur.skip(offset);
-		if (limit) cur.limit(limit);
+		if (offset) cur=cur.skip(offset);
+		if (limit) cur=cur.limit(limit);
 		// if (queries && queries.search) 
 		// if (userid) key.userid=userid;
 		cur.toArray()

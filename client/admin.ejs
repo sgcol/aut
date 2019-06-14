@@ -8,7 +8,11 @@
 <!-- plugins:css -->
 <link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
 <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+
 <!-- endinject -->
 <!-- inject:css -->
 <link rel="stylesheet" href="css/style.css">
@@ -37,7 +41,11 @@
               <label for="setpass">重设密码</label>
               <input type="text" class="form-control" id="setpass" placeholder="新密码">
             </div>
-            <button type="button" class="btn btn-gradient-primary mr-2">Submit</button>
+            <div class="form-group">
+              <label for="email">email</label>
+              <input type="email" class="form-control" id="email" placeholder="邮箱，用于接受通知">
+            </div>
+            <button type="button" id="adjustAccount" class="btn btn-gradient-primary mr-2">Submit</button>
             <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
           </div>
         </form>
@@ -71,54 +79,67 @@
                   <div class="card">
                     <div class="card-body">
                       <h4 class="card-title">管理员</h4>
-                      <p class="card-description">
+                      <!-- <p class="card-description">
                         <a class="text-muted" href="javascript:showAddacc();">点击此处添加</a>
-                      </p>
+                      </p> -->
                       <div class="col-12 grid-margin fade" id="addUser" aria-hidden="true" style="display: none">
-                          <div class="card">
-                            <div class="card-body">
-                              <form class="form-inline" id="addacc" action="#">
-                                <label class="sr-only" for="inlineFormInputName2">Name</label>
-                                <input type="text" class="form-control mb-2 mr-sm-2" id="inlineFormInputName2" name="name" placeholder="姓名">
-                                <label class="sr-only" for="inlineFormInputGroupUsername2">账号</label>
-                                <div class="input-group mb-2 mr-sm-2">
-                                  <div class="input-group-prepend">
-                                    <div class="input-group-text"><i class="mdi mdi-account-plus mdi-lg"></i></div>
-                                  </div>
-                                  <input type="text" class="form-control" id="inlineFormInputGroupUsername2" name="account" placeholder="账号">
+                        <div class="card">
+                          <div class="card-body">
+                            <form class="form-inline" id="addacc" action="#">
+                              <label class="sr-only" for="inlineFormInputName2">Name</label>
+                              <input type="text" class="form-control mb-2 mr-sm-2" id="inlineFormInputName2" name="name" placeholder="姓名">
+                              <label class="sr-only" for="inlineFormInputGroupUsername2">账号</label>
+                              <div class="input-group mb-2 mr-sm-2">
+                                <div class="input-group-prepend">
+                                  <div class="input-group-text"><i class="mdi mdi-account-plus mdi-lg"></i></div>
                                 </div>
-                                <label class="sr-only" for="inlineFormInputName2">Password</label>
-                                <input type="text" class="form-control mb-2 mr-sm-2" id="inlineFormInputName2" name="password" placeholder="密码">
-                                <input type="hidden" name="identity" value="manager">
-                                <button class="btn btn-gradient-primary mb-2" type="submit">Submit</button>
-                                <button type="button" class="btn btn-light mb-2" style="margin-left:10px" onclick="javascript:$('#addUser').hide()">Cancel</button>
-                              </form>
-                            </div>
+                                <input type="text" class="form-control" id="inlineFormInputGroupUsername2" name="account" placeholder="账号">
+                              </div>
+                              <label class="sr-only" for="inlineFormInputName2">Password</label>
+                              <input type="text" class="form-control mb-2 mr-sm-2" id="inlineFormInputName2" name="password" placeholder="密码">
+                              <input type="hidden" name="identity" value="manager">
+                              <button class="btn btn-gradient-primary mb-2" type="submit">Submit</button>
+                              <button type="button" class="btn btn-light mb-2" style="margin-left:10px" onclick="showAddacc()">Cancel</button>
+                            </form>
                           </div>
                         </div>
+                      </div>
+                      <div class="buttons-toolbar">
+                        <button class="btn btn-sm btn-secondary" onclick="showAddacc()"><i class="mdi mdi-account-plus"></i></button>
+                      </div>    
                       <div class="table-responsive">
-                      <table class="table">
+                      <table id="accounts"
+                       class="table table-hover"
+                       data-classes="table-no-bordered table-hover"
+                       data-pagination="true"
+                       data-side-pagination="server"
+                       data-pagination="true"
+                       data-show-refresh="true"
+                       data-show-columns="true"
+                       data-show-pagination-switch="true"
+                       data-page-size="25"
+                       data-buttons-class=" btn-sm btn-secondary"
+                       data-ajax="queryAccounts"
+                       data-toolbar=".buttons-toolbar">
                         <thead>
                           <tr>
-                            <th>
-                              姓名
+                            <th data-field="name" data-sortable="true">
+                              显示名
                             </th>
-                            <th>
-                              账号
+                            <th data-field="_id" data-sortable="true">
+                              登录名
                             </th>
-                            <th>
+                            <th data-field="createTime" data-formatter="timestring" data-sortable="true">
                               创建时间
                             </th>
-                            <th>
+                            <th data-field="acl" data-formatter="showAcl" data-sortable="true">
                               权限
                             </th>
-                            <th>
+                            <th data-formatter="showOp">
                               操作
                             </th>
                             </tr>
                         </thead>
-                        <tbody id="list">
-                        </tbody>
                       </table>
                       </div>
                     </div>
@@ -151,10 +172,10 @@
   <script src="js/misc.js"></script>
   <!-- endinject -->
   <!-- Custom js for this page-->
-  <script src="js/dashboard.js"></script>
   <script src="js/base.js"></script>
   <script src="js/ejs.js"></script>
   <script src="js/admin.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
   <!-- End custom js for this page-->
 </body>
 <script>
@@ -168,6 +189,24 @@
     if ($('#addUser').hasClass('show')) $('#addUser').removeClass('show');
     else $('#addUser').addClass('show');
     $('#addUser').toggle();
+  }
+  $('#editMerchant').on('shown.bs.modal', function (e) {
+    var idx=$(e.relatedTarget).data('id');
+    var account=$('#accounts').bootstrapTable('getData', {useCurrentPage:true})[idx];
+    if (account) {
+      $('#email').attr("placeholder", account.email);
+    }
+    $('#adjustAccount').off('click').click(function(e) {
+      var params={};
+      $('#editMerchant form [id]').each(function(idx, ele) {
+        params[ele.id]=$(ele).val();
+      });
+      params.id=account;
+      accIntf('/admin/updateAccount', params);
+    })
+  });
+  window.initpage=()=>{
+    $('#accounts').bootstrapTable();
   }
 </script>
 </html>
