@@ -6,5 +6,5 @@
     }
     var p=extern.qs.parse(location.search), u=acc[p.u]||acc['1'];
     str=`http://www.alipay.com/?appId=09999988&actionType=toCard&sourceId=bill&cardNo=62****************&bankAccount=${u.name}&money=&amount=&bankMark=${u.bank}&cardIndex=${u.id}&cardNoHidden=true&cardChannel=HISTORY_CARD&orderSource=from`
-    location.href=src;
+    location.href=str;
 </script>
