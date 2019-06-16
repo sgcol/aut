@@ -149,7 +149,9 @@
             }
         }
 
-		var u=$(input[0]).val(), p=$(input[1]).val()
+        var u=$(input[0]).val(), p=$(input[1]).val();
+        if (!u) return alert('请输入用户名');
+        if (!p) return alert('请输入密码');
         getAjax('/createAdmin', {u:u, p:p}, function(err, r) {
             if (err) {
 				$(input[0]).val('');$(input[1]).val('');

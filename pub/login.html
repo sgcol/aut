@@ -100,3 +100,11 @@
 </body>
 
 </html>
+<script>
+$('.login100-form-btn').click((e)=>{
+	e.preventDefault();
+	if (!$(':text').val()) return alert('请输入用户名');
+	if ((!$(':password').val())) return alert('请输入密码');
+	$('.validate-form').submit();
+});
+</script>
