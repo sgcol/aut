@@ -141,7 +141,7 @@ function initmode(db, cb) {
 	app.use(bodyParser.json());
 	app.all('/createAdmin', httpf({u:'string', p:'string', callback:true}, function(username, password, callback) {
 		var salt=randomstring();
-		db.users.insert({_id:username, password:md5(salt+password), salt:salt, acl:'admin', name:'超级管理员', createTime:new Date()}, err=>{
+		db.users.insertOne({_id:username, password:md5(salt+password), salt:salt, acl:'admin', name:'超级管理员', createTime:new Date()}, err=>{
 			if (err) return callback(err);
 			// delete all handler
 			app._router.stack.splice(_appHandlers-1);
@@ -516,7 +516,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 				o.debugMode=true;
 				o.share=0.98;
 			}
-			db.users.insert(o, {w:1}, function(err) {
+			db.users.insertOne(o, {w:1}, function(err) {
 				callback(err);
 			})	
 		})
@@ -852,6 +852,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		return ret;
 	}));
 	app.all('/sysnotification', getAuth, httpf(function() {
+		var req=this.req;
 		return httpf.json(sysnotifier.all().filter(n=>{
 			return aclgt(req.acl, n.acl);
 		}));

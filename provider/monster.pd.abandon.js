@@ -207,7 +207,7 @@ function putorder(orderid, product, money, ownerId, host, callback) {
 		occupied.add(product);
 		pify(getDB)().then((db)=>{
 			if (product.buySell=='S') updateOrder(orderid, {status:'待支付', coin:'USDT', lasttime:new Date(), providerOrderId:ret.orderId});
-			return db.monster.insert({orderid:orderid, exOrderId:ret.orderId, product:product, money:money, time:new Date()});
+			return db.monster.insertOne({orderid:orderid, exOrderId:ret.orderId, product:product, money:money, time:new Date()});
 		}).then(()=>{
 			callback(null, body);
 		}).catch((e)=>{

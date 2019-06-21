@@ -44,7 +44,9 @@ var order=function(){
 	var callback=arguments[arguments.length-1];
 	if (typeof callback=='function') callback('启动中');
 };
-exports.order=order;
+exports.order=function() {
+	order.apply(null, arguments);
+};
 exports.bestSell=null;
 exports.getBalance=_noop;
 exports.sell=_noop;
@@ -293,7 +295,7 @@ function init(err, db) {
 		return f;
 	}
 	function nextAccount(merchantdata, mer_userid, callback) {
-		var merid=merchantdata._id.toHexString()+'.'+mer_userid;
+		var merid=merchantdata._id+'.'+mer_userid;
 		db.alipay_accounts.findOne({occupied:merid, daily:{$lt:alipayLimitation}}, {sort:{daily:1}}).then((acc)=>{
 			if (acc) return callback(null, acc);
 			// 商户没有足够的alipayAccount了
@@ -305,9 +307,14 @@ function init(err, db) {
 				db.alipay_accounts.find({occupied:null}).limit(enlarge).toArray().then((freeAccounts)=>{
 					if (freeAccounts.length!=enlarge) {
 						// send a notify that accounts not enough;
+						if (!freeAccounts.length) {
+							notifier.add('支付宝账号已用完，请添加');
+							throw '暂时没有可用通道';	
+						}
 						notifier.add('支付宝账号不足');
 					}
-					db.alipay_accounts.updateOne({_id:{$in:freeAccounts.map(acc=>acc._id)}}, {occupied:merid, daily:0}, {w:1}).then(()=>{
+					 
+					db.alipay_accounts.updateMany({_id:{$in:freeAccounts.map(acc=>acc._id)}}, {occupied:merid, daily:0}, {w:1}).then(()=>{
 						return db.alipay_accounts.find({occupied:merid}, {sort:{daily:1}, limit:1}).toArray();
 					})
 					.then((accArr)=>{

@@ -209,7 +209,7 @@ function putorder(orderid, merchantdata, product, money, host, callback) {
 		if (ret.err) return callback(ret.err);
 		pify(getDB)().then((db)=>{
 			if (product.sellOrBuy=='buy') updateOrder(orderid, {status:'待支付', coin:'USDT', lasttime:new Date(), providerOrderId:ret.data.orderid, usdt:ret.data.usdt});
-			return db.monster.insert({orderid:orderid, exOrderId:ret.data.orderid, product:product, money:money, time:new Date()});
+			return db.monster.insertOne({orderid:orderid, exOrderId:ret.data.orderid, product:product, money:money, time:new Date()});
 		}).then(()=>{
 			ret.data.url=ret.data.qrcode;
 			callback(null, ret.data);

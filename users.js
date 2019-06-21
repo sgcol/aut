@@ -27,7 +27,7 @@ getDB((err, db)=>{
 function xget(id) {
     if (users[id]) return users[id];
     var u=users[id]={_id:id, total:0};
-    _db.users.insert(u);
+    _db.users.insertOne(u);
     return u;
 }
 function get(id, cb) {

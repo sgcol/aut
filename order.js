@@ -24,13 +24,15 @@ function createOrder(merchantid, userid, merchantOrderId, money, preferredPay, c
             if (r.length>0) return callback('orderid重复');
             pify(getMerchant)(merchantid).then((mer)=>{
                 if ((mer.daily||0)+money>(mer.limitation||2000000)) throw '超出每日收款上限';
-                var start=mer.validfrom||'08:00', end=mer.validend||'21:00';
-                var nowtime=(new Date().toGMTString().match(/((?:\d){2}(?:\:(?:\d){2}){1,2})/))[1];
+                var start=new Date(mer.validfrom||Date.UTC(1971, 1,1, 0, 0, 0))
+                , end=new Date(mer.validend||Date.UTC(1971, 1, 1, 13, 0, 0));
+                var nowtime=new Date();
+                nowtime.setUTCFullYear(1971, 1, 1);
                 if (nowtime<start || nowtime>end) throw '本时段不开放充值';
-                return db.bills.insert({merchantOrderId:merchantOrderId, userid:mer._id, merchantid:merchantid, mer_userid:userid, provider:'', providerOrderId:'', share:mer.share, money:money, paidmoney:-1, time:new Date(), lasttime:new Date(), lasterr:'', preferredPay:preferredPay, cb_url:cb_url, status:'created'}, {w:1});
+                return db.bills.insertOne({merchantOrderId:merchantOrderId, userid:mer._id, merchantid:merchantid, mer_userid:userid, provider:'', providerOrderId:'', share:mer.share, money:money, paidmoney:-1, time:new Date(), lasttime:new Date(), lasterr:'', preferredPay:preferredPay, cb_url:cb_url, status:'created'}, {w:1});
             })
             .then((r)=>{
-                callback(null, r.insertedIds[0].toHexString());            
+                callback(null, r.insertedId.toHexString());            
             }).catch((e)=>{
                 callback(e);
             })
@@ -40,9 +42,9 @@ function createOrder(merchantid, userid, merchantOrderId, money, preferredPay, c
 function createSellOrder(merchantid, money, provider, coin, callback) {
     getDB((err, db)=>{
         if (err) return callback(err);
-        db.bills.insert({type:'sell', merchantid:merchantid, provider:provider||'unknown', providerOrderId:'', coin:coin, money:money, time:new Date(), lasttime:new Date(), lasterr:'', status:'created'}, {w:1})
+        db.bills.insertOne({type:'sell', merchantid:merchantid, provider:provider||'unknown', providerOrderId:'', coin:coin, money:money, time:new Date(), lasttime:new Date(), lasterr:'', status:'created'}, {w:1})
         .then((r)=>{
-            callback(null, r.insertedIds[0].toHexString());            
+            callback(null, r.insertedId.toHexString());            
         }).catch((e)=>{
             callback(e);
         })
@@ -51,10 +53,10 @@ function createSellOrder(merchantid, money, provider, coin, callback) {
 function getOrderDetail(orderid, callback) {
     getDB((err, db) =>{
         if (err) return callback(err);
-        db.bills.find({_id:ObjectID(orderid)}, (err, r)=>{
+        db.bills.findOne({_id:ObjectID(orderid)}, (err, r)=>{
             if (err) return callback(err);
-            if (!r.value) return callback('no such order');
-            callback(null, r.value.merchantid, r.value.money, r.value.mer_userid, r.value.cb_url);
+            if (!r) return callback('no such order');
+            callback(null, r.merchantid, r.money, r.mer_userid, r.cb_url);
         })
     });
 }
@@ -64,7 +66,7 @@ function cancelOrder(orderid, callback) {
         db.bills.find({_id:ObjectID(orderid), status:{$ne:'canceled'}}).toArray((err, r)=>{
             if (err) return callback(err);
             if (r.length==0) return callback('no such order');
-            db.bills.update({_id:ObjectID(orderid)}, {$set:{status:'canceled'}});
+            db.bills.updateOne({_id:ObjectID(orderid)}, {$set:{status:'canceled'}});
             if (r[0].type=='sell') notifySellSystem(r[0]);
             callback();
         })
@@ -247,7 +249,7 @@ function balancelog(user, delta, desc) {
             })    
         })
     })((err, userdata) =>{
-        db.balance.insert({user:userdata._id, before:userdata.total||0, delta:delta, desc:desc});
+        db.balance.insertOne({user:userdata._id, before:userdata.total||0, delta:delta, desc:desc});
     });
 }
 function updateWithLog(user, delta, desc, orderid, provider) {
@@ -257,7 +259,7 @@ function updateWithLog(user, delta, desc, orderid, provider) {
         cb(null, {_id:user});
     })((err, userdata) =>{
         getDB((err, db)=>{
-            db.balance.insert({user:userdata, delta:delta, desc:desc, orderid:orderid, t:new Date()});
+            db.balance.insertOne({user:userdata, delta:delta, desc:desc, orderid:orderid, t:new Date()});
             var inc={};
             inc[`in.${provider}`]=delta;
             db.users.update({_id:userdata._id}, {$inc:inc}, {upsert:true});

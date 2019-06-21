@@ -282,8 +282,8 @@
         } else if (ele.id=='valid') {
           var timerange=jv.match(/((?:\d){2}(?:\:(?:\d){2}){1,2})\s*[-~]\s*((?:\d){2}(?:\:(?:\d){2}){1,2})/);
           if (!timerange && jv) return alert('请这样输入 08:00-19:00');
-          params[validfrom]=timerange[1];
-          params[validend]=timerange[2];
+          params[validfrom]=new Date('1971-1-1 '+timerange[1]);
+          params[validend]=new Date('1971-1-1 '+timerange[2]);
         } else params[ele.id]=jv;
       });
       params.id=merchant._id;
