@@ -20,6 +20,7 @@ var q=async.queue(function (extern_callback, queue_callback) {
         {'alipay_logs':{capped:true, size:200*1024*1024, max:3650000}},
         'alipay_settings',
         {'withdrawals':{index:['userid', 'done']}},
+        {notify:{capped:true, size:100*1024, max:1000000}},
         ]}, 
         function(err, db) {
           if (err) return cb(err);
