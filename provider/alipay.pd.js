@@ -118,7 +118,7 @@ function init(err, db) {
 		fee!=null && (upd.fee=normalizeFee(fee));
 		var defaultValue={createTime:new Date()};
 		if (fee==null) defaultValue.fee=alipayFee;
-		db.alipay_accounts.update({_id:appId}, {$set:upd,$setOnInsert:defaultValue}, {upsert:true, w:1}, callback);
+		db.alipay_accounts.updateOne({_id:appId}, {$set:upd,$setOnInsert:defaultValue}, {upsert:true, w:1}, callback);
 	}))
 	router.all('/listAccounts', verifyAuth, verifyManager, httpf({appId:'?string', page:'?number', perPage:'?number', sorts:'?object', queries:'?object', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, function(appId, page, perPage, sorts, queries, sort, order, offset, limit, callback) {
 		var key={};
@@ -198,7 +198,7 @@ function init(err, db) {
 			if (err) return callback(err);
 			callback(null, r?r.settings:{});
 		});
-		db.alipay_settings.update({_id:'settings'}, {$set:settings}, {w:1, upsert:true}, (err, r)=>{
+		db.alipay_settings.updateOne({_id:'settings'}, {$set:settings}, {w:1, upsert:true}, (err, r)=>{
 			if (err) return callback(err);
 			if (settings.limitation) alipayLimitation=settings.limitation;
 			if (settings.fee) alipayFee=normalizeFee(settings.fee);
@@ -282,7 +282,7 @@ function init(err, db) {
 		}
 		confirmOrder(orderid, total_amount, net, (err)=>{
 			if (!err) {
-				db.alipay_accounts.update({_id:acc.appId}, {$set:{'log.success':acc.log.success, 'succrate':succrate}, $inc:{daily:net, total:net, 'gross.daily':total_amount, 'gross.total':total_amount, used:1}});
+				db.alipay_accounts.updateOne({_id:acc.appId}, {$set:{'log.success':acc.log.success, 'succrate':succrate}, $inc:{daily:net, total:net, 'gross.daily':total_amount, 'gross.total':total_amount, used:1}});
 				delete usedAccount[orderid];
 			}
 			if (err && err!='used order') return callback(err);
@@ -314,7 +314,7 @@ function init(err, db) {
 						notifier.add('支付宝账号不足');
 					}
 					 
-					db.alipay_accounts.updateMany({_id:{$in:freeAccounts.map(acc=>acc._id)}}, {occupied:merid, daily:0}, {w:1}).then(()=>{
+					db.alipay_accounts.updateMany({_id:{$in:freeAccounts.map(acc=>acc._id)}}, {$set:{occupied:merid, daily:0}}, {w:1}).then(()=>{
 						return db.alipay_accounts.find({occupied:merid}, {sort:{daily:1}, limit:1}).toArray();
 					})
 					.then((accArr)=>{
@@ -366,6 +366,7 @@ function init(err, db) {
 		nextAccount(merchantdata, mer_userid, (err, account)=>{
 			if (err) return callback(err);
 			if (!account) return callback('没有可用的支付宝账号');
+			account.appId=account._id;
 			usedAccount[orderid]=account;
 			if (!account.alipayInst) account.alipayInst=new AlipaySdk(account);
 			const formData = new AlipayFormData();
@@ -401,7 +402,7 @@ function init(err, db) {
 			// log all [in] in the accounts
 			db.alipay_accounts.find({daily:{$lt:0}}).toArray().then((r)=>{
 				var logs=r.map((ele)=>{return {net:ele.daily, gross:ele.gross.daily, t:today, accId:ele._id, accName:ele.name}});
-				db.alipay_accounts.updateOne({daily:{$lt:0}}, {$set:{daily:0}});
+				db.alipay_accounts.updateMany({daily:{$lt:0}}, {$set:{daily:0}});
 				db.alipay_logs.insertMany(logs);
 			})
 		}
@@ -431,7 +432,7 @@ var usedAccount=[];
 						else acc.used++;
 						op.succrate=(acc.log.success||0)/acc.used;
 						op.used=acc.used;
-						db.alipay_accounts.update({_id:acc.appId}, {$set:op});
+						db.alipay_accounts.updateOne({_id:acc.appId}, {$set:op});
 					} else {
 						makeItDone(orderid, result.alipay_trade_query_response.total_amount);
 					}

@@ -231,7 +231,7 @@ function updateOrder(orderid, upd, callback) {
     if (!callback) callback=function() {};
     if (typeof upd!='object') return callback('param error');
     getDB((err, db)=>{
-        db.bills.update({_id:ObjectID(orderid)}, {$set:upd}, function(err, r) {
+        db.bills.updateOne({_id:ObjectID(orderid)}, {$set:upd}, function(err, r) {
             callback(err, r);
         });
     });
