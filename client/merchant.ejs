@@ -232,6 +232,14 @@
     }
     $('#addUser').toggle();
   }
+  function formattime(t, changeZeroTo24) {
+    if (typeof t=='string') t=new Date(t);
+    var m=('0'+t.getMinutes()).slice(-2);
+    var h=t.getHours();
+    if (h==0 && changeZeroTo24) h=24;
+    h=('0'+h).slice(-2);
+    return h+':'+m;
+  }
 
   var providers=$('#providers');
   
@@ -267,6 +275,7 @@
       })
       $('#fee').attr("placeholder", ''+((1-merchant.share)*100).toFixed(2)+'%');
       $('#parent').attr('placeholder', merchant.parent);
+      $('#valid').attr('placeholder', formattime(merchant.validfrom)+'-'+formattime(merchant.validend, true));
     }
     $('#adjustMerchant').off('click').click(function(e) {
       var params={};
