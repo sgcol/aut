@@ -273,11 +273,69 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			callback(e);
 		})
 	}))
+	app.all('/admin/listOutgoingOrders', verifyAuth, httpf({from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, function(from, to, sort, order, count, offset, callback) {
+		var times={};
+		if (from) times.$gte=from;
+		if (to) times.$lte=to;
+		var query={time:times};
+		if (this.req.auth.acl!='admin' && this.req.auth.acl!='manager') {
+			query.merchantid=this.req.auth.merchantid;
+		}
+		var cursor=db.withdrawals.find(query);
+		if (sort) {
+			var so={};
+			so[sort]=(order=='asc'?1:-1);
+			cursor=cursor.sort(so);
+		}
+		if (offset) {
+			cursor=cursor.skip(offset);
+		}
+		if (count) cursor=cursor.limit(count);
+		Promise.all([
+			db.withdrawals.aggregate([
+				{$match:query},
+				{$group:{
+					_id:0,
+					total:{$sum:$money}
+				}}]
+			).toArray(),
+			cursor.toArray()
+		]).then((results)=>{
+			var r=results[1];
+			var merids=new Set();
+			for (var i=0; i<r.length; i++) {
+				var o=r[i];
+				merids.add(o.merchantid);
+			}
+			var idarr=[];
+			merids.forEach((v)=>{idarr.push(v)});
+			db.users.find({merchantid:{$in:idarr}}).toArray().then((idmap)=>{
+				var map={};
+				for (var i=0; i<idmap.length; i++) {
+					map[idmap[i].merchantid]=idmap[i].name;
+				}
+				for (var i=0; i<r.length; i++) {
+					var o=r[i];
+					o.mername=map[o.merchantid];
+				}
+				cursor.count(false, (err, c)=>{
+					if (err) return callback(err);
+					callback(null, {total:c, rows:r, sum:results[0][0].total});
+				});
+			})
+			.catch((e)=>{
+				callback(e);
+			});
+		})
+		.catch((e)=>{
+			callback(e);
+		})
+	}))
 	app.all('/admin/listOrders', verifyAuth, httpf({from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, function(from, to, sort, order, count, offset, callback) {
-		var times=[];
-		if (from) times.push({$gte:from});
-		if (to) times.push({$lte:to});
-		var query={};
+		var times={};
+		if (from) times.$gte=from;
+		if (to) times.$lte=to;
+		var query={time:times};
 		if (this.req.auth.acl!='admin' && this.req.auth.acl!='manager') {
 			query.merchantid=this.req.auth.merchantid;
 		}
@@ -799,7 +857,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			var takesop=[], now=new Date(), inc={};
 			for (var i in lefts) {
 				var d=Math.min(lefts[i],want);
-				takesop.push({userid:userid, name:r.value.name, _t:now, take:take, provider:i, done:false});
+				takesop.push({userid:userid, name:r.value.name, _t:now, money:take, change:inc, snap:{in:usrdata.in, out:usrdata.out}, provider:i, done:false});
 				inc['out.'+i]=d;
 				if (d==want) break;
 				want-=d;

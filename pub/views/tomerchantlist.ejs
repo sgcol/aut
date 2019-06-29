@@ -9,6 +9,10 @@
 <link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
 <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
 <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
 <!-- endinject -->
 <!-- inject:css -->
 <link rel="stylesheet" href="css/style.css">
@@ -55,30 +59,46 @@
                 <div class="card">
                   <div class="card-body">
                     <h4 class="card-title">清帐订单</h4>
+                    <div class="buttons-toolbar">
+                      <form class="form-inline" id="params">
+                        <div class="input-group input-group-sm">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-calendar-today"></i></span>
+                          </div>
+                          <input type="text" class="form-control mr-sm-2" name="dates" placeholder="时间">
+                        </div> 
+                        <div class="form-group">
+                          <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:querydata();"><i class="mdi mdi-magnify"></i></a>
+                        </div>
+                      </form>
+                    </div>
                     <div class="table-responsive">
-                      <table class="table" id="orderlist">
+                      <table class="table"
+                      data-classes="table-no-bordered table-hover" 
+                      data-toggle="table" 
+                      data-show-refresh="true"
+                      data-show-columns="true"
+                      data-show-pagination-switch="true"
+                      data-pagination="true" 
+                      data-page-size="30" 
+                      data-page-list="[10, 25, 50, 100, ALL]" 
+                      data-side-pagination="server" 
+                      data-locale="zh-CN" 
+                      data-url="/admin/listOutgoingOrders"
+                      data-buttons-class=" btn-sm btn-secondary"
+                      data-toolbar=".buttons-toolbar"
+                      data-show-footer="true"
+                      data-response-handler="handleData">
                         <thead>
                           <tr>
-                            <th>
+                            <th data-field="name" data-sortable="true" data-footer-formatter="Total">
                               商户
                             </th>
-                            <th>
-                              提供商
+                            <th data-field="time" data-sortable="true" data-formatter="timestring">
+                              时间
                             </th>
-                            <th>
-                              提供商单号
-                            </th>
-                            <th>
+                            <th data-field="money" data-sortable="true" data-footer-formatter="showTotalOutgoing">
                               金额
-                            </th>
-                            <th>
-                              创建时间
-                            </th>
-                            <th>
-                              状态
-                            </th>
-                            <th>
-                              改变时间
                             </th>
                           </tr>
                         </thead>
@@ -120,73 +140,36 @@
   <script src="js/misc.js"></script>
   <!-- endinject -->
   <!-- Custom js for this page-->
-    <script src="js/base.js"></script>
+  <script src="js/base.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>  
   <!-- End custom js for this page-->
 </body>
 <script>
-function timestring(t) {
-  return new Date(t).toLocaleDateString()+' '+ new Date(t).toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");;
-}
-function formatBigNumber(s) {
-  return (''+s).replace(/(?=(?!^)(?:\d{4})+(?:\.|$))(\d{4}(\.\d+$)?)/g,',$1');
-}
-function statusHtmlfy(s) {
-  if (!s) s='未知';
-  if (s=='created') return `<label class="badge badge-gradient-info">创建</label>`;
-  if (s=='completed') return `<label class="badge badge-gradient-success">完成</label>`
-  if (s.indexOf('failed')>=0 ||s.indexOf('失败')>=0) return `<label class="badge badge-gradient-danger">${s}</label>`
-  return `<label class="badge badge-gradient-warning">${s}</label>`
-}
-function forceconfirm(orderid) {
-  accIntf('/admin/confirmOrder', {orderid:orderid}, (err)=>{
-    if (err) return showerr(err);
-    refreshOrderList()
-  });
-}
-function sendNotify(orderid) {
-  accIntf('/admin/notifyMerchant', {orderid:orderid}, (err)=>{
-    if (err) return showerr(err);
-    refreshOrderList()
-  });
-}
-function refreshOrderList() {
-  accIntf('/admin/listOrders', {pageno:currentpage, count:20, type:'sell'}, function(err, data) {
-    var p=$('#orderlist tbody');
-    p.empty();
-    if (err) p.append('<tr><td colspan="9999">'+errstr(err)+'</td></tr>');
-    var list=data.message;
-    recordCount=list.total;
-    for (var i=0; i<list.length; i++) {
-      var o=list[i];
-      var htmlstr=`<tr><td>${o.mername}<td>${o.provider||''}<td>${o.providerOrderId||''}<td>${o.money}<td>${timestring(o.time)}<td>${statusHtmlfy(o.status)}<td>${timestring(o.lasttime)}`;
-      htmlstr+='</tr>'
-      p.append(htmlstr);
-    }
-    // $('.tooltipfy').tooltip();
-  })
-}
-var currentpage=0, recordCount=0;
-function prevPage() {
-  currentpage--;
-  if (currentpage>=0) return refreshOrderList();
-  currentpage=0;
-}
-function nextPage() {
-  currentpage++;
-  if ((currentpage*20)<recordCount) return refreshOrderList();
-  currentpage=Math.floor(recordCount/20);
-}
-function firstPage() {
-  currentpage=0;
-  refreshOrderList();
-}
-function lastPage() {
-  currentpage=Math.floor(recordCount/20);
-  refreshOrderList();
-}
-$(()=>{
-  refreshOrderList();
-});
-  
+  var data;
+  function handleData(res) {
+    data=res;
+    return res;
+  }
+  // function requestData(params) {
+  //   if (!params.data.account) return alert('必须指定支付宝账号才能查询');
+  //   accIntf('pvd/alipay/statements', params.data, (err, r)=>{
+  //     params.success(r);
+  //   });
+  // }
+  function showTotalText() {
+    return "Total";
+  }
+  function showTotalOutgoing() {
+    return data?data.total:undefined;
+  }
+  function querydata() {
+    var querys={};
+    var drp=$('input[name="dates"]').data('daterangepicker');
+    querys.startTime=drp.startDate._d;
+    querys.endTime=drp.endDate._d;
+    if (allclear) $('#detail').bootstrapTable('refresh', {query:querys});
+  }  
 </script>
 </html>

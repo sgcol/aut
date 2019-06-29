@@ -295,7 +295,7 @@ function init(err, db) {
 		return f;
 	}
 	function nextAccount(merchantdata, mer_userid, callback) {
-		var merid=merchantdata._id+'.'+mer_userid;
+		var merid=merchantdata._id;//+'.'+mer_userid;
 		db.alipay_accounts.findOne({occupied:merid, daily:{$lt:alipayLimitation}}, {sort:{daily:1}}).then((acc)=>{
 			if (acc) return callback(null, acc);
 			// 商户没有足够的alipayAccount了
