@@ -362,12 +362,14 @@ function init(err, db) {
 		// x.useCount++;
 		// return x;
 	}
+
 	order =function(orderid, money, merchantdata, mer_userid, coinType, _host, callback) {
 		nextAccount(merchantdata, mer_userid, (err, account)=>{
 			if (err) return callback(err);
 			if (!account) return callback('没有可用的支付宝账号');
 			account.appId=account._id;
 			usedAccount[orderid]=account;
+			account.keyType='PKCS8';
 			if (!account.alipayInst) account.alipayInst=new AlipaySdk(account);
 			const formData = new AlipayFormData();
 			formData.setMethod('get');

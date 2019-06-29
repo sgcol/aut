@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "alipay-sdk": "^3.0.4",
+    "alipay-sdk": "^3.0.7",
     "async": "^2.6.1",
     "bitcoin-core": "^2.0.0",
     "body-parser": "^1.18.3",
