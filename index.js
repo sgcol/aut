@@ -93,7 +93,9 @@ function prepareNeighbors(callback) {
 }
 
 chokidar.watch(path.join(__dirname, 'pub/views'), {ignored: /[\/\\]\./})
-.on('change', (p)=>{delete app.cache[path.basename(p)]})
+.on('change', (p)=>{
+	delete app.cache[path.basename(p)]
+})
 .on('unlink', p =>{delete app.cache[path.basename(p)]});
 
 function checkAdminAccountExists(cb) {
@@ -296,7 +298,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 				{$match:query},
 				{$group:{
 					_id:0,
-					total:{$sum:$money}
+					total:{$sum:'$money'}
 				}}]
 			).toArray(),
 			cursor.toArray()

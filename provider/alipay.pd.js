@@ -373,8 +373,8 @@ function init(err, db) {
 			if (!account.alipayInst) account.alipayInst=new AlipaySdk(account);
 			const formData = new AlipayFormData();
 			formData.setMethod('get');
-			formData.addField('return_url', url.resolve(_host, 'pvd/alipay/echo'));
-			formData.addField('notify_url', url.resolve(_host, 'pvd/alipay/done'));
+			formData.addField('return_url', url.resolve(_host, '../pvd/alipay/echo'));
+			formData.addField('notify_url', url.resolve(_host, '../pvd/alipay/done'));
 			formData.addField('bizContent', {
 			  outTradeNo: orderid,
 			  productCode: 'FAST_INSTANT_TRADE_PAY',

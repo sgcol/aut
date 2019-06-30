@@ -24,10 +24,10 @@ function createOrder(merchantid, userid, merchantOrderId, money, preferredPay, c
             if (r.length>0) return callback('orderid重复');
             pify(getMerchant)(merchantid).then((mer)=>{
                 if ((mer.daily||0)+money>(mer.limitation||2000000)) throw '超出每日收款上限';
-                var start=new Date(mer.validfrom||Date.UTC(1971, 1,1, 0, 0, 0))
-                , end=new Date(mer.validend||Date.UTC(1971, 1, 1, 13, 0, 0));
+                var start=new Date(mer.validfrom||Date.UTC(1971, 0,1, 0, 0, 0))
+                , end=new Date(mer.validend||Date.UTC(1971, 0, 1, 13, 0, 0));
                 var nowtime=new Date();
-                nowtime.setUTCFullYear(1971, 0, 0);
+                nowtime.setFullYear(1971, 0, 1);
                 if (nowtime<start || nowtime>end) throw '本时段不开放充值';
                 return db.bills.insertOne({merchantOrderId:merchantOrderId, userid:mer._id, merchantid:merchantid, mer_userid:userid, provider:'', providerOrderId:'', share:mer.share, money:money, paidmoney:-1, time:new Date(), lasttime:new Date(), lasterr:'', preferredPay:preferredPay, cb_url:cb_url, status:'created'}, {w:1});
             })
