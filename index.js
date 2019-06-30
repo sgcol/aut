@@ -241,10 +241,14 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		});
 	}))
 	app.all('/adapter/listOrders', verifySign, httpf({merchantid:'string', orderid:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, function(merchantid, orderid, from, to, sort, order, count, offset, callback) {
-		var times=[];
-		if (from) times.push({$gte:from});
-		if (to) times.push({$lte:to});
-		var query={merchantid:merchantid};
+		var query={};
+		if (from ||to) {
+			var times={};
+			if (from) times.$gte=from;
+			if (to) times.$lte=to;
+			query.time=times;	
+		}
+		query.merchantid=merchantid;
 		if (orderid) {
 			query.merchantOrderId=orderid;
 		}
@@ -276,10 +280,13 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		})
 	}))
 	app.all('/admin/listOutgoingOrders', verifyAuth, httpf({from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, function(from, to, sort, order, count, offset, callback) {
-		var times={};
-		if (from) times.$gte=from;
-		if (to) times.$lte=to;
-		var query={time:times};
+		var query={};
+		if (from ||to) {
+			var times={};
+			if (from) times.$gte=from;
+			if (to) times.$lte=to;
+			query.time=times;	
+		}
 		if (this.req.auth.acl!='admin' && this.req.auth.acl!='manager') {
 			query.merchantid=this.req.auth.merchantid;
 		}
@@ -334,10 +341,13 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		})
 	}))
 	app.all('/admin/listOrders', verifyAuth, httpf({from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, function(from, to, sort, order, count, offset, callback) {
-		var times={};
-		if (from) times.$gte=from;
-		if (to) times.$lte=to;
-		var query={time:times};
+		var query={};
+		if (from ||to) {
+			var times={};
+			if (from) times.$gte=from;
+			if (to) times.$lte=to;
+			query.time=times;	
+		}
 		if (this.req.auth.acl!='admin' && this.req.auth.acl!='manager') {
 			query.merchantid=this.req.auth.merchantid;
 		}
