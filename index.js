@@ -329,7 +329,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 				}
 				cursor.count(false, (err, c)=>{
 					if (err) return callback(err);
-					callback(null, {total:c, rows:r, sum:results[0][0].total});
+					callback(null, {total:c, rows:r, /*sum:results[0][0].total*/});
 				});
 			})
 			.catch((e)=>{

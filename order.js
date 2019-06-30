@@ -166,7 +166,7 @@ function confirmOrder(orderid, money, net, callback) {
             db.bills.update({_id:ObjectID(orderid)}, {$set:upd}, {w:1}, function(_e) {
                 if (_e || err) return callback(_e||err);
                 notifyMerchant(r);
-                callback();
+                // callback();
             })
         });
     })
