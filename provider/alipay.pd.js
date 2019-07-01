@@ -77,7 +77,7 @@ var allaccounts=[], alipayLimitation, alipayFee;
 		if (err) return cb(err);
 		async.parallel([
 			function fillUsedAccount(cb){
-				db.bills.find({status:'待支付', 'provider.name':'支付宝'}).toArray((err, r)=>{
+				db.bills.find({status:'待支付', 'provider':'支付宝'}).toArray((err, r)=>{
 					if (err) return cb(err);
 					for (var i=0; i<r.length; i++) {
 						usedAccount[r[i]._id.toHexString()]=r[i].alipay_account;
@@ -267,7 +267,7 @@ function init(err, db) {
 		// 	callback(null, httpf.text('success'));
 		// })
 	}));
-	function makeItDone(orderid, callback) {
+	function makeItDone(orderid, total_amount, callback) {
 		callback=callback||function(){};
 		var acc=usedAccount[orderid], net, succrate;
 		if (acc) {
@@ -370,7 +370,7 @@ function init(err, db) {
 			account.appId=account._id;
 			usedAccount[orderid]=account;
 			account.keyType='PKCS8';
-			if (!account.alipayInst) account.alipayInst=new AlipaySdk(account);
+			var alipayInst=new AlipaySdk(account);
 			const formData = new AlipayFormData();
 			formData.setMethod('get');
 			formData.addField('return_url', url.resolve(_host, '../pvd/alipay/echo'));
@@ -383,7 +383,7 @@ function init(err, db) {
 			  body: '商品详情',
 			});
 			// formData.addField('passback_params', encodeURI(JSON.stringify({idx:idx, id:account.appId})));
-			account.alipayInst.exec(
+			alipayInst.exec(
 				'alipay.trade.page.pay',
 				{},
 				{ formData: formData },
@@ -411,14 +411,16 @@ function init(err, db) {
 	}, 30*60*1000);
 }
 var pos=0;
-var usedAccount=[];
+var usedAccount={};
 
 (function () {
 	function chkAlipayOrderStatus() {
 		async.eachOf(usedAccount, (acc, orderid, cb)=>{
-			acc.alipayInst.exec('alipay.trade.query', {bizContent:{
-				out_trade_no:ele.orderid
+			var alipayInst=new AlipaySdk(acc);
+			alipayInst.exec('alipay.trade.query', {bizContent:{
+				out_trade_no:orderid
 			}}).then(result=>{
+				if (result.code!='10000') return cb();
 				if (result.alipay_trade_query_response.trade_status!='WAIT_BUYER_PAY') {
 					// remove this one from usedAccount
 					if (result.alipay_trade_query_response.subCode!='SUCCESS') {
@@ -449,7 +451,7 @@ var usedAccount=[];
 			// usedAccount=usedAccount.filter(v=>v);
 		});
 	}
-	setInterval(chkAlipayOrderStatus, 30*1000);
+	setInterval(chkAlipayOrderStatus, 1*1000);
 })();
 
 exports.router=router;
