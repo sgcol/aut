@@ -756,7 +756,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}else {
 			var query={userid:this.req.auth._id, used:true};
 		}
-		db.bills.aggregate([{$match:query}, {$group:{
+		db.bills.aggregate([{$match:query}, {$sort:{time:1}}, {$group:{
 			_id:{
 				month:{$dateToString:{format:'%Y-%m', date:'$time'}},
 				provider:'$provider'

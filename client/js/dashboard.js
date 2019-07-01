@@ -24,6 +24,8 @@
     merchant:'#ffd500',
     agent:'#fe7096',
     system:'#9a55ff',
+    '支付宝':'#0e9dec',
+    '微信':'#346b21',
   }
 
   function dateToYM(date) {
