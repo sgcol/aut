@@ -8,6 +8,7 @@
     <link rel="shortcut icon" href="images/favicon.png" />
     <link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+    <link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
     <link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
     <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
     <!-- endinject -->
@@ -54,7 +55,7 @@
           <i class="mdi mdi-fullscreen" id="fullscreen-button"></i>
         </a>
       </li>
-      <li class="nav-item dropdown">
+      <!-- <li class="nav-item dropdown">
         <a class="nav-link count-indicator dropdown-toggle" id="messageDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
           <i class="mdi mdi-email-outline"></i>
           <span class="count-symbol bg-warning"></span>
@@ -100,7 +101,7 @@
           <div class="dropdown-divider"></div>
           <h6 class="p-3 mb-0 text-center">4 new messages</h6>
         </div>
-      </li>
+      </li> -->
       <li class="nav-item dropdown">
         <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-toggle="dropdown">
           <i class="mdi mdi-bell-outline"></i>
@@ -306,6 +307,42 @@
               </div>
             </div>
           </div>
+          <div class="row">
+              <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">历史记录</h4>
+                    <table                            
+                    class="table table-hover"
+                    data-toggle="table"
+                    data-classes="table-no-bordered table-hover"
+                    data-pagination="true"
+                    data-side-pagination="server"
+                    data-pagination="true"
+                    data-show-refresh="true"
+                    data-show-columns="true"
+                    data-show-pagination-switch="true"
+                    data-page-size="25"
+                    data-buttons-class=" btn-sm btn-secondary"
+                    data-ajax="queryOrders"
+                    data-toolbar=".buttons-toolbar"
+                    data-sort-name="time"
+                    data-sort-order="desc"
+                    >
+                    <thead>
+                      <th data-field="_id">订单号</th>
+                      <th data-field="merchantOrderId">发起订单</th>
+                      <th data-field="mername">商户</th>
+                      <th data-field="mer_userid" >用户id</th>
+                      <th data-field="money" >金额</th>
+                      <th data-field="status" >状态</th>
+                      <th data-field="time" data-formatter="timestring"  data-sortable="true">时间</th>
+                    </thead>
+                    </table>
+                  </div>
+                </div>
+              </div>
+          </div>
         </div>
         <!-- content-wrapper ends -->
         <!-- partial:partials/_footer.html -->
@@ -332,6 +369,7 @@
   <script src="js/md5.js"></script>
   <script src="js/qs.js"></script>
   <script src="js/base.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
   <!-- endinject -->
 </body>
 <script>
@@ -366,7 +404,8 @@ $(()=>{
     e.preventDefault();
     var now=new Date();
     var params={
-        cb_url:'http://127.0.0.1',
+        cb_url:'http://127.0.0.1/demo/result',
+        return_url:location.href,
         merchantid:$('#merchantid').val(),
         money:Number($('#money').val()),
         orderid:'TESTORDER'+now.getTime(),
@@ -378,5 +417,11 @@ $(()=>{
     location.href='/order?'+Qs.stringify(params);
   });
 });
+function queryOrders(params) {
+  accIntf('/admin/listOrders', Object.assign({testOrderOnly:true}, params.data), function(err, r) {
+    if (err) return;
+    params.success(r);
+  });
+}
 </script>
 </html>

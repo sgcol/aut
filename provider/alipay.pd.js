@@ -17,6 +17,7 @@ const url = require('url')
 , confirmOrder =require('../order.js').confirmOrder
 , updateOrder =require('../order.js').updateOrder
 , cancelOrder =require('../order.js').cancelOrder
+, getOrderDetail=require('../order.js').getOrderDetail
 , pify =require('pify')
 , getvalue=require('get-value')
 , notifier=require('../sysnotifier.js')
@@ -205,8 +206,9 @@ function init(err, db) {
 			callback();
 		});
 	}))
-	router.all('/statements', httpf({account:'string', startTime:'?date', endTime:'?date', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, function(account, start, end, sort, order, offset, limit, callback) {
-		var key={provider:'支付宝', 'alipay_account.name':account};
+	router.all('/statements', httpf({account:'?string', startTime:'?date', endTime:'?date', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, function(account, startTime, endTime, sort, order, offset, limit, callback) {
+		var key={provider:'支付宝'};
+		if (account) key['alipay_account.name']=account;
 		if (startTime) key.lasttime={'&gte':startTime}
 		if (endTime) {
 			if (key.lasttime) key.lasttime['&lte']=endTime;
@@ -242,8 +244,28 @@ function init(err, db) {
 			callback(e);
 		})
 	}))
+	/*
+	a return
+	{"q":{"charset":"utf-8","out_trade_no":"5d1b6a959df22346c840fb9e","method":"alipay.trade.page.pay.return","total_amount":"1.00","sign":"Ml5/C+ZCe2cY4HpgW/SVTT7+gxCOyFDp58PCrO6AKJrTuPpnZgbwzkzZeaM/feOWfPCztexfzJ3Xehby2mIYTRTjYJV3MfHR2CmqhkQCV9vxZtvNE7gwms7eAuPO0MgUNTVeFdJ652ayV+zvX3nEm8Ebv1sriEw0qTUiPCqVi4tYFSFhiy4uK+V5zDPGL+N0S/Prc4VKOl2mOX1sd7d1ECOFG40c/eOnZvyfJzy+0j8K7t9g9XeP5G6UPo9wevkLzch5P8HzNjXD3vykV7D5ekDfWKRKWa2lOdRzOf2Mb1o2OWosOqwrXaTdWmiRvgH8k2W69wQnC09kvcGjMT1aTQ==","trade_no":"2019070222001453091040186309","auth_app_id":"2019022863436492","version":"1.0","app_id":"2019022863436492","sign_type":"RSA2","seller_id":"2088431661537352","timestamp":"2019-07-02 22:31:26"},"b":{}}
+	*/
 	router.all('/echo', (req, res)=>{
 		res.send({q:req.query, b:req.body});
+	})
+	router.all('/return', (req, res)=>{
+		var orderid=req.query.out_trade_no;
+		(function tryUseMerchantReturnUrl(cb) {
+			if (!orderid) return cb('orderid not defined');
+			getOrderDetail(orderid, (err, merchantid, money, mer_userid, cb_url, return_url)=>{
+				if (err) return cb(err);
+				if (!return_url) return cb('use default page');
+				res.redirect(return_url);
+				cb();
+			})	
+		})(function ifFailed(err) {
+			if (!err) return;
+			//show default page
+			res.send('充值完成');
+		})
 	})
 	router.all('/done', httpf({out_trade_no:'string', total_amount:'number', trade_status:'string', passback_params:'?string', callback:true}, function(orderid, total_amount, status, passback_params, callback) {
 		makeItDone(orderid, total_amount, callback);
@@ -373,7 +395,7 @@ function init(err, db) {
 			var alipayInst=new AlipaySdk(account);
 			const formData = new AlipayFormData();
 			formData.setMethod('get');
-			formData.addField('return_url', url.resolve(_host, '../pvd/alipay/echo'));
+			formData.addField('return_url', url.resolve(_host, '../pvd/alipay/return'));
 			formData.addField('notify_url', url.resolve(_host, '../pvd/alipay/done'));
 			formData.addField('bizContent', {
 			  outTradeNo: orderid,

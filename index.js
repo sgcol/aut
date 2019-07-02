@@ -340,7 +340,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			callback(e);
 		})
 	}))
-	app.all('/admin/listOrders', verifyAuth, httpf({from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, function(from, to, sort, order, count, offset, callback) {
+	app.all('/admin/listOrders', verifyAuth, httpf({from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', testOrderOnly:'?boolean', callback:true}, function(from, to, sort, order, count, offset, testOrderOnly, callback) {
 		var query={};
 		if (from ||to) {
 			var times={};
@@ -350,6 +350,9 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}
 		if (this.req.auth.acl!='admin' && this.req.auth.acl!='manager') {
 			query.merchantid=this.req.auth.merchantid;
+		}
+		if (testOrderOnly) {
+			query.merchantOrderId=/TESTORDER/;
 		}
 		var cursor=db.bills.find(query);
 		if (sort) {
@@ -409,9 +412,9 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		
 		return ret;
 	}));
-	app.all('/order', verifySign, httpf({orderid:'string', money:'number', merchantid:'string', userid:'string', cb_url:'string', time:'string', no_return:true}, function(orderid, money, merchantid, userid, cb_url, time) {
+	app.all('/order', verifySign, httpf({orderid:'string', money:'number', merchantid:'string', userid:'string', cb_url:'string', return_url:'?string', time:'string', no_return:true}, function(orderid, money, merchantid, userid, cb_url, return_url, time) {
 		var res=this.res;
-		createOrder(merchantid, userid, orderid, money, 'alipay', cb_url, function(err, sysOrderId) {
+		createOrder(merchantid, userid, orderid, money, 'alipay', cb_url, return_url, function(err, sysOrderId) {
 			if (err) return res.render('error.ejs', {err:err});
 			return res.render('order.ejs', {orderid:sysOrderId, money:money, merchantid:merchantid});
 		});
@@ -756,15 +759,18 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}else {
 			var query={userid:this.req.auth._id, used:true};
 		}
-		db.bills.aggregate([{$match:query}, {$sort:{time:1}}, {$group:{
-			_id:{
-				month:{$dateToString:{format:'%Y-%m', date:'$time'}},
-				provider:'$provider'
-			},
-			money:{$sum:'$money'},
-			net:{$sum:'$net'},
-			count:{$sum:1}
-		}}]).toArray().then((r)=>{
+		db.bills.aggregate([{$match:query}, 
+			{$group:{
+				_id:{
+					month:{$dateToString:{format:'%Y-%m', date:'$time'}},
+					provider:'$provider'
+				},
+				money:{$sum:'$money'},
+				net:{$sum:'$net'},
+				count:{$sum:1}
+			}},
+			{$sort:{_id:1}}
+		]).toArray().then((r)=>{
 			callback(null, httpf.json(r));
 		}).catch(callback);
 	}));
@@ -924,8 +930,15 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.all('/sysnotification', getAuth, httpf(function() {
 		var req=this.req;
 		return httpf.json(sysnotifier.all().filter(n=>{
-			return aclgt(req.acl, n.acl);
+			if (req.auth.acl==n.acl) return true;
+			return aclgt(req.auth.acl, n.acl);
 		}));
+	}));
+	app.all('/dismissnotification', getAuth, httpf({id:'number'}, function(id) {
+		sysnotifier.remove(id);
+	}))
+	app.all('/demo/result', httpf({orderid:'string', money:'number', callback:true}, function(orderid, money, callback) {
+		_orderFunc.updateOrder(orderid, {status:'已送达'}, callback);
 	}));
 
 	/////////////////some server rendered pages

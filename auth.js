@@ -53,6 +53,10 @@ function aclgt(acl1, acl2) {
     if (acl1=='agent' && acl2=='merchant') return true;
     return false;
 }
+function aclgte(acl1, acl2) {
+    if (acl1==acl2) return true;
+    return aclgt(acl1, acl2);
+}
 
 module.exports={
     aclgt:aclgt,

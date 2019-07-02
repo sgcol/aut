@@ -68,7 +68,9 @@
                         data-page-size="25"
                         data-buttons-class=" btn-sm btn-secondary"
                         data-url="admin/listOrders"
-                        data-toolbar=".buttons-toolbar">
+                        data-toolbar=".buttons-toolbar"
+                        data-sort-order="desc"
+                        data-sort-name="time">
                          <thead>
                            <tr>
                              <th data-field="mername">
@@ -86,7 +88,7 @@
                              <th data-field="money">
                                金额
                              </th>
-                             <th data-field="time" data-formatter="timestring">
+                             <th data-field="time" data-formatter="timestring" data-sort-order="desc" data-sortable="true">
                                创建时间
                              </th>
                              <th data-field="status" data-formatter="statusHtmlfy">

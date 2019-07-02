@@ -13,7 +13,7 @@ function getUser(id, cb) {
     })
 }
 
-function createOrder(merchantid, userid, merchantOrderId, money, preferredPay, cb_url, callback) {
+function createOrder(merchantid, userid, merchantOrderId, money, preferredPay, cb_url, return_url, callback) {
     if (typeof preferredPay=='function') {
         callback=preferredPay;
         preferredPay=null;
@@ -29,7 +29,7 @@ function createOrder(merchantid, userid, merchantOrderId, money, preferredPay, c
                 var nowtime=new Date();
                 nowtime.setFullYear(1971, 0, 1);
                 if (nowtime<start || nowtime>end) throw '本时段不开放充值';
-                return db.bills.insertOne({merchantOrderId:merchantOrderId, userid:mer._id, merchantid:merchantid, mer_userid:userid, provider:'', providerOrderId:'', share:mer.share, money:money, paidmoney:-1, time:new Date(), lasttime:new Date(), lasterr:'', preferredPay:preferredPay, cb_url:cb_url, status:'created'}, {w:1});
+                return db.bills.insertOne({merchantOrderId:merchantOrderId, userid:mer._id, merchantid:merchantid, mer_userid:userid, provider:'', providerOrderId:'', share:mer.share, money:money, paidmoney:-1, time:new Date(), lasttime:new Date(), lasterr:'', preferredPay:preferredPay, cb_url:cb_url, return_url:return_url, status:'created'}, {w:1});
             })
             .then((r)=>{
                 callback(null, r.insertedId.toHexString());            
@@ -56,7 +56,7 @@ function getOrderDetail(orderid, callback) {
         db.bills.findOne({_id:ObjectID(orderid)}, (err, r)=>{
             if (err) return callback(err);
             if (!r) return callback('no such order');
-            callback(null, r.merchantid, r.money, r.mer_userid, r.cb_url);
+            callback(null, r.merchantid, r.money, r.mer_userid, r.cb_url, r.return_url);
         })
     });
 }

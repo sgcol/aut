@@ -119,7 +119,7 @@
           <i class="mdi mdi-fullscreen" id="fullscreen-button"></i>
         </a>
       </li>
-      <li class="nav-item dropdown">
+      <!-- <li class="nav-item dropdown">
         <a class="nav-link count-indicator dropdown-toggle" id="messageDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
           <i class="mdi mdi-email-outline"></i>
           <span class="count-symbol bg-warning"></span>
@@ -165,7 +165,7 @@
           <div class="dropdown-divider"></div>
           <h6 class="p-3 mb-0 text-center">4 new messages</h6>
         </div>
-      </li>
+      </li> -->
       <li class="nav-item dropdown">
         <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-toggle="dropdown">
           <i class="mdi mdi-bell-outline"></i>
@@ -525,8 +525,8 @@
         } else if (ele.id=='valid') {
           var timerange=jv.match(/((?:\d){2}(?:\:(?:\d){2}){1,2})\s*[-~]\s*((?:\d){2}(?:\:(?:\d){2}){1,2})/);
           if (!timerange && jv) return alert('请这样输入 08:00-19:00');
-          params.validfrom=new Date('1971-1-1 '+timerange[1]);
-          params.validend=new Date('1971-1-1 '+timerange[2]);
+          params.validfrom=new Date('1971-1-1 '+timerange[1]+' GMT+0800');
+          params.validend=new Date('1971-1-1 '+timerange[2]+' GMT+0800');
         } else params[ele.id]=jv;
       });
       params.id=merchant._id;

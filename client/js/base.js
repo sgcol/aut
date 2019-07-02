@@ -98,10 +98,10 @@
                             <i class="mdi mdi-currency-btc"></i>
                         </div>
                         </div>
-                        <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
+                        <div class="preview-item-content d-flex align-items-start flex-column justify-content-center" data-id="${i}">
                         <h6 class="preview-subject font-weight-normal mb-1">${notifications[i].title}</h6>
                         <p class="text-gray ellipsis mb-0">
-                            ${notifications[i].desc}
+                            ${notifications[i].desc||''+' '+timestring(notifications[i].time)}
                         </p>
                         </div>
                     </a>
@@ -109,15 +109,23 @@
                     `);
                     container.append(item);  
                 }
+                $('.preview-item-content').click(dismiss);
                 oldNotifications={}
                 for (var i=0; i<notifications.length; i++) {
                     oldNotifications[notifications[i]._id]=true;
                 }
                 if (notificationschanged) {
                     //beep
-                    example4(830.6, 'sine');
+                    bell(830.6, 'sine');
                 }
             })
+        }
+        function dismiss(e) {
+            var nid=Number($(this).data('id'));
+            if (nid==null || isNaN(nid)) return;
+            accIntf('/dismissnotification', {id:nid}, ()=>{
+                receiveNotifications();
+            });
         }
         receiveNotifications();
         setInterval(receiveNotifications, 1*30*1000);

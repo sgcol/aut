@@ -64,7 +64,7 @@
           <i class="mdi mdi-fullscreen" id="fullscreen-button"></i>
         </a>
       </li>
-      <li class="nav-item dropdown">
+      <!-- <li class="nav-item dropdown">
         <a class="nav-link count-indicator dropdown-toggle" id="messageDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
           <i class="mdi mdi-email-outline"></i>
           <span class="count-symbol bg-warning"></span>
@@ -110,7 +110,7 @@
           <div class="dropdown-divider"></div>
           <h6 class="p-3 mb-0 text-center">4 new messages</h6>
         </div>
-      </li>
+      </li> -->
       <li class="nav-item dropdown">
         <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-toggle="dropdown">
           <i class="mdi mdi-bell-outline"></i>
@@ -317,13 +317,15 @@
                      data-buttons-class=" btn-sm btn-secondary"
                      data-toolbar=".buttons-toolbar"
                      data-show-footer="true"
-                     data-response-handler="handleData">
+                     data-response-handler="handleData"
+                     data-sort-name="time"
+                     data-sort-order="desc">
                       <thead>
                         <th data-field="_id" data-footer-formatter="showTotalText" data-sortable="true">订单号</th>
-                        <th data-field="name" data-visible="false" data-sortable="true">账号</th>
+                        <th data-field="alipay_account.name" data-visible="false" data-sortable="true">账号</th>
                         <th data-field="paidmoney" data-footer-formatter="showTotalMoney" data-sortable="true">毛收入</th>
                         <th data-field="net" data-footer-formatter="showTotalNet" data-sortable="true">净收入</th>
-                        <th data-field="t" data-formatter=“timestring”  data-sortable="true">时间</th>
+                        <th data-field="time" data-sort-order="desc" data-formatter="timestring"  data-sortable="true">时间</th>
                       </thead>
                       <tbody></tbody>
                     </table>

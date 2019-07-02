@@ -54,7 +54,7 @@
           <i class="mdi mdi-fullscreen" id="fullscreen-button"></i>
         </a>
       </li>
-      <li class="nav-item dropdown">
+      <!-- <li class="nav-item dropdown">
         <a class="nav-link count-indicator dropdown-toggle" id="messageDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
           <i class="mdi mdi-email-outline"></i>
           <span class="count-symbol bg-warning"></span>
@@ -100,7 +100,7 @@
           <div class="dropdown-divider"></div>
           <h6 class="p-3 mb-0 text-center">4 new messages</h6>
         </div>
-      </li>
+      </li> -->
       <li class="nav-item dropdown">
         <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-toggle="dropdown">
           <i class="mdi mdi-bell-outline"></i>
@@ -376,7 +376,8 @@
 <script>
 $('.call-pay-interface').html(`在你的程序中调用${location.origin+'/order'}，参数表如下
   <ul class="list-arrow">
-    <li>cb_url, string, 通知回调地址
+    <li>cb_url, string, 充值结果回调地址
+    <li>return_url, string, 充值结束后的返回地址，可不填
     <li>merchantid, string, 分配给你的merchantid
     <li>money, number, 充值数量，元作为单位，支持两位小数，如 100.25
     <li>userid, string, 你方平台中玩家的id
