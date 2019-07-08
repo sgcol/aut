@@ -29,6 +29,53 @@ module.exports={
     }
 }
 
+// otc adapter
+/*const sysevents=require('./sysevents.js'), mysql=require('mysql2'), pp=require('php-parser'), path=require('path');
+new Promise((resolve, reject) =>{
+    resolve(pp.parseCode(fs.readFileSync(path.join(__dirname, './otc/Application/Common/Conf/config.php'))));
+}).then((content)=>{
+    return new Promise((resolve)=>{
+        var phpObj=content.children[0].expr.items;
+        var o={};
+        phpObj.forEach((item)=>{
+            o[item.key.value]=item.value.value;
+        })
+        resolve(o);
+    })
+}).then(config=>{
+    var connection = mysql.createPool({
+        host     : config.DB_HOST,
+        user     : config.DB_USER,
+        password : config.DB_PWD,
+        database : config.DB_NAME,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0
+    });
+    connection.connect();
+
+    sysevents.on('newAlipayAccount', async function (acc) {
+        var time=Math.floor(new Date().getTime()/1000), salt=md5(time).substr(0, 3), pwd=md5(md5(acc.pwd)+salt);
+        var r=await connection.query(
+            `insert into ${config.DB_NAME}.cy_user (username, country_code, mobile, password, salt, addip, addtime, status, ue_img, yqm) values ('${acc.name}', 0, '${acc.name}', '${pwd}', '${salt}', '0.0.0.0', ${time}, 1, '/Uploads/head_portrait60.png', 'aabb');`
+        );
+        await connection.query(`insert into ${config.DB_NAME}.cy_user_coin (userid, usdt) values (${r.id}, 99999999999999)`);
+        request.post('http://127.0.0.1/api/market/add', this.makeOTCSign({userid:r.id, sellorbuy:'sell', price:6.98, provider:2, coin:'usdt'}));
+    }).on('newAccount', acc=>{
+        if (acc.acl=='admin' ||acc.acl=='manager') return;
+        var time=Math.floor(new Date().getTime()/1000), salt=md5(time).substr(0, 3), pwd=md5(md5(acc.originPwd)+salt);
+        connection.query(`insert into ${config.DB_NAME}.cy_user (username, country_code, mobile, password, salt, addip, addtime, status, ue_img, yqm) values ('${acc.name}', 0, '${acc._id}', '${pwd}', '${salt}', '0.0.0.0', ${time}, 1, '/Uploads/head_portrait60.png', 'aabb');`)
+    }).on('alipayOrderCreated', order=>{
+        connection.query()
+    }).on('orderConfirmed', order=>{
+
+    }) 
+})
+.catch(e=>{
+    console.error(e);
+})
+*/
+
 if (module==require.main) {
     // test mode
     const request=require('request');

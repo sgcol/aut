@@ -272,15 +272,15 @@
                     <form class="forms-extra">
                         <div class="form-group">
                         <label for="bankbenefit">户名</label>
-                        <input type="text" class="form-control" id="bank.account" placeholder="收款人户名">
+                        <input type="text" class="form-control" id="bank_account" placeholder="收款人户名">
                         </div>
                         <div class="form-group">
                         <label for="bankaccount">账号</label>
-                        <input type="text" class="form-control" id="bank.no" placeholder="收款人账号">
+                        <input type="text" class="form-control" id="bank_no" placeholder="收款人账号">
                         </div>
                         <div class="form-group">
                         <label for="bank">银行</label>
-                        <input type="text" class="form-control" id="bank.name" placeholder="选择银行">
+                        <input type="text" class="form-control" id="bank_name" placeholder="选择银行">
                         </div>
                     </form>
                     </div>
@@ -296,7 +296,7 @@
                     <form class="forms-extra">
                         <div class="form-group">
                         <label for="alipayAccount">收款账户</label>
-                        <input type="text" class="form-control" id="alipay.account" placeholder="支付宝账户/手机号码">
+                        <input type="text" class="form-control" id="alipay_account" placeholder="支付宝账户/手机号码">
                         </div>
                     </form>
                     </div>
@@ -343,16 +343,16 @@
 <script>
 var availble;
 window.initpage=()=>{
-    availble=addAllFields(me.in)-addAllFields(me.out);
+    availble=me.profit;
     $('.breadcrumb-item span').text('余额'+availble);
 
     if (me.bank) {
-        $('#bank.account').attr('placeholder',me.bank.account);
-        $('#bank.no').attr('placeholder', me.bank.no);
-        $('#bank.name').attr('placeholder', me.bank.name);
+        $('#bank_account').attr('placeholder',me.bank.account);
+        $('#bank_no').attr('placeholder', me.bank.no);
+        $('#bank_name').attr('placeholder', me.bank.name);
     }
     if (me.alipay) {
-        $('#alipay.account').attr('placeholder', me.alipay.account);
+        $('#alipay_account').attr('placeholder', me.alipay.account);
     }    
 };
 
@@ -363,7 +363,10 @@ $('#apply').click(function() {
     });
     if (Object.keys(params).length) accIntf('user/setextradata', params);
     var take=$('#take').val();
-    if (take) accIntf('user/take', {take:take});
+    if (take && take!="0") accIntf('user/take', {take:take}, (err)=>{
+        if (err) return alert(err);
+        alert('提交成功，一般在第二天会到账')
+    });
 });
 </script>
 </html>

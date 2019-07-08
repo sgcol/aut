@@ -1,8 +1,9 @@
 const getDB=require('./db.js'), pify=require('pify'), getMerchant=require('./merchants.js').getMerchant,ObjectID = require('mongodb').ObjectID
     ,request=require('request'), notifySellSystem=require('./sellOrder.js').notifySellSystem, async=require('async')
-    , sortObj=require('sort-object'), qs=require('querystring').stringify, sysnotifier=require('./sysnotifier.js')
-    , md5=require('md5');
+    , sortObj=require('sort-object'), qs=require('querystring').stringify, url=require('url'), sysnotifier=require('./sysnotifier.js')
+    , md5=require('md5'), sysevents=require('./sysevents.js');
 
+const onlineUsers=require('./auth.js').onlineUsers
 function getUser(id, cb) {
     getDB((err, db)=>{
         db.users.find({_id:id}).toArray((err, r)=>{
@@ -32,6 +33,7 @@ function createOrder(merchantid, userid, merchantOrderId, money, preferredPay, c
                 return db.bills.insertOne({merchantOrderId:merchantOrderId, userid:mer._id, merchantid:merchantid, mer_userid:userid, provider:'', providerOrderId:'', share:mer.share, money:money, paidmoney:-1, time:new Date(), lasttime:new Date(), lasterr:'', preferredPay:preferredPay, cb_url:cb_url, return_url:return_url, status:'created'}, {w:1});
             })
             .then((r)=>{
+                sysevents.emit('orderCreated', r.ops[0]);
                 callback(null, r.insertedId.toHexString());            
             }).catch((e)=>{
                 callback(e);
@@ -98,6 +100,7 @@ function confirmOrder(orderid, money, net, callback) {
             if (!net) net=money;
             r.paidmoney=money;
             var provider=r.provider||'unknown';
+            sysevents.emit('orderConfirmed', r);
             callback();
             var shares=[];
             // shares.push((money*(r[0].share||0.985)).toFixed(2));
@@ -142,6 +145,11 @@ function confirmOrder(orderid, money, net, callback) {
                     inc.daily=delta;
                     last=delta;
                     upds.push({updateOne:{filter:{_id:ele.user._id}, update:{$inc:inc}}});
+                    if (onlineUsers[ele.user._id]) {
+                        onlineUsers[ele.user._id].profit+=delta;
+                        onlineUsers[ele.user._id].daily+=delta;
+                        onlineUsers[ele.user._id].in[provider.name||provider]+=delta;
+                    }
                 }
                 db.users.bulkWrite(upds, {ordered:false});
                 var now=new Date();
@@ -179,9 +187,11 @@ function merSign(merchantData, o) {
 function notifyMerchant(orderdata) {
     getDB((err, db)=>{
         pify(getMerchant)(orderdata.merchantid).then((mer)=>{
-            return pify(request)({uri:orderdata.cb_url, form:merSign(mer, {orderid:orderdata.merchantOrderId, money:orderdata.paidmoney})});
+            var custom_params=url.parse(orderdata.cb_url, true).query;
+            return pify(request)({uri:orderdata.cb_url, form:merSign(mer, Object.assign(custom_params, {orderid:orderdata.merchantOrderId, money:orderdata.paidmoney}))});
         }).then((header, body)=>{
             return new Promise((resolve, reject)=>{
+                if (body.trim()=='') return resolve('');
                 try {
                     var ret=JSON.parse(body);
                 } catch(e) {
@@ -190,9 +200,9 @@ function notifyMerchant(orderdata) {
                 if (body.err) return reject(body.err);
                 resolve(ret);
             });
-        }).then(()=>{
+        }).then((ret)=>{
             retryNotifyList.delete(orderdata._id);
-            db.bills.update({_id:orderdata._id}, {$set:{status:'complete', lasttime:new Date()}});
+            db.bills.update({_id:orderdata._id}, {$set:{status:'complete', lasttime:new Date(), merchant_return:body}});
         }).catch((e)=>{
             // put into retry list
             var rn=retryNotifyList.get(orderdata._id);
@@ -200,13 +210,13 @@ function notifyMerchant(orderdata) {
                 rn=orderdata;
                 rn.retrytimes=1;
                 retryNotifyList.set(orderdata._id, rn);
-                db.bills.update({_id:orderdata._id}, {$set:{lasttime:new Date(), status:'通知商户', lasterr:e.message}});
+                db.bills.update({_id:orderdata._id}, {$set:{lasttime:new Date(), status:'通知商户', lasterr:e.message, merchant_return:body}});
             }
             else {
                 rn.retrytimes++;
+                db.bills.update({_id:orderdata._id}, {$set:{lasttime:new Date(), status:'通知失败', lasterr:e.message, merchant_return:body}});
                 if (rn.retrytimes>5) {
                     retryNotifyList.delete(orderdata._id);
-                    db.bills.update({_id:orderdata._id}, {$set:{lasttime:new Date(), status:'通知失败', lasterr:e.message}});
                 }
             }
         });    

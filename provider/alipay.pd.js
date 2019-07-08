@@ -21,7 +21,8 @@ const url = require('url')
 , pify =require('pify')
 , getvalue=require('get-value')
 , notifier=require('../sysnotifier.js')
-, argv=require('yargs').argv;
+, argv=require('yargs').argv
+, sysevents=require('../sysevents.js');
 
 const _noop=function() {};
 
@@ -119,14 +120,20 @@ function init(err, db) {
 		fee!=null && (upd.fee=normalizeFee(fee));
 		var defaultValue={createTime:new Date()};
 		if (fee==null) defaultValue.fee=alipayFee;
-		db.alipay_accounts.updateOne({_id:appId}, {$set:upd,$setOnInsert:defaultValue}, {upsert:true, w:1}, callback);
+		db.alipay_accounts.updateOne({_id:appId}, {$set:upd,$setOnInsert:defaultValue}, {upsert:true, w:1}, (err, r)=>{
+			if (err) return callback(err);
+			if (r.upserted) {
+				sysevents.emit('newAlipayAccount', upd);
+			}
+			callback();
+		});
 	}))
 	router.all('/listAccounts', verifyAuth, verifyManager, httpf({appId:'?string', page:'?number', perPage:'?number', sorts:'?object', queries:'?object', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, function(appId, page, perPage, sorts, queries, sort, order, offset, limit, callback) {
 		var key={};
 		if (appId) {
 			key._id=appId;
 		}
-		var cur=db.alipay_accounts.find(key);
+		var cur=db.alipay_accounts.find(key, {alipayPublicKey:0, privateKey:0});
 		if (!appId) {
 			if (sort) {
 				var so={};
@@ -412,6 +419,7 @@ function init(err, db) {
 			).then((result)=>{
 				// result 为可以跳转到支付链接的 url
 				updateOrder(orderid, {status:'待支付', alipay_account:account, lasttime:new Date()})
+				sysevents.emit('alipayOrderCreated', {alipay_account:account, orderid:orderid, money:money, merchant:merchantdata});
 				callback(null, {to:result});		
 			}).catch((err)=>{
 				callback(err)

@@ -10,6 +10,7 @@ const server = require('http').createServer()
 , cookieParser = require('cookie-parser')
 , qs = require('querystring')
 , sortObj=require('sort-object')
+, objPath=require('object-path')
 , filter = require('filter-object')
 , merge = require('gy-merge')
 , fs = require('fs')
@@ -33,6 +34,7 @@ const server = require('http').createServer()
 , md5 = require('md5')
 , sysnotifier =require('./sysnotifier.js')
 , verifyOTC =require('./otc.js').verifyOTC
+, clone =require('clone')
 , chokidar =require('chokidar')
 , argv = require('yargs')
 	.default('port', 80)
@@ -41,7 +43,8 @@ const server = require('http').createServer()
 	.default('authtimeout', 3*60*1000)
 	.describe('host', 'bypass default host for testing alipay notification')
 	.argv
-, debugout=require('debugout')(argv.debugout);
+, debugout=require('debugout')(argv.debugout)
+, events=require('./sysevents.js');
 
 require('colors');
 
@@ -92,11 +95,11 @@ function prepareNeighbors(callback) {
 	});	
 }
 
-chokidar.watch(path.join(__dirname, 'pub/views'), {ignored: /[\/\\]\./})
+var watcher=chokidar.watch(path.join(__dirname, 'pub/views'), {ignored: /[\/\\]\./})
 .on('change', (p)=>{
-	delete app.cache[path.basename(p)]
+	delete app.cache[path.basename(p, '.ejs')]
 })
-.on('unlink', p =>{delete app.cache[path.basename(p)]});
+.on('unlink', p =>{delete app.cache[path.basename(p, '.ejs')]});
 
 function checkAdminAccountExists(cb) {
 	getDB((err, db)=>{
@@ -210,7 +213,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		callback(null, {url:'alipay.com'});
 	}));
 
-	const _auth=require('./auth.js'), authedClients=_auth.authedClients, aclgt=_auth.aclgt, verifyManager=_auth.verifyManager, verifyAdmin=_auth.verifyAdmin, getAuth=_auth.getAuth, verifyAuth=_auth.verifyAuth, noAuthToLogin=_auth.verifyAuth;
+	const _auth=require('./auth.js'), addAuth=_auth.addAuth, authedClients=_auth.authedClients, aclgt=_auth.aclgt, verifyManager=_auth.verifyManager, verifyAdmin=_auth.verifyAdmin, getAuth=_auth.getAuth, verifyAuth=_auth.verifyAuth, noAuthToLogin=_auth.verifyAuth;
 
 	function verifyDebugMode(req, res, next) {
 		if (req.auth.debugMode) return next();
@@ -279,7 +282,11 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			callback(e);
 		})
 	}))
-	app.all('/admin/listOutgoingOrders', verifyAuth, httpf({from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, function(from, to, sort, order, count, offset, callback) {
+	app.all('/admin/listOutgoingOrders', verifyAuth, httpf({name:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, function(name, from, to, sort, order, count, offset, callback) {
+		var op=[];
+		if (this.req.auth.acl=='agent' || this.req.auth.acl=='merchant') {
+			name=this.req.auth.name;
+		}
 		var query={};
 		if (from ||to) {
 			var times={};
@@ -287,19 +294,35 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			if (to) times.$lte=to;
 			query.time=times;	
 		}
-		if (this.req.auth.acl!='admin' && this.req.auth.acl!='manager') {
-			query.merchantid=this.req.auth.merchantid;
+		if (name) {
+			query.name=name;
+			var cursor=db.withdrawals.find(query);
+			if (sort) {
+				var so={};
+				so[sort]=(order=='asc'?1:-1);
+				cursor=cursor.sort(so);
+			}
+			if (offset) {
+				cursor=cursor.skip(offset);
+			}
+			if (count) cursor=cursor.limit(count);
+			op=[cursor.toArray(), cursor.count()];
+		} else {
+			var cursor=db.withdrawals.aggregate([{$match:query}, {$group:{_id:'$userid', money:{$sum:'$money'}, name:{$last:'$name'}, _t:{$last:'$_t'}}}]);
+			var cur2=cursor.clone();
+			if (sort) {
+				var so={};
+				so[sort]=(order=='asc'?1:-1);
+				cursor.sort(so);
+			}
+			if (offset) {
+				cursor.skip(offset);
+			}
+			if (count) {
+				cursor.limit(count);
+			}
+			op=[cursor.toArray(), cur2.group({_id:null, c:{$sum:1}}).project({_id:0}).toArray()];
 		}
-		var cursor=db.withdrawals.find(query);
-		if (sort) {
-			var so={};
-			so[sort]=(order=='asc'?1:-1);
-			cursor=cursor.sort(so);
-		}
-		if (offset) {
-			cursor=cursor.skip(offset);
-		}
-		if (count) cursor=cursor.limit(count);
 		Promise.all([
 			db.withdrawals.aggregate([
 				{$match:query},
@@ -307,34 +330,10 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 					_id:0,
 					total:{$sum:'$money'}
 				}}]
-			).toArray(),
-			cursor.toArray()
-		]).then((results)=>{
+			).toArray()].concat(op)).then((results)=>{
 			var r=results[1];
-			var merids=new Set();
-			for (var i=0; i<r.length; i++) {
-				var o=r[i];
-				merids.add(o.merchantid);
-			}
-			var idarr=[];
-			merids.forEach((v)=>{idarr.push(v)});
-			db.users.find({merchantid:{$in:idarr}}).toArray().then((idmap)=>{
-				var map={};
-				for (var i=0; i<idmap.length; i++) {
-					map[idmap[i].merchantid]=idmap[i].name;
-				}
-				for (var i=0; i<r.length; i++) {
-					var o=r[i];
-					o.mername=map[o.merchantid];
-				}
-				cursor.count(false, (err, c)=>{
-					if (err) return callback(err);
-					callback(null, {total:c, rows:r, /*sum:results[0][0].total*/});
-				});
-			})
-			.catch((e)=>{
-				callback(e);
-			});
+			var c=objPath.get(r, [0, 'c'])||objPath.get(results, [2, 0, 'c'])||0;
+			callback(null, {total:c, rows:r, sum:objPath.get(results, [0,0,'total'], 0)});
 		})
 		.catch((e)=>{
 			callback(e);
@@ -561,7 +560,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			} else return callback('用户名密码错');
 			var now=new Date();
 			var rstr=randomstring()+now.getTime();
-			var o=authedClients[rstr]=r[0];
+			var o=addAuth(rstr, r[0]);//authedClients[rstr]=r[0];
 			o.validUntil=new Date(now.getTime()+auth_timeout);
 			o.acl=o.acl||o.identity;
 			o.name=o.name||o._id;
@@ -591,6 +590,8 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			}
 			db.users.insertOne(o, {w:1}, function(err) {
 				callback(err);
+				o.originPwd=password;
+				if (!err) events.emit('newAccount', o);
 			})	
 		})
 	}))
@@ -848,7 +849,8 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		if (aclgt(this.req.auth.acl, 'manager')) {
 			if (!userid) return callback('no userid specified');
 		}
-		userid=this.req.auth._id;
+		else userid=this.req.auth._id;
+		var user=this.req.auth;
 		db.users.findOneAndUpdate({_id:userid, profit:{$gte:want}}, {$inc:{profit:-want}}, {w:'majority'}, (err, r)=>{
 			if (err) return callback(err);
 			if (!r.value) {
@@ -858,9 +860,11 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 					return callback('没有这个用户');
 				});
 			}
+			user.profit-=want;
 			var usrdata=r.value, total=0, lefts={};
+			if (!usrdata.out) usrdata.out={};
 			for (var i in usrdata.in) {
-				lefts[i]=usrdata.in[i]-usrdata.out[i];
+				lefts[i]=usrdata.in[i]-(usrdata.out[i]||0);
 				if (lefts[i]<0) {
 					// write a warning
 				}
@@ -875,7 +879,9 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			var takesop=[], now=new Date(), inc={};
 			for (var i in lefts) {
 				var d=Math.min(lefts[i],want);
-				takesop.push({userid:userid, name:r.value.name, _t:now, money:take, change:inc, snap:{in:usrdata.in, out:usrdata.out}, provider:i, done:false});
+				var chg={};
+				chg[i]=d;
+				takesop.push({userid:userid, name:r.value.name, _t:now, money:d, change:chg, snap:{in:usrdata.in, out:usrdata.out}, provider:i, done:false});
 				inc['out.'+i]=d;
 				if (d==want) break;
 				want-=d;
@@ -942,10 +948,14 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	}));
 
 	/////////////////some server rendered pages
-	app.all('/fromuserlist.html', noAuthToLogin, (req, res) =>{
+	function err_h(err, req, res, next) {
+		if (err.err=='no auth') return res.redirect('/login.html');
+		return next(err);
+	}
+	app.all('/fromuserlist.html', verifyAuth, err_h, (req, res) =>{
 		res.render('fromuserlist', {acl:req.auth.acl});
 	})
-	app.all('/tomerchantlist.html', noAuthToLogin, (req, res)=>{
+	app.all('/tomerchantlist.html', verifyAuth, err_h, (req, res)=>{
 		res.render('tomerchantlist', {acl:req.auth.acl});
 	})
 	/////////////////must be last one
@@ -953,6 +963,10 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		res.status(404);
 		res.render('404', {});
 	});
+	app.use(function(err, req, res, next) {
+		if (err.err=='no auth') return res.send(err);
+		res.render('error', err);
+	})
 	
 	if (appStarted) return console.log('normal server is running'.green);
 	app.listen(argv.port, function() {

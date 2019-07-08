@@ -61,6 +61,14 @@
                     <h4 class="card-title">清帐订单</h4>
                     <div class="buttons-toolbar">
                       <form class="form-inline" id="params">
+                        <% if (acl=='admin' || acl=='manager') {  %>
+                        <div class="input-group input-group-sm">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-account-box"></i></span>
+                          </div>
+                          <input type="text" class="form-control mr-sm-2" placeholder="商户/代理名字" name="name">
+                        </div>
+                        <% } %>
                         <div class="input-group input-group-sm">
                           <div class="input-group-prepend">
                             <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-calendar-today"></i></span>
@@ -94,7 +102,7 @@
                             <th data-field="name" data-sortable="true" data-footer-formatter="Total">
                               商户
                             </th>
-                            <th data-field="time" data-sortable="true" data-formatter="timestring">
+                            <th data-field="_t" data-sortable="true" data-formatter="timestring">
                               时间
                             </th>
                             <th data-field="money" data-sortable="true" data-footer-formatter="showTotalOutgoing">
@@ -156,14 +164,14 @@
     return "Total";
   }
   function showTotalOutgoing() {
-    return data?data.total:undefined;
+    return data?data.sum:undefined;
   }
   function querydata() {
     var querys={};
     var drp=$('input[name="dates"]').data('daterangepicker');
     querys.startTime=drp.startDate._d;
     querys.endTime=drp.endDate._d;
-    if (allclear) $('#detail').bootstrapTable('refresh', {query:querys});
+    $('#detail').bootstrapTable('refresh', {query:querys});
   }  
 </script>
 </html>

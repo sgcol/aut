@@ -10,7 +10,7 @@ var q=async.queue(function (extern_callback, queue_callback) {
   (function(cb) {
     if (__stored_db) return cb(null, __stored_db, easym);
     else new easym.DbProvider().init(argv.mongo, {exists:[
-        {bills:{index:['status', 'time', 'type' ]}},
+        {bills:{index:['status', 'time', 'type', {userid:1, used:1, time:-1, lasttime:-1, paidmoney:1, money:1}]}},
         'knownCard',
         {users:{index:['acl', 'merchantid']}},
         {monster:{index:'exOrderId', capped:true, size:100*1024, max:100000}},
@@ -19,7 +19,7 @@ var q=async.queue(function (extern_callback, queue_callback) {
         {'alipay_accounts':{index:['disable', 'occupied', 'in']}},
         {'alipay_logs':{capped:true, size:200*1024*1024, max:3650000}},
         'alipay_settings',
-        {'withdrawals':{index:['userid', 'done']}},
+        {'withdrawals':{index:['userid', 'done', {_t:-1, userid:1, money:1, name:-1}, 'money', 'name']}},
         {notify:{capped:true, size:100*1024, max:1000000, index:'read'}},
         ]}, 
         function(err, db) {

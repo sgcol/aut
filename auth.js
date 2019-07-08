@@ -3,31 +3,26 @@ const argv = require('yargs')
     .argv;
     
 const auth_timeout=argv.authtimeout;
-var authedClients={};
-function verifyAuth(req, res, next) {
-    if (!req.cookies || !req.cookies.a) return res.send({err:'no auth'});
+var authedClients={}, onlineUsers={};
+function checkAuth(req, updateAuthTime, next) {
+    if (!req.cookies || !req.cookies.a) return next({err:'no auth'});
     var auth=authedClients[req.cookies.a];
-    if (!auth) return res.send({err:'no auth'});
+    if (!auth) return next({err:'no auth'});
     var now=new Date();
     if (auth.validUntil<now) {
         delete authedClients[req.cookies.a]
-        return res.send({err:'no auth'});
+        delete onlineUsers[auth._id];
+        return next({err:'no auth'});
     }
-    auth.validUntil=new Date(now.getTime()+auth_timeout);
+    updateAuthTime && (auth.validUntil=new Date(now.getTime()+auth_timeout));
     req.auth=auth;
     next();
 }
+function verifyAuth(req, res, next) {
+    checkAuth(req, true, next);
+}
 function getAuth(req, res, next) {
-    if (!req.cookies || !req.cookies.a) return res.send({err:'no auth'});
-    var auth=authedClients[req.cookies.a];
-    if (!auth) return res.send({err:'no auth'});
-    var now=new Date();
-    if (auth.validUntil<now) {
-        delete authedClients[req.cookies.a]
-        return res.send({err:'no auth'});
-    }
-    req.auth=auth;
-    next();		
+    checkAuth(req, false, next);
 }
 const noAuthToLogin=verifyAuth;
 function verifyAdmin(req, res, next) {
@@ -40,11 +35,18 @@ function verifyManager(req, res, next) {
     if (req.auth.acl=='admin' || req.auth.acl=='manager') return next();
     res.send({err:'无权访问'});
 }
-
+function addAuth(key, o) {
+    authedClients[key]=o;
+    onlineUsers[o._id]=o;
+    return o;
+}
 setInterval(function() {
     var now =new Date();
     for (var i in authedClients) {
-        if (authedClients[i].validUntil<now) delete authedClients[i];
+        if (authedClients[i].validUntil<now) {
+            delete onlineUsers[authedClients[i]._id];
+            delete authedClients[i];
+        }
     }
 }, 5*60*1000);
 function aclgt(acl1, acl2) {
@@ -64,5 +66,7 @@ module.exports={
     verifyAdmin:verifyAdmin,
     getAuth:getAuth,
     verifyAuth:verifyAuth,
-    authedClients:authedClients
+    authedClients:authedClients,
+    addAuth:addAuth,
+    onlineUsers:onlineUsers
 }

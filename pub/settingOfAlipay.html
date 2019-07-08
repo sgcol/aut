@@ -525,7 +525,7 @@
           `
   }
   function showincoming(value, record) {
-    return `${value||0}/${record.in||0}`;
+    return `${value||0}/${record.total||0}`;
   }
   function showGrossIncoming(value, record) {
     return `${value||0}/${record.gross?(record.gross.total||0):0} `;
