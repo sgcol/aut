@@ -405,10 +405,10 @@ $(()=>{
     var now=new Date();
     var params={
         cb_url:'http://127.0.0.1/demo/result',
-        return_url:location.href,
         merchantid:$('#merchantid').val(),
         money:Number($('#money').val()),
         orderid:'TESTORDER'+now.getTime(),
+        return_url:location.href,
         time:now.getTime(),
         userid:$('#userid').val(),
     };
