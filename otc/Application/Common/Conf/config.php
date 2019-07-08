@@ -8,11 +8,11 @@ return array(
 
 	'DB_HOST'              => '127.0.0.1',
 
-	'DB_NAME'              => 'otc',
+	'DB_NAME'              => 'usdt',
 
 	'DB_USER'              => 'root',
 
-	'DB_PWD'               => '123456',
+	'DB_PWD'               => '123456qwe',
 
 	'DB_PORT'              => '3306',
 
