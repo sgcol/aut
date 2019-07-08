@@ -134,8 +134,8 @@
     window.timestring =(t)=>{
       return new Date(t).toLocaleDateString()+' '+ new Date(t).toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");;
     }
-    window.formatBigNumber=(s)=>{
-      return (''+s).replace(/(?=(?!^)(?:\d{3})+(?:\.|$))(\d{3}(\.\d+$)?)/g,',$1');
+    window.formatBigNumber=(s, digitNumber)=>{
+      return Number(s).toLocaleString(undefined, {maximumFractionDigits:digitNumber||2});
     }
     window.addAllFields=(o)=>{
         var ret=0;

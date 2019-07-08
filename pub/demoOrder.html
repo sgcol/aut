@@ -412,6 +412,7 @@ $(()=>{
         time:now.getTime(),
         userid:$('#userid').val(),
     };
+    if (!params.userid || !params.money) return alert('请正确填写参数');
     var key=$('#key').val();
     params.sign=md5(key+Qs.stringify(params));
     location.href='/order?'+Qs.stringify(params);
