@@ -201,8 +201,12 @@
       $('#editMerchant form [id]').each(function(idx, ele) {
         params[ele.id]=$(ele).val();
       });
-      params.id=account;
-      accIntf('/admin/updateAccount', params);
+      params.id=account._id;
+      accIntf('/admin/updateAccount', params, (err)=>{
+        if (err) alert(err);
+        alert('成功');
+        $('#editMerchant').modal('hide');
+      });
     })
   });
   window.initpage=()=>{
