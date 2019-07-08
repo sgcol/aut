@@ -437,7 +437,7 @@
       });
       params.id=account._id;
       accIntf('/admin/updateAccount', params, (err)=>{
-        if (err) alert(err);
+        if (err) return alert(err);
         alert('成功');
         $('#editMerchant').modal('hide');
       });

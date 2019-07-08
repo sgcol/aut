@@ -597,8 +597,8 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	}))
 	app.all('/admin/updateAccount', verifyAuth, httpf({id:'?string', merchantid:'?string', /*key:'?string', debugMode:'?boolean', del:'?boolean', */callback:true}, function(id, merchantid,/*key, debugMode, del,*/callback) {
 		var params=merge(this.req.query, this.req.body);
-		delete params.id;
-		delete params.merchantid;
+		// delete params.id;
+		// delete params.merchantid;
 
 		for (var i in params) {
 			if (params[i]==null || params[i]==='') delete params[i];
@@ -609,7 +609,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		else if (merchantid) useid.merchantid=merchantid;
 		else return callback('id merchantid必须指定一个');
 		if (!aclgt(this.req.auth.acl, 'manager')) {
-			if ((id && id!=this.auth._id) || (merchantid && merchantid!=this.req.auth.merchantid)) return callback('无此权限');
+			if ((id && id!=this.req.auth._id) || (merchantid && merchantid!=this.req.auth.merchantid)) return callback('无此权限');
 		}
 		if (merchantid) {
 			broadcastNeighbors({type:'admin:updateMerchant', data:params});
