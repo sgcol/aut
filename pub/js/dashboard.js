@@ -171,7 +171,7 @@
       for (var k in rs.out) {
         var subtotal=0;
         for (var m in rs.out[k]) {
-          subtotal+=rs.out[k][m];
+          subtotal+=fix2(rs.out[k][m]);
         }
         _out.data.push(subtotal);
         _out.bg.push(colors[k]||colors.white);
@@ -181,18 +181,18 @@
         _in.bg.push(colors.white);
       }
       for (var k in rs.in) {
-        _in.data.push(rs.in[k].net);
+        _in.data.push(fix2(rs.in[k].net));
         _in.bg.push(colors[k]||colors.white);
         _in.label.push(k);
-        _in.total+=rs.in[k].net;  
+        _in.total+=fix2(rs.in[k].net);  
       }
       if (_in.total!=_out.total) {
         if (_in.total>_out.total) {
-          _out.data.push(_in.total-_out.total);
+          _out.data.push(fix2(_in.total-_out.total));
           _out.bg.push(colors.gray);
           _out.label.push('分账少了');
         } else {
-          _in.data.push(_out.total-_in.total);
+          _in.data.push(fix2(_out.total-_in.total));
           _in.bg.push(colors.red);
           _in.label.push('充值少了');
         }

@@ -237,7 +237,7 @@
             <nav aria-label="breadcrumb">
                 <ul class="breadcrumb">
                 <li class="breadcrumb-item active" aria-current="page">
-                    <span>余额 12233445</span>
+                    <span>余额 </span>
                     <i class="mdi mdi-coin icon-sm text-primary align-middle"></i>
                 </li>
                 </ul>
@@ -343,7 +343,7 @@
 <script>
 var availble;
 window.initpage=()=>{
-    availble=me.profit;
+    availble=fix2(me.profit);
     $('.breadcrumb-item span').text('余额'+availble);
 
     if (me.bank) {

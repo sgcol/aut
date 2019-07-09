@@ -1,4 +1,4 @@
-const getDB=require('./db.js'), pify=require('pify'), getMerchant=require('./merchants.js').getMerchant,ObjectID = require('mongodb').ObjectID
+const getDB=require('./db.js'), pify=require('pify'), getMerchant=require('./merchants.js').getMerchant,ObjectID = require('mongodb').ObjectID, Decimal128=require('mongodb').Decimal128
     ,request=require('request'), notifySellSystem=require('./sellOrder.js').notifySellSystem, async=require('async')
     , sortObj=require('sort-object'), qs=require('querystring').stringify, url=require('url'), sysnotifier=require('./sysnotifier.js')
     , md5=require('md5'), sysevents=require('./sysevents.js');
@@ -140,9 +140,9 @@ function confirmOrder(orderid, money, net, callback) {
                         shares.splice(i);
                         break;
                     }
-                    inc[`in.${provider.name||provider}`]=delta;
-                    inc.profit=delta;
-                    inc.daily=delta;
+                    inc[`in.${provider.name||provider}`]=Decimal128.fromString(''+delta);
+                    inc.profit=Decimal128.fromString(''+delta);
+                    inc.daily=Decimal128.fromString(''+delta);
                     last=delta;
                     upds.push({updateOne:{filter:{_id:ele.user._id}, update:{$inc:inc}}});
                     if (onlineUsers[ele.user._id]) {
@@ -184,13 +184,20 @@ function merSign(merchantData, o) {
     o.sign=md5(merchantData.key+qs(sortObj(o,{sort:(a, b)=>{return a>b?1:-1}})));
     return o;
 }
+function normalizeError(e) {
+    if (typeof e=='string') return e;
+    if (e instanceof Error) return e.message;
+    return e;
+}
 function notifyMerchant(orderdata) {
     getDB((err, db)=>{
+        var body;
         pify(getMerchant)(orderdata.merchantid).then((mer)=>{
             var custom_params=url.parse(orderdata.cb_url, true).query;
             return pify(request)({uri:orderdata.cb_url, form:merSign(mer, Object.assign(custom_params, {orderid:orderdata.merchantOrderId, money:orderdata.paidmoney}))});
         }).then((header, body)=>{
             return new Promise((resolve, reject)=>{
+                body=body;
                 if (body.trim()=='') return resolve('');
                 try {
                     var ret=JSON.parse(body);
@@ -210,11 +217,11 @@ function notifyMerchant(orderdata) {
                 rn=orderdata;
                 rn.retrytimes=1;
                 retryNotifyList.set(orderdata._id, rn);
-                db.bills.update({_id:orderdata._id}, {$set:{lasttime:new Date(), status:'通知商户', lasterr:e.message, merchant_return:body}});
+                db.bills.update({_id:orderdata._id}, {$set:{lasttime:new Date(), status:'通知商户', lasterr:normalizeError(e), merchant_return:body}});
             }
             else {
                 rn.retrytimes++;
-                db.bills.update({_id:orderdata._id}, {$set:{lasttime:new Date(), status:'通知失败', lasterr:e.message, merchant_return:body}});
+                db.bills.update({_id:orderdata._id}, {$set:{lasttime:new Date(), status:'通知失败', lasterr:normalizeError(e), merchant_return:body}});
                 if (rn.retrytimes>5) {
                     retryNotifyList.delete(orderdata._id);
                 }
@@ -271,7 +278,8 @@ function updateWithLog(user, delta, desc, orderid, provider) {
         getDB((err, db)=>{
             db.balance.insertOne({user:userdata, delta:delta, desc:desc, orderid:orderid, t:new Date()});
             var inc={};
-            inc[`in.${provider}`]=delta;
+            inc[`in.${provider}`]=Decimal128.fromString(''+delta);
+            inc.daily=Decimal128.fromString(''+delta);
             db.users.update({_id:userdata._id}, {$inc:inc}, {upsert:true});
             // if (!userdata.total) {
             //     userdata.total={};

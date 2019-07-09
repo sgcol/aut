@@ -14,6 +14,7 @@ const url = require('url')
 , async =require('async')
 , md5 = require('md5')
 , getDB=require('../db.js')
+, Decimal128 =require('mongodb').Decimal128
 , confirmOrder =require('../order.js').confirmOrder
 , updateOrder =require('../order.js').updateOrder
 , cancelOrder =require('../order.js').cancelOrder
@@ -22,6 +23,7 @@ const url = require('url')
 , getvalue=require('get-value')
 , notifier=require('../sysnotifier.js')
 , argv=require('yargs').argv
+, dec2num =require('../etc.js').dec2num
 , sysevents=require('../sysevents.js');
 
 const _noop=function() {};
@@ -240,8 +242,8 @@ function init(err, db) {
 				]).toArray((err, tm)=>{
 					var totalmoney, totalnet;
 					if (!err && tm.length>0) {
-						totalmoney=tm[0].totalMoney; 
-						totalnet=tm[0].net;
+						totalmoney=dec2num(tm[0].totalMoney); 
+						totalnet=dec2num(tm[0].net);
 					}
 					callback(null, {total:c, rows:r, totalmoney:totalmoney, totalnet:totalnet});
 				})
@@ -311,7 +313,7 @@ function init(err, db) {
 		}
 		confirmOrder(orderid, total_amount, net, (err)=>{
 			if (!err) {
-				db.alipay_accounts.updateOne({_id:acc.appId}, {$set:{'log.success':acc.log.success, 'succrate':succrate}, $inc:{daily:net, total:net, 'gross.daily':total_amount, 'gross.total':total_amount, used:1}});
+				db.alipay_accounts.updateOne({_id:acc.appId}, {$set:{'log.success':acc.log.success, 'succrate':succrate}, $inc:{daily:Decimal128.fromString(''+net), total:Decimal128.fromString(''+net), 'gross.daily':Decimal128.fromString(''+total_amount), 'gross.total':Decimal128.fromString(''+total_amount), used:1}});
 				delete usedAccount[orderid];
 			}
 			if (err && err!='used order') return callback(err);

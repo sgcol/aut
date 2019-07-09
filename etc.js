@@ -1,6 +1,7 @@
 (function(exports) {
 	const sortObj=require('sort-object'), qs=require('querystring').stringify, url=require('url'), crypto=require('crypto');
-	const merge=require('gy-merge'), sortObj=require('sort-object');
+	const merge=require('gy-merge');
+	const Decimal128=require('mongodb').Decimal128;
 	const accessKey='8ec6e926-fa23645b-1aba961a-9ad42', secretKey='760252a2-0b814bfb-dd6e61d0-2f102';
 	exports.md5 = function (str, length) {
 		var buf = new Buffer(str.length * 2 + 1);
@@ -26,5 +27,10 @@
 		hmac.update(qs(sortObj(obj)));
 		obj.Signature=hmac.digest('base64');
 		return obj;
+	}
+	exports.dec2num=function(dec) {
+		if (dec==null) return null;
+		if (dec instanceof Decimal128) return Number(dec.toString());
+		return dec;
 	}
 })(module.exports);

@@ -16,11 +16,13 @@ const server = require('http').createServer()
 , fs = require('fs')
 // , subdirs = require('subdirs')
 // , del = require('delete')
+, dec2num =require('./etc.js').dec2num
 , randomstring =require('random-string')
 , async =require('async')
 , pm2 =require('pm2')
 , getDB=require('./db.js')
 , ObjectID = require('mongodb').ObjectID
+, Decimal128 =require('mongodb').Decimal128
 , httpf = require('httpf')
 , pify =require('pify')
 , _orderFunc=require('./order.js')
@@ -112,7 +114,7 @@ function checkAdminAccountExists(cb) {
 }
 function plusall(obj1, obj2) {
 	for (var k in obj2) {
-		obj1[k]=(obj1[k]||0)+obj2[k];
+		obj1[k]=dec2num(obj1[k])||0+dec2num(obj2[k])||0;
 	}
 	return obj1;
 }
@@ -240,7 +242,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.all('/adapter/balance', verifySign, httpf({merchantid:'string', callback:true}, function(merchantid, callback) {
 		db.users.findOne({merchantid:merchantid}, (err, r)=>{
 			if (err) return callback(err);
-			callback(null, {balance:r.profit});
+			callback(null, {balance:dec2num(r.profit)});
 		});
 	}))
 	app.all('/adapter/listOrders', verifySign, httpf({merchantid:'string', orderid:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, function(merchantid, orderid, from, to, sort, order, count, offset, callback) {
@@ -564,6 +566,17 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			o.validUntil=new Date(now.getTime()+auth_timeout);
 			o.acl=o.acl||o.identity;
 			o.name=o.name||o._id;
+			o.profit=dec2num(o.profit);
+			if (o.in) {
+				for (var k in o.in) {
+					o.in[k]=dec2num(o.in[k]);
+				}
+			}
+			if (o.out) {
+				for (var k in o.out) {
+					o.out[k]=dec2num(o.out[k]);
+				}
+			}
 			res.cookie('a',rstr);
 			if (o.acl=='admin'||o.acl=='manager') return callback(null, {to:'/dashboard.html', token:rstr});
 			else if (o.acl=='merchant') return callback(null, {to:'/merentry.html', token:rstr});
@@ -721,7 +734,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 				t.setHours(0, 0, 0, 0);
 				db.bills.aggregate([{$match:{time:{$gte:t}, paidmoney:{$gt:-1}}}, {$group:{_id:null, sum:{$sum:'$money'}}}], function(err, r) {
 					if (err) return cb(null, 0);
-					cb(null, r[0]?r[0].sum:0);
+					cb(null, r[0]?dec2num(r[0].sum):0);
 				})
 			}
 		}, callback);
@@ -772,6 +785,10 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			}},
 			{$sort:{_id:1}}
 		]).toArray().then((r)=>{
+			r.forEach(item=>{
+				item.money=dec2num(item.money);
+				item.net=dec2num(item.net);
+			})
 			callback(null, httpf.json(r));
 		}).catch(callback);
 	}));
@@ -785,6 +802,9 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			var incoming={};
 			source_incoming.forEach((ele)=>{
 				incoming[ele._id||'unknown']=ele;
+				ele.money=dec2num(ele.money);
+				ele.paidmoney=dec2num(ele.paidmoney);
+				ele.net=dec2num(ele.net);
 			});
 			var outgoing={system:{}, merchant:{}, agent:{}};
 			source_outgoing.forEach((ele)=>{
@@ -851,7 +871,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}
 		else userid=this.req.auth._id;
 		var user=this.req.auth;
-		db.users.findOneAndUpdate({_id:userid, profit:{$gte:want}}, {$inc:{profit:-want}}, {w:'majority'}, (err, r)=>{
+		db.users.findOneAndUpdate({_id:userid, profit:{$gte:want}}, {$inc:{profit:Decimal128.fromString(''-want)}}, {w:'majority'}, (err, r)=>{
 			if (err) return callback(err);
 			if (!r.value) {
 				// maybe no user or not enough money
@@ -882,7 +902,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 				var chg={};
 				chg[i]=d;
 				takesop.push({userid:userid, name:r.value.name, _t:now, money:d, change:chg, snap:{in:usrdata.in, out:usrdata.out}, provider:i, done:false});
-				inc['out.'+i]=d;
+				inc['out.'+i]=Decimal128.fromString(''+d);
 				if (d==want) break;
 				want-=d;
 			}
