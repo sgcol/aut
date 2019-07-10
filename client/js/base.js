@@ -135,7 +135,8 @@
       return new Date(t).toLocaleDateString()+' '+ new Date(t).toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");;
     }
     window.formatBigNumber=(s, digitNumber)=>{
-      return Number(s).toLocaleString(undefined, {maximumFractionDigits:digitNumber||2});
+        return s;
+    //   return Number(s).toLocaleString(undefined, {maximumFractionDigits:digitNumber||2});
     }
     window.fix2=(n)=>{
         return Number(Number(n).toFixed(2));
