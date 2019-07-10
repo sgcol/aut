@@ -242,7 +242,7 @@ function merchantStatus(isDebugging) {
 }
 function queryRecentMerchantAccounts(params) {
   accIntf('/admin/listAccount', {identity:'merchant', offset:0, limit:4, sort:'createTime', order:'des'}, (err, r)=>{
-    if (err) return params.fail(err);
+    if (err) return params.error(err);
     params.success(r);
   })
 }
@@ -263,7 +263,7 @@ function showOp(v, o) {
 }
 function queryRecentOrders(params) {
   accIntf('/admin/listOrders', {offset:0, limit:10, sort:'time', order:'des'}, (err, r)=>{
-    if (err) return params.fail(err);
+    if (err) return params.error(err);
     params.success(r);
   })
 }

@@ -114,7 +114,7 @@ function checkAdminAccountExists(cb) {
 }
 function plusall(obj1, obj2) {
 	for (var k in obj2) {
-		obj1[k]=dec2num(obj1[k])||0+dec2num(obj2[k])||0;
+		obj1[k]=(dec2num(obj1[k])||0)+(dec2num(obj2[k])||0);
 	}
 	return obj1;
 }

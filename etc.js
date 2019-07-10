@@ -30,7 +30,7 @@
 	}
 	exports.dec2num=function(dec) {
 		if (dec==null) return null;
-		if (dec instanceof Decimal128) return Number(dec.toString());
+		if (dec._bsontype && dec._bsontype=='Decimal128') return Number(dec.toString());
 		return dec;
 	}
 })(module.exports);
