@@ -774,13 +774,17 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			var query={userid:this.req.auth._id, used:true};
 		}
 		db.bills.aggregate([{$match:query}, 
+			{$addFields: {
+				convertedMoney:{$toDecimal:'$money'},
+				convertedNet:{$toDecimal:'$net'}
+			}},
 			{$group:{
 				_id:{
 					month:{$dateToString:{format:'%Y-%m', date:'$time'}},
 					provider:'$provider'
 				},
-				money:{$sum:'$money'},
-				net:{$sum:'$net'},
+				money:{$sum:'$convertedMoney'},
+				net:{$sum:'$convertedNet'},
 				count:{$sum:1}
 			}},
 			{$sort:{_id:1}}
