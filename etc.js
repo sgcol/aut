@@ -1,3 +1,8 @@
+function dec2num(dec) {
+	if (dec==null) return null;
+	if (dec._bsontype && dec._bsontype=='Decimal128') return Number(dec.toString());
+	return dec;
+}
 (function(exports) {
 	const sortObj=require('sort-object'), qs=require('querystring').stringify, url=require('url'), crypto=require('crypto');
 	const merge=require('gy-merge');
@@ -33,4 +38,14 @@
 		if (dec._bsontype && dec._bsontype=='Decimal128') return Number(dec.toString());
 		return dec;
 	}
+	exports.dec2num=dec2num;
+	function dedecimal(obj) {
+		for (var k in obj) {
+			if (typeof obj[k]!='object') continue;
+			if (obj[k]._bsontype && obj[k]._bsontype=='Decimal128') obj[k]=Number(obj[k].toString());
+			else dedecimal(obj[k]);
+		}
+		return obj;
+	}
+	exports.dedecimal=dedecimal;
 })(module.exports);

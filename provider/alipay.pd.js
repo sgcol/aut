@@ -24,6 +24,7 @@ const url = require('url')
 , notifier=require('../sysnotifier.js')
 , argv=require('yargs').argv
 , dec2num =require('../etc.js').dec2num
+, dedecaimal=require('../etc.js').dedecimal
 , sysevents=require('../sysevents.js');
 
 const _noop=function() {};
@@ -149,7 +150,7 @@ function init(err, db) {
 		.then(r=>{
 			cur.count((err, c)=>{
 				if (err) return callback(err);
-				callback(null, {total:c, rows:r});
+				callback(null, {total:c, rows:dedecaimal(r)});
 			});
 		})
 		.catch(e=>{
