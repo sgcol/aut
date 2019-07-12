@@ -404,7 +404,7 @@ $(()=>{
     e.preventDefault();
     var now=new Date();
     var params={
-        cb_url:'http://127.0.0.1/demo/result',
+        cb_url:location.origin+'/demo/result',
         merchantid:$('#merchantid').val(),
         money:Number($('#money').val()),
         orderid:'TESTORDER'+now.getTime(),

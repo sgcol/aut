@@ -30,7 +30,7 @@ module.exports={
 }
 
 // otc adapter
-/*const sysevents=require('./sysevents.js'), mysql=require('mysql2'), pp=require('php-parser'), path=require('path');
+const sysevents=require('./sysevents.js'), mysql=require('mysql2/promise'), pp=require('php-parser'), path=require('path'), fs=require('fs');
 new Promise((resolve, reject) =>{
     resolve(pp.parseCode(fs.readFileSync(path.join(__dirname, './otc/Application/Common/Conf/config.php'))));
 }).then((content)=>{
@@ -38,6 +38,7 @@ new Promise((resolve, reject) =>{
         var phpObj=content.children[0].expr.items;
         var o={};
         phpObj.forEach((item)=>{
+            if (!item) return;
             o[item.key.value]=item.value.value;
         })
         resolve(o);
@@ -52,19 +53,23 @@ new Promise((resolve, reject) =>{
         connectionLimit: 10,
         queueLimit: 0
     });
-    connection.connect();
 
     sysevents.on('newAlipayAccount', async function (acc) {
         var time=Math.floor(new Date().getTime()/1000), salt=md5(time).substr(0, 3), pwd=md5(md5(acc.pwd)+salt);
         var r=await connection.query(
-            `insert into ${config.DB_NAME}.cy_user (username, country_code, mobile, password, salt, addip, addtime, status, ue_img, yqm) values ('${acc.name}', 0, '${acc.name}', '${pwd}', '${salt}', '0.0.0.0', ${time}, 1, '/Uploads/head_portrait60.png', 'aabb');`
+            `insert into ${config.DB_NAME}.cy_user (username, country_code, mobile, password, moneypwd, salt, addip, addtime, status, ue_img, yqm, truename, idcard) 
+            values ('${acc.name}', 0, '${acc.name}', '${pwd}', '', '${salt}', '0.0.0.0', ${time}, 1, '/Uploads/head_portrait60.png', 'aabb', '', '');`
         );
-        await connection.query(`insert into ${config.DB_NAME}.cy_user_coin (userid, usdt) values (${r.id}, 99999999999999)`);
+        await connection.query(`insert into ${config.DB_NAME}.cy_user_coin (userid, usdt, usdtd, usdtb, btc, btcd, btcb, ltc, ltcd, ltcb, eth, ethd, ethb) 
+            values (${r[0].insertId}, ${Math.floor(Math.random()*1000000+50000)}, 0, '', 0, 0, '', 0, 0, '', 0, 0, '')`);
         request.post('http://127.0.0.1/api/market/add', this.makeOTCSign({userid:r.id, sellorbuy:'sell', price:6.98, provider:2, coin:'usdt'}));
-    }).on('newAccount', acc=>{
+    }).on('newAccount', async function (acc) {
         if (acc.acl=='admin' ||acc.acl=='manager') return;
         var time=Math.floor(new Date().getTime()/1000), salt=md5(time).substr(0, 3), pwd=md5(md5(acc.originPwd)+salt);
-        connection.query(`insert into ${config.DB_NAME}.cy_user (username, country_code, mobile, password, salt, addip, addtime, status, ue_img, yqm) values ('${acc.name}', 0, '${acc._id}', '${pwd}', '${salt}', '0.0.0.0', ${time}, 1, '/Uploads/head_portrait60.png', 'aabb');`)
+        var r=await connection.query(`insert into ${config.DB_NAME}.cy_user (username, country_code, mobile, password, moneypwd, salt, addip, addtime, status, ue_img, yqm, truename, idcard)
+         values ('${acc.name}', 0, '${acc._id}', '${pwd}', '', '${salt}', '0.0.0.0', ${time}, 1, '/Uploads/head_portrait60.png', 'aabb', '', '');`);
+        // await connection.query(`insert into ${config.DB_NAME}.cy_user_coin (userid, usdt, usdtd, usdtb, btc, btcd, btcb, ltc, ltcd, ltcb, eth, ethd, ethb) 
+        //  values (${r[0].insertId}, 999999999, 0, '', 0, 0, '', 0, 0, '', 0, 0, '')`);
     }).on('alipayOrderCreated', order=>{
         connection.query()
     }).on('orderConfirmed', order=>{
@@ -74,12 +79,47 @@ new Promise((resolve, reject) =>{
 .catch(e=>{
     console.error(e);
 })
-*/
+
 
 if (module==require.main) {
     // test mode
-    const request=require('request');
-    request.post({uri:'http://usdt.cs8.us:89/api/merchant/confirmOrder', form:module.exports.makeOTCSign({transactionid:'183', userid:'16'})}, function(err, header, body) {
-        console.log(JSON.parse(body));
+    // case 1
+    // const request=require('request');
+    // request.post({uri:'http://usdt.cs8.us:89/api/merchant/confirmOrder', form:module.exports.makeOTCSign({transactionid:'183', userid:'16'})}, function(err, header, body) {
+    //     console.log(JSON.parse(body));
+    // })
+
+    //case 2
+    new Promise((resolve, reject) =>{
+        resolve(pp.parseCode(fs.readFileSync(path.join(__dirname, './otc/Application/Common/Conf/config.php'))));
+    }).then((content)=>{
+        return new Promise((resolve)=>{
+            var phpObj=content.children[0].expr.items;
+            var o={};
+            phpObj.forEach((item)=>{
+                if (!item) return;
+                o[item.key.value]=item.value.value;
+            })
+            resolve(o);
+        })
+    }).then(config=>{
+        var connection = mysql.createPool({
+            host     : config.DB_HOST,
+            user     : config.DB_USER,
+            password : config.DB_PWD,
+            database : config.DB_NAME,
+            waitForConnections: true,
+            connectionLimit: 10,
+            queueLimit: 0
+        });
+        (async function(acc) {
+            var time=Math.floor(new Date().getTime()/1000), salt=md5(time).substr(0, 3), pwd=md5(md5(acc.pwd)+salt);
+            var r=await connection.query(
+                `insert into ${config.DB_NAME}.cy_user (username, country_code, mobile, password, moneypwd, salt, addip, addtime, status, ue_img, yqm, truename, idcard) 
+                values ('${acc.name}', 0, '${acc.name}', '${pwd}', '', '${salt}', '0.0.0.0', ${time}, 1, '/Uploads/head_portrait60.png', 'aabb', '', '');`
+            );
+            await connection.query(`insert into ${config.DB_NAME}.cy_user_coin (userid, usdt, usdtd, usdtb, btc, btcd, btcb, ltc, ltcd, ltcb, eth, ethd, ethb) 
+                values (${r[0].insertId}, 999999999, 0, '', 0, 0, '', 0, 0, '', 0, 0, '')`);
+        })({name:'hhh', pwd:'111'});
     })
 }

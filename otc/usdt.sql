@@ -2,8 +2,8 @@
 # Date: 2019-05-13 09:51:07
 # Generator: MySQL-Front 5.3  (Build 4.234)
 
-create database otc;
-use otc;
+create database usdt;
+use usdt;
 /*!40101 SET NAMES utf8 */;
 
 #
