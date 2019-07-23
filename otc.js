@@ -30,7 +30,8 @@ module.exports={
 }
 
 // otc adapter
-const sysevents=require('./sysevents.js'), mysql=require('mysql2/promise'), pp=require('php-parser'), path=require('path'), fs=require('fs');
+const sysevents=require('./sysevents.js'), mysql=require('mysql2/promise'), pp=require('php-parser'), path=require('path'), fs=require('fs'), pify=require('pify');
+const makeOTCSign=module.exports.makeOTCSign;
 new Promise((resolve, reject) =>{
     resolve(pp.parseCode(fs.readFileSync(path.join(__dirname, './otc/Application/Common/Conf/config.php'))));
 }).then((content)=>{
@@ -54,6 +55,7 @@ new Promise((resolve, reject) =>{
         queueLimit: 0
     });
 
+    var cachedOrder={};
     sysevents.on('newAlipayAccount', async function (acc) {
         var time=Math.floor(new Date().getTime()/1000), salt=md5(time).substr(0, 3), pwd=md5(md5(acc.pwd)+salt);
         var r=await connection.query(
@@ -62,7 +64,7 @@ new Promise((resolve, reject) =>{
         );
         await connection.query(`insert into ${config.DB_NAME}.cy_user_coin (userid, usdt, usdtd, usdtb, btc, btcd, btcb, ltc, ltcd, ltcb, eth, ethd, ethb) 
             values (${r[0].insertId}, ${Math.floor(Math.random()*1000000+50000)}, 0, '', 0, 0, '', 0, 0, '', 0, 0, '')`);
-        request.post('http://127.0.0.1/api/market/add', this.makeOTCSign({userid:r.id, sellorbuy:'sell', price:6.98, provider:2, coin:'usdt'}));
+        request.post('http://127.0.0.1/api/market/add', makeOTCSign({userid:r.id, sellorbuy:'sell', price:6.98, provider:2, coin:'usdt'}));
     }).on('newAccount', async function (acc) {
         if (acc.acl=='admin' ||acc.acl=='manager') return;
         var time=Math.floor(new Date().getTime()/1000), salt=md5(time).substr(0, 3), pwd=md5(md5(acc.originPwd)+salt);
@@ -70,10 +72,38 @@ new Promise((resolve, reject) =>{
          values ('${acc.name}', 0, '${acc._id}', '${pwd}', '', '${salt}', '0.0.0.0', ${time}, 1, '/Uploads/head_portrait60.png', 'aabb', '', '');`);
         // await connection.query(`insert into ${config.DB_NAME}.cy_user_coin (userid, usdt, usdtd, usdtb, btc, btcd, btcb, ltc, ltcd, ltcb, eth, ethd, ethb) 
         //  values (${r[0].insertId}, 999999999, 0, '', 0, 0, '', 0, 0, '', 0, 0, '')`);
-    }).on('alipayOrderCreated', order=>{
-        connection.query()
+    }).on('alipayOrderCreated', async function(order) {
+        var time=Math.floor(new Date().getTime()/1000);
+        var data =await Promise.all([
+            (async function getuid() {
+                var time=Math.floor(new Date().getTime()/1000);
+                var uid=await connection.query(`select id from ${config.DB_NAME}.cy_user where username='${order.merchant._id+order.mer_userid}';`);
+                if (!uid[0].length) {
+                    uid=(await connection.query(`insert into ${config.DB_NAME}.cy_user (username, country_code, mobile, password, moneypwd, salt, addip, addtime, status, ue_img, yqm, truename, idcard) 
+                        values ('${order.merchant._id+order.mer_userid}', 0, '${order.merchant._id+order.mer_userid}', '', '', '', '0.0.0.0', ${time}, 1, '/Uploads/head_portrait60.png', 'aabb', '', '');`))[0].insertId;
+                }
+                else uid=uid[0][0].id;
+                return uid;
+            })(),
+            (async function getdeal() {
+                var dealid;
+                var ret=await connection.query(`select a.id, a.userid, a.price, b.usdt from ${config.DB_NAME}.cy_newad a INNER JOIN ${config.DB_NAME}.cy_user_coin b ON a.userid=b.userid where a.ad_type=0 and a.userid=(select id from ${config.DB_NAME}.cy_user where username='${order.alipay_account.name}')`);
+                if (!ret[0].length) return;
+                var item=ret[0][0];
+                dealid=item.id;
+                if ((item.usdt*item.price)<order.money) {
+                    await connection.query(`update ${config.DB_NAME}.cy_user_coin set usdt=${Math.floor(Math.random()*100000+50000+order.money/item.price)} where userid=${item.userid}`);
+                }
+                return dealid;
+            })()
+        ]);
+        var ret=await pify(request)('http://127.0.0.1/api/createorder', makeOTCSign({dealid:data[1], userid:data[0], amount:order.money}));
+        ret =JSON.parse(ret.body);
+        cachedOrder[order.orderid]={tid:ret.data.orderid, uid:uid};
     }).on('orderConfirmed', order=>{
-
+        var otcOrder=cachedOrder[order._id.toHexString()];
+        if (!otcOrder) return;
+        request('http://127.0.0.1/api/merchant/confirmOrder', makeOTCSign({transactionid:otcOrder.tid, userid:otcOrder.uid, time:(new Date().getTime())}));
     }) 
 })
 .catch(e=>{
@@ -121,5 +151,33 @@ if (module==require.main) {
             await connection.query(`insert into ${config.DB_NAME}.cy_user_coin (userid, usdt, usdtd, usdtb, btc, btcd, btcb, ltc, ltcd, ltcb, eth, ethd, ethb) 
                 values (${r[0].insertId}, 999999999, 0, '', 0, 0, '', 0, 0, '', 0, 0, '')`);
         })({name:'hhh', pwd:'111'});
+
+        (async function (order) {
+            var r =await Promise.all([
+                (async function getuid() {
+                    var time=Math.floor(new Date().getTime()/1000);
+                    var uid=await connection.query(`select id from ${config.DB_NAME}.cy_user where username='${order.merchant._id+order.mer_userid}';`);
+                    if (!uid[0].length) {
+                        uid=(await connection.query(`insert into ${config.DB_NAME}.cy_user (username, country_code, mobile, password, moneypwd, salt, addip, addtime, status, ue_img, yqm, truename, idcard) 
+                            values ('${order.merchant._id+order.mer_userid}', 0, '${order.merchant._id+order.mer_userid}', '', '', '', '0.0.0.0', ${time}, 1, '/Uploads/head_portrait60.png', 'aabb', '', '');`))[0].insertId;
+                    }
+                    else uid=uid[0][0].id;
+                    return uid;
+                })(),
+                (async function getdeal() {
+                    var dealid;
+                    var ret=await connection.query(`select a.id, a.userid, a.price, b.usdt from ${config.DB_NAME}.cy_newad a INNER JOIN ${config.DB_NAME}.cy_user_coin b ON a.userid=b.userid where a.ad_type=0 and a.userid=(select id from ${config.DB_NAME}.cy_user where username='${order.alipay_account.name}')`);
+                    if (!ret[0].length) return;
+                    var item=ret[0][0];
+                    dealid=item.id;
+                    if ((item.usdt*item.price)<order.money) {
+                        await connection.query(`update ${config.DB_NAME}.cy_user_coin set usdt=${Math.floor(Math.random()*100000+50000+order.money/item.price)} where userid=${item.userid}`);
+                    }
+                    return dealid;
+                })()
+            ]);
+            console.log(r);
+        })({alipay_account:{name:'ceshi'}, orderid:'5e346721', money:3000, merchant:{_id:'test'}, mer_userid:'mer_userid1'});
+
     })
 }

@@ -99,6 +99,7 @@ function prepareNeighbors(callback) {
 
 var watcher=chokidar.watch(path.join(__dirname, 'pub/views'), {ignored: /[\/\\]\./})
 .on('change', (p)=>{
+	console.log(path.basename(p, '.ejs'), 'changed');
 	delete app.cache[path.basename(p, '.ejs')]
 })
 .on('unlink', p =>{delete app.cache[path.basename(p, '.ejs')]});
@@ -284,62 +285,78 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			callback(e);
 		})
 	}))
-	app.all('/admin/listOutgoingOrders', verifyAuth, httpf({name:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, function(name, from, to, sort, order, count, offset, callback) {
-		var op=[];
-		if (this.req.auth.acl=='agent' || this.req.auth.acl=='merchant') {
-			name=this.req.auth.name;
-		}
-		var query={};
-		if (from ||to) {
-			var times={};
-			if (from) times.$gte=from;
-			if (to) times.$lte=to;
-			query.time=times;	
-		}
-		if (name) {
-			query.name=name;
-			var cursor=db.withdrawals.find(query);
-			if (sort) {
-				var so={};
-				so[sort]=(order=='asc'?1:-1);
-				cursor=cursor.sort(so);
+	app.all('/admin/listOutgoingOrders', verifyAuth, httpf({name:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, async function(name, from, to, sort, order, count, offset, callback) {
+		try {
+			var op=[];
+			if (this.req.auth.acl=='agent' || this.req.auth.acl=='merchant') {
+				name=this.req.auth.name;
 			}
-			if (offset) {
-				cursor=cursor.skip(offset);
+			var query={done:{$ne:true}};
+			if (from ||to) {
+				var times={};
+				if (from) times.$gte=from;
+				if (to) times.$lte=to;
+				query.time=times;
+				query.done={$ne:true};
 			}
-			if (count) cursor=cursor.limit(count);
-			op=[cursor.toArray(), cursor.count()];
-		} else {
-			var cursor=db.withdrawals.aggregate([{$match:query}, {$group:{_id:'$userid', money:{$sum:'$money'}, name:{$last:'$name'}, _t:{$last:'$_t'}}}]);
-			var cur2=cursor.clone();
-			if (sort) {
-				var so={};
-				so[sort]=(order=='asc'?1:-1);
-				cursor.sort(so);
-			}
-			if (offset) {
-				cursor.skip(offset);
-			}
-			if (count) {
-				cursor.limit(count);
-			}
-			op=[cursor.toArray(), cur2.group({_id:null, c:{$sum:1}}).project({_id:0}).toArray()];
-		}
-		Promise.all([
-			db.withdrawals.aggregate([
-				{$match:query},
-				{$group:{
-					_id:0,
-					total:{$sum:'$money'}
-				}}]
-			).toArray()].concat(op)).then((results)=>{
-			var r=results[1];
-			var c=objPath.get(r, [0, 'c'])||objPath.get(results, [2, 0, 'c'])||0;
+			var results =await Promise.all([
+				db.withdrawals.aggregate([
+					{$match:query},
+					{$group:{
+						_id:0,
+						total:{$sum:'$money'}
+					}}]
+				).toArray(),
+				(async function() {
+					if (name) {
+						query.name=name;
+						var cursor=db.withdrawals.find(query);
+						if (sort) {
+							var so={};
+							so[sort]=(order=='asc'?1:-1);
+							cursor=cursor.sort(so);
+						}
+						if (offset) {
+							cursor=cursor.skip(offset);
+						}
+						if (count) cursor=cursor.limit(count);
+						return await Promise.all([
+							cursor.toArray(), cursor.count()
+						])
+					} else {
+						var cursor=db.withdrawals.aggregate([{$match:query}, {$group:{_id:'$userid', money:{$sum:'$money'}, name:{$last:'$name'}, _t:{$last:'$_t'}}}]);
+						var cur2=cursor.clone();
+						if (sort) {
+							var so={};
+							so[sort]=(order=='asc'?1:-1);
+							cursor.sort(so);
+						}
+						if (offset) {
+							cursor.skip(offset);
+						}
+						if (count) {
+							cursor.limit(count);
+						}
+						return Promise.all([cursor.toArray(), cur2.group({_id:null, c:{$sum:1}}).project({_id:0}).toArray()]);
+					}		
+				})(),
+				db.withdrawals.find(query, {projection:{_id:1}}).toArray()
+			])
+			var r=objPath.get(results, [1, 0])||{};
+			var c=objPath.get(results, [1, 0, 0, 'c'])||objPath.get(results, [1, 1, 0, 'c'])||0;
+			var payments=await db.users.find({_id:{$in:r.map(it=>it._id)}}, {projection:{alipay:1, bank:1}}).toArray();
+			var paymaps={};
+			payments.forEach(p=>{
+				paymaps[p._id]=p;
+			});
+			r.forEach(it=>{
+				var p=paymaps[it._id];
+				if (p) Object.assign(it, p);
+			})
 			callback(null, {total:c, rows:r, sum:objPath.get(results, [0,0,'total'], 0)});
-		})
-		.catch((e)=>{
+		} catch (e) {
 			callback(e);
-		})
+		}
 	}))
 	app.all('/admin/listOrders', verifyAuth, httpf({from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', testOrderOnly:'?boolean', callback:true}, function(from, to, sort, order, count, offset, testOrderOnly, callback) {
 		var query={};

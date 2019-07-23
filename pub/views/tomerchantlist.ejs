@@ -108,6 +108,8 @@
                             <th data-field="money" data-sortable="true" data-footer-formatter="showTotalOutgoing">
                               金额
                             </th>
+                            <th data-field="bank" data-formatter="showBankInfo">提款账户</th>
+                            <th data-formatter="showOp">操作</th>
                           </tr>
                         </thead> 
                         <tbody>
@@ -160,11 +162,18 @@
   //     params.success(r);
   //   });
   // }
-  function showTotalText() {
+  function showTotalText() {  
     return "Total";
   }
   function showTotalOutgoing() {
     return data?data.sum:undefined;
+  }
+  function showOp(v, o) {
+    return `<button class="btn btn-outline-primary btn-sm tooltipfy" title="已支付" onclick="javascript:sendNotify('${o._id}')">支付完成</button>`;
+  }
+  function showBankInfo(v, o) {
+    o.bank=o.bank||{};
+    return `<ul><li>${o.bank.name}<li>${o.bank.no}<li>${o.bank.account}</ul>  `
   }
   function querydata() {
     var querys={};

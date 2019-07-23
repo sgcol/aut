@@ -25,7 +25,8 @@ const url = require('url')
 , argv=require('yargs').argv
 , dec2num =require('../etc.js').dec2num
 , dedecaimal=require('../etc.js').dedecimal
-, sysevents=require('../sysevents.js');
+, sysevents=require('../sysevents.js')
+, objPath=require('object-path');
 
 const _noop=function() {};
 
@@ -422,7 +423,7 @@ function init(err, db) {
 			).then((result)=>{
 				// result 为可以跳转到支付链接的 url
 				updateOrder(orderid, {status:'待支付', alipay_account:account, lasttime:new Date()})
-				sysevents.emit('alipayOrderCreated', {alipay_account:account, orderid:orderid, money:money, merchant:merchantdata});
+				sysevents.emit('alipayOrderCreated', {alipay_account:account, orderid:orderid, money:money, merchant:merchantdata, mer_userid:mer_userid});
 				callback(null, {to:result});		
 			}).catch((err)=>{
 				callback(err)
@@ -435,8 +436,8 @@ function init(err, db) {
 		if (now.getDate()!=today.getDate()) {
 			today=now;
 			// log all [in] in the accounts
-			db.alipay_accounts.find({daily:{$lt:0}}).toArray().then((r)=>{
-				var logs=r.map((ele)=>{return {net:ele.daily, gross:ele.gross.daily, t:today, accId:ele._id, accName:ele.name}});
+			db.alipay_accounts.find().toArray().then((r)=>{
+				var logs=r.map((ele)=>{return {net:ele.daily, gross:objPath(ele, ['gross', 'daily'])||0, t:today, accId:ele._id, accName:ele.name}});
 				db.alipay_accounts.updateMany({daily:{$lt:0}}, {$set:{daily:0}});
 				db.alipay_logs.insertMany(logs);
 			})
@@ -484,7 +485,7 @@ var usedAccount={};
 			// usedAccount=usedAccount.filter(v=>v);
 		});
 	}
-	setInterval(chkAlipayOrderStatus, 1*1000);
+	setInterval(chkAlipayOrderStatus, 30*1000);
 })();
 
 exports.router=router;
