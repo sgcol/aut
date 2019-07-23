@@ -892,7 +892,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}
 		else userid=this.req.auth._id;
 		var user=this.req.auth;
-		db.users.findOneAndUpdate({_id:userid, profit:{$gte:want}}, {$inc:{profit:Decimal128.fromString(''-want)}}, {w:'majority'}, (err, r)=>{
+		db.users.findOneAndUpdate({_id:userid, profit:{$gte:want}}, {$inc:{profit:Decimal128.fromString(''+(-want))}}, {w:'majority'}, (err, r)=>{
 			if (err) return callback(err);
 			if (!r.value) {
 				// maybe no user or not enough money
