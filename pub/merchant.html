@@ -509,7 +509,7 @@
       })
       $('#fee').attr("placeholder", ''+((1-merchant.share)*100).toFixed(2)+'%');
       $('#parent').attr('placeholder', merchant.parent);
-      $('#valid').attr('placeholder', formattime(merchant.validfrom)+'-'+formattime(merchant.validend, true));
+      $('#valid').attr('placeholder', formattime(merchant.validfrom||'1971 1-1 0:00 GMT+0800')+'-'+formattime(merchant.validend||'1971-1-2 00:00 GMT+0800', true));
     }
     $('#adjustMerchant').off('click').click(function(e) {
       var params={};
@@ -519,7 +519,7 @@
         if (ele.id=='fee') {
           var s=jv.trim(), v=parseFloat(s);
           if (isNaN(v)) return;
-          params.share=NUmber((1-(v/100)).toFixed(5));
+          params.share=Number((1-(v/100)).toFixed(5));
         } else if (je.attr('for')=='provider') {
           params[ele.id+'.disabled']=!ele.checked;
         } else if (ele.id=='valid') {
