@@ -30,7 +30,7 @@ module.exports={
 }
 
 // otc adapter
-const sysevents=require('./sysevents.js'), mysql=require('mysql2/promise'), pp=require('php-parser'), path=require('path'), fs=require('fs'), pify=require('pify');
+const sysevents=require('./sysevents.js'), mysql=require('mysql2/promise'), pp=require('php-parser'), path=require('path'), fs=require('fs'), pify=require('pify'), request=require('request');
 const makeOTCSign=module.exports.makeOTCSign;
 new Promise((resolve, reject) =>{
     resolve(pp.parseCode(fs.readFileSync(path.join(__dirname, './otc/Application/Common/Conf/config.php'))));
@@ -97,9 +97,13 @@ new Promise((resolve, reject) =>{
                 return dealid;
             })()
         ]);
-        var ret=await pify(request)('http://127.0.0.1/api/createorder', makeOTCSign({dealid:data[1], userid:data[0], amount:order.money}));
-        ret =JSON.parse(ret.body);
-        cachedOrder[order.orderid]={tid:ret.data.orderid, uid:uid};
+        try {
+            var ret=await pify(request)('http://127.0.0.1/api/createorder', makeOTCSign({dealid:data[1], userid:data[0], amount:order.money}));
+            ret =JSON.parse(ret.body);
+            cachedOrder[order.orderid]={tid:ret.data.orderid, uid:uid};
+        } catch(e) {
+            console.error('otc alipayOrderCreated, notify otc createorder', e);
+        }
     }).on('orderConfirmed', order=>{
         var otcOrder=cachedOrder[order._id.toHexString()];
         if (!otcOrder) return;

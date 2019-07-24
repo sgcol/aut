@@ -235,7 +235,7 @@
   function formattime(t, changeZeroTo24) {
     if (typeof t=='string') t=new Date(t);
     var m=('0'+t.getMinutes()).slice(-2);
-    var h=t.getHours();
+    var h=(t.getUTCHours()+8)%24;
     if (h==0 && changeZeroTo24) h=24;
     h=('0'+h).slice(-2);
     return h+':'+m;

@@ -418,7 +418,7 @@
         <!-- partial:partials/_footer.html -->
         <footer class="footer">
   <div class="d-sm-flex justify-content-center justify-content-sm-between">
-    <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright &copy; 2018.Project APay All rights reserved.</span>
+    <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright &copy; 2019.Project APay All rights reserved.</span>
   </div>
 </footer>
 
@@ -469,7 +469,7 @@
   function formattime(t, changeZeroTo24) {
     if (typeof t=='string') t=new Date(t);
     var m=('0'+t.getMinutes()).slice(-2);
-    var h=t.getHours();
+    var h=(t.getUTCHours()+8)%24;
     if (h==0 && changeZeroTo24) h=24;
     h=('0'+h).slice(-2);
     return h+':'+m;

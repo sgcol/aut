@@ -143,6 +143,7 @@
         // return Number(Number(n).toFixed(2));
     }
     window.addAllFields=(o)=>{
+        if (typeof o!="object") return o;
         var ret=0;
         for (var k in o) {
             var v=Number(o[k]);

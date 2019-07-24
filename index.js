@@ -17,6 +17,7 @@ const server = require('http').createServer()
 // , subdirs = require('subdirs')
 // , del = require('delete')
 , dec2num =require('./etc.js').dec2num
+, dedecimal =require('./etc.js').dedecimal
 , randomstring =require('random-string')
 , async =require('async')
 , pm2 =require('pm2')
@@ -521,6 +522,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 				var r=rs[0];
 				var agent_ids=[], agents={};
 				r.forEach((ele)=>{
+					dedecimal(ele);
 					if (ele.acl=='agent') {
 						agent_ids.push(ele._id);
 						agents[ele._id]=ele;
@@ -883,8 +885,12 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	// 	});
 	// }));
 	app.all('/user/setextradata', verifyAuth, httpf({callback:true}, function(callback){
-		var userid=this.req.auth._id;
-		db.users.updateOne({_id:userid}, {$set:Object.assign(this.req.body, this.req.query)}, {w:1}, callback);
+		var user=this.req.auth, userid=user._id;
+		var upd=Object.assign(this.req.body, this.req.query);
+		db.users.updateOne({_id:userid}, {$set:upd}, {w:1}, function(err) {
+			if (err) return callback(err);
+			for (var k in upd) objPath.set(user, k, upd[k]);
+		});
 	}))
 	app.all('/user/take', verifyAuth, httpf({userid:'?string', take:'number', callback:true}, function(userid, want, callback) {
 		if (aclgt(this.req.auth.acl, 'manager')) {
@@ -892,7 +898,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}
 		else userid=this.req.auth._id;
 		var user=this.req.auth;
-		db.users.findOneAndUpdate({_id:userid, profit:{$gte:want}}, {$inc:{profit:Decimal128.fromString(''+(-want))}}, {w:'majority'}, (err, r)=>{
+		db.users.findOneAndUpdate({_id:userid, profit:{$gte:Decimal128.fromString(''+want)}}, {$inc:{profit:Decimal128.fromString(''+(-want))}}, {w:'majority'}, (err, r)=>{
 			if (err) return callback(err);
 			if (!r.value) {
 				// maybe no user or not enough money
@@ -984,8 +990,8 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.all('/dismissnotification', getAuth, httpf({id:'number'}, function(id) {
 		sysnotifier.remove(id);
 	}))
-	app.all('/demo/result', httpf({orderid:'string', money:'number', callback:true}, function(orderid, money, callback) {
-		_orderFunc.updateOrder(orderid, {status:'已送达'}, callback);
+	app.all('/demo/result', httpf({orderid:'string', money:'number'}, function(orderid, money) {
+		return httpf.json({});
 	}));
 
 	/////////////////some server rendered pages

@@ -313,7 +313,7 @@
         <!-- partial:partials/_footer.html -->
         <footer class="footer">
   <div class="d-sm-flex justify-content-center justify-content-sm-between">
-    <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright &copy; 2018.Project APay All rights reserved.</span>
+    <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright &copy; 2019.Project APay All rights reserved.</span>
   </div>
 </footer>
 
@@ -356,10 +356,20 @@ window.initpage=()=>{
     }    
 };
 
+function setparam(o, path, v) {
+    var n=o;
+    for (var i=0; i<path.length-1; i++) {
+        var d=path[i];
+        if (!n[d]) n[d]={};
+        n=n[d];
+    }
+    n[path[path.length-1]]=v;
+    return o;
+}
 $('#apply').click(function() {
     var params={};
     $('.forms-extra [id]').each(function(idx, ele) {
-        if ($(ele).val()) params[ele.id]=$(ele).val();
+        if ($(ele).val()) params[ele.id.split('_').join('.')]=$(ele).val();
     });
     if (Object.keys(params).length) accIntf('user/setextradata', params);
     var take=$('#take').val();

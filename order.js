@@ -247,6 +247,8 @@ var retryNotifyList=new Map();
 function updateOrder(orderid, upd, callback) {
     if (!callback) callback=function() {};
     if (typeof upd!='object') return callback('param error');
+    if (typeof orderid!='string') 
+        return callback('orderid error '+orderid);
     getDB((err, db)=>{
         db.bills.updateOne({_id:ObjectID(orderid)}, {$set:upd}, function(err, r) {
             callback(err, r);

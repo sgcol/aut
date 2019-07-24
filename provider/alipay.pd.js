@@ -437,12 +437,14 @@ function init(err, db) {
 			today=now;
 			// log all [in] in the accounts
 			db.alipay_accounts.find().toArray().then((r)=>{
-				var logs=r.map((ele)=>{return {net:ele.daily, gross:objPath(ele, ['gross', 'daily'])||0, t:today, accId:ele._id, accName:ele.name}});
-				db.alipay_accounts.updateMany({daily:{$lt:0}}, {$set:{daily:0}});
+				var logs=r.map((ele)=>{return {net:ele.daily||0, gross:objPath.get(ele, ['gross', 'daily'])||0, t:today, accId:ele._id, accName:ele.name}});
+				db.alipay_accounts.updateMany({}, {$set:{daily:0, 'gross.daily':0}});
 				db.alipay_logs.insertMany(logs);
-			})
+			}).catch((e)=>{
+				console.error(e);
+			});
 		}
-	}, 30*60*1000);
+	}, 5*1000);
 }
 var pos=0;
 var usedAccount={};
