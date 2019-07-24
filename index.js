@@ -325,7 +325,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 							cursor.toArray(), cursor.count()
 						])
 					} else {
-						var cursor=db.withdrawals.aggregate([{$match:query}, {$group:{_id:'$userid', money:{$sum:'$money'}, name:{$last:'$name'}, _t:{$last:'$_t'}}}]);
+						var cursor=db.withdrawals.aggregate([{$match:query}, {$group:{_id:'$userid', money:{$sum:'$money'}, name:{$last:'$name'}, _t:{$last:'$_t'}, involved:{$addToSet:{$convert:{input:'$_id', to:"string"}}} }}]);
 						var cur2=cursor.clone();
 						if (sort) {
 							var so={};
@@ -358,6 +358,9 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		} catch (e) {
 			callback(e);
 		}
+	}))
+	app.all('/admin/confirmOutgoing', verifyAuth, verifyManager, httpf({outids:'string', callback:true}, function(outidstr, callback) {
+		db.withdrawals.updateMany({_id:{$in:outidstr.split(',').map(v=>ObjectID(v))}}, {$set:{done:true}}, callback);
 	}))
 	app.all('/admin/listOrders', verifyAuth, httpf({from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', testOrderOnly:'?boolean', callback:true}, function(from, to, sort, order, count, offset, testOrderOnly, callback) {
 		var query={};

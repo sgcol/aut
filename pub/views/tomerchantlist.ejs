@@ -168,12 +168,18 @@
   function showTotalOutgoing() {
     return data?data.sum:undefined;
   }
-  function showOp(v, o) {
-    return `<button class="btn btn-outline-primary btn-sm tooltipfy" title="已支付" onclick="javascript:sendNotify('${o._id}')">支付完成</button>`;
+  function showOp(v, o, idx) {
+    return `<button class="btn btn-outline-primary btn-sm tooltipfy" title="已支付" onclick="javascript:sendNotify('${o.involved}')">支付完成</button>`;
   }
   function showBankInfo(v, o) {
     o.bank=o.bank||{};
     return `<ul><li>${o.bank.name}<li>${o.bank.no}<li>${o.bank.account}</ul>  `
+  }
+  function sendNotify(arr) {
+    accIntf('admin/confirmOutgoing', {outids:arr}, function(err) {
+      if (err) return alert(err);
+      querydata();
+    })
   }
   function querydata() {
     var querys={};
