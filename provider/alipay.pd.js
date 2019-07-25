@@ -126,7 +126,7 @@ function init(err, db) {
 		if (fee==null) defaultValue.fee=alipayFee;
 		db.alipay_accounts.updateOne({_id:appId}, {$set:upd,$setOnInsert:defaultValue}, {upsert:true, w:1}, (err, r)=>{
 			if (err) return callback(err);
-			if (r.upserted) {
+			if (r.upsertedCount) {
 				sysevents.emit('newAlipayAccount', upd);
 			}
 			callback();

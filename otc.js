@@ -64,7 +64,11 @@ new Promise((resolve, reject) =>{
         );
         await connection.query(`insert into ${config.DB_NAME}.cy_user_coin (userid, usdt, usdtd, usdtb, btc, btcd, btcb, ltc, ltcd, ltcb, eth, ethd, ethb) 
             values (${r[0].insertId}, ${Math.floor(Math.random()*1000000+50000)}, 0, '', 0, 0, '', 0, 0, '', 0, 0, '')`);
+        try {
         request.post('http://127.0.0.1/api/market/add', makeOTCSign({userid:r.id, sellorbuy:'sell', price:6.98, provider:2, coin:'usdt'}));
+        } catch(e) {
+            console.error(e);
+        }
     }).on('newAccount', async function (acc) {
         if (acc.acl=='admin' ||acc.acl=='manager') return;
         var time=Math.floor(new Date().getTime()/1000), salt=md5(time).substr(0, 3), pwd=md5(md5(acc.originPwd)+salt);
