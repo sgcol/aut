@@ -454,7 +454,7 @@ $(function () {
             <li><a href="<?php echo U('user/fxq');?>">反洗钱条目</a></li>
         </ul>
     </div>
-    <p class="copyright">Copyright © 2013-2017 - CHBTC.COM All Rights Reserved 京ICP备12021837号-11</p>
+    <p class="copyright">Copyright © 2013-2017 - All Rights Reserved</p>
 </div>
 <script src="https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js"></script>
 <script type="text/javascript" src="/Public/static/js/main.js"></script>
