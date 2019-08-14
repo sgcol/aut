@@ -268,9 +268,14 @@ function init(err, db) {
 		})
     })
 	router.all('/done', function(req, res) {
-        console.log(this.req.body);
-        if (code!=0) return callback('code is not zero');
-		makeItDone(data.mch_order_no, data.total_fee*data.rate, data, (err)=>{
+        console.log(req.body);
+        try {
+            var r=JSON.parse(req.body);
+        } catch(e) {
+            return res.send({code:'-1', status_msg:e});
+        }
+        if (r.code!=0) return res.send({code:'-1', status_msg:'code is not zero'});
+		makeItDone(r.data.mch_order_no, r.data.total_fee*r.data.rate, r.data, (err)=>{
             if (err) return res.send({code:'-1', status_msg:err});
             res.send({code:'0', status_msg:'done'});
         });
