@@ -169,6 +169,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.use(cookieParser());
 	app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 	app.use(bodyParser.json());
+	app.use(bodyParser.text());
 	app.set('views', path.join(__dirname, 'pub/views'));
 	app.set('view engine', 'ejs');
 

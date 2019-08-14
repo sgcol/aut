@@ -267,8 +267,7 @@ function init(err, db) {
 			res.send('充值完成');
 		})
     })
-    var textBody=bodyParser.text();
-	router.all('/done', textBody, httpf({code:'number', data:'object', callback:true}, function(code, data, callback) {
+	router.all('/done', httpf({code:'number', data:'object', callback:true}, function(code, data, callback) {
         if (code!=0) return callback('code is not zero');
 		makeItDone(data.mch_order_no, data.total_fee*data.rate, data, callback);
 	}));
