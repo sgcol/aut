@@ -270,7 +270,7 @@ function init(err, db) {
 		}
 		confirmOrder(orderid, total_amount, net, (err)=>{
 			if (!err) {
-				db.ksher_accounts.updateOne({_id:acc.appId}, {$set:{'log.success':acc.log.success, 'succrate':succrate}, $inc:{daily:Decimal128.fromString(''+net), total:Decimal128.fromString(''+net), 'gross.daily':Decimal128.fromString(''+total_amount), 'gross.total':Decimal128.fromString(''+total_amount), used:1}});
+				db.ksher_accounts.updateOne({_id:acc.appId}, {$set:{'log.success':acc.log.success, 'succrate':succrate}, $inc:{daily:Decimal128.fromString(''+net), total:Decimal128.fromString(''+net), 'gross.daily':Decimal128.fromString(''+total_amount), 'gross.total':Decimal128.fromString(''+total_amount), used:1, thb:Decimal128.fromString(''+data.total_fee/100)}});
 				delete usedAccount[orderid];
 			}
             if (err && err!='used order') return callback(err);

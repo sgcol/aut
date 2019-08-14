@@ -48,4 +48,15 @@ function dec2num(dec) {
 		return obj;
 	}
 	exports.dedecimal=dedecimal;
+	function decimalfy(o) {
+		for (var k in o) {
+			if (typeof o[k]=='number') o[k]=Decimal128.fromString(''+o[k]);
+			if (typeof o[k]=='object') {
+				if (o[k]._bsontype) continue;
+				decimalfy(o[k]);
+			}
+		}
+		return o;
+	}
+	exports.decimalfy=decimalfy;
 })(module.exports);
