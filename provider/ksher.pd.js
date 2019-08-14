@@ -61,32 +61,6 @@ function tableSizeFor(cap) {
     return (n < 0) ? 1 : n + 1;
 }
 
-if (module==require.main) {
-    const appid='mch21377';
-    //test code
-    var data = {
-        'appid' : appid,
-        'nonce_str' : randomstring(16),
-        'mch_order_no' : randomstring(16),
-        'channel' : 'wechat',
-        'total_fee' : 43400,
-        'fee_type' : 'THB',
-        // 'img_type' : 'png',
-        'notify_url' : 'http://api.mch.ksher.net/Dspay/NativepayApp/pay_notify'
-    };
-    
-    var privatekey_content = fs.readFileSync("./mch_privkey.pem");
-    
-    var request_url = 'http://api.mch.ksher.net/KsherPay/native_pay';
-
-    request.post({url:request_url, form:makeSign(data, privatekey_content)}, (err, header, body)=>{
-        console.log(body);
-    })
-    
-    queryRate({appId:appid, privateKey:privatekey_content}, console.log);
-    return;
-}
-
 var order=function() {
     var callback=arguments[arguments.length-1];
     if (typeof callback=='function') callback('启动中');
@@ -275,7 +249,8 @@ function init(err, db) {
             return res.send({code:'-1', status_msg:e});
         }
         if (r.code!=0) return res.send({code:'-1', status_msg:'code is not zero'});
-		makeItDone(r.data.mch_order_no, r.data.total_fee*r.data.rate, r.data, (err)=>{
+		makeItDone(r.data.mch_order_no, r.data.cash_fee/100, r.data, (err)=>{
+            console.log('after makedone', err);
             if (err) return res.send({code:'-1', status_msg:err});
             res.send({code:'0', status_msg:'done'});
         });
@@ -398,4 +373,32 @@ function init(err, db) {
 			});
 		}
 	}, 5*1000);
+}
+
+if (module==require.main) {
+    // const appid='mch21377';
+    // //test code
+    // var data = {
+    //     'appid' : appid,
+    //     'nonce_str' : randomstring(16),
+    //     'mch_order_no' : randomstring(16),
+    //     'channel' : 'wechat',
+    //     'total_fee' : 43400,
+    //     'fee_type' : 'THB',
+    //     // 'img_type' : 'png',
+    //     'notify_url' : 'http://api.mch.ksher.net/Dspay/NativepayApp/pay_notify'
+    // };
+    
+    // var privatekey_content = fs.readFileSync("./mch_privkey.pem");
+    
+    // var request_url = 'http://api.mch.ksher.net/KsherPay/native_pay';
+
+    // request.post({url:request_url, form:makeSign(data, privatekey_content)}, (err, header, body)=>{
+    //     console.log(body);
+    // })
+    
+    // queryRate({appId:appid, privateKey:privatekey_content}, console.log);
+
+    request.post('http://127.0.0.1:7008/pvd/ksher/done', {})
+    return;
 }
