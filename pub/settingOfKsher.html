@@ -39,22 +39,22 @@
         <form>
           <div class="card-body">
             <div class="form-group">
-              <label for="privatekey">支付宝账号</label>
+              <label for="name">ksher账号</label>
               <input type="text" class="form-control" id="name" placeholder="账号名">
               <label for="privatekey">收款限额</label>
-              <input type="text" class="form-control" id="limitation" placeholder="不填使用支付宝设置中的默认值">
+              <input type="text" class="form-control" id="limitation" placeholder="不填使用ksher设置中的默认值">
               <label for="fee">费率</label>
-              <input type="text" class="form-control" id="fee" placeholder="不填使用支付宝设置中的默认值">
-              <label for="privatekey">支付宝密码</label>
+              <input type="text" class="form-control" id="fee" placeholder="不填使用ksher设置中的默认值">
+              <label for="privatekey">ksher密码</label>
               <input type="text" class="form-control" id="pwd" placeholder="密码">
-              <label for="privatekey">appID</label>
+              <label for="privatekey">appid</label>
               <input type="text" class="form-control" id="appId" placeholder="appID">
               <label for="privatekey">私钥</label>
               <textarea type="text" class="form-control" id="privateKey" placeholder=""></textarea>
-              <label for="alipayPublicKey">支付宝公钥</label>
-              <textarea type="text" class="form-control" id="alipayPublicKey" placeholder="alipay public key"></textarea>
+              <label for="ksherPublicKey">ksher公钥</label>
+              <textarea type="text" class="form-control" id="ksherPublicKey" placeholder="无需设置，我们不验证公钥"></textarea>
             </div>
-            <a class="card-description form-group" href="https://docs.open.alipay.com/291/105971/" target="_blank">私钥公钥生成指南</a>
+            <a class="card-description form-group" href="http://merchant.ksher.net/big_business/it_integration" target="_blank">获取私钥(IT Integration)</a>
             <div class="form-group">
               <div class="form-check form-check">
                 <label class="form-check-label">
@@ -74,7 +74,7 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
         <div class="modal-header">
-          <h5 class="card-title">支付宝通用设置</h5>
+          <h5 class="card-title">ksher通用设置</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -83,11 +83,11 @@
           <div class="card-body">
             <div class="form-group">
               <label for="limitation">收款限额</label>
-              <input type="text" class="form-control" id="limitation" placeholder="默认20万">
+              <input type="text" class="form-control" id="limitation" placeholder="默认5万">
             </div>  
             <div class="form-group">
               <label for="fee">费率</label>
-              <input type="text" class="form-control" id="fee" placeholder="默认6‰">
+              <input type="text" class="form-control" id="fee" placeholder="默认1.4%">
             </div>    
             <div class="form-group">
               <button type="button" id="adjustAlipaySetting" class="btn btn-gradient-primary mr-2" data-dismiss="modal">Submit</button>
@@ -358,11 +358,11 @@
               <span class="page-title-icon bg-gradient-primary text-white mr-2">
                 <i class="fab fa-alipay"></i>
               </span>
-              支付宝账号
+              ksher账号
             </h3>
             <nav aria-label="breadcrumb">
               <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">支付宝</a></li>
+                <li class="breadcrumb-item"><a href="#">ksher</a></li>
                 <li class="breadcrumb-item active" aria-current="page">账号管理</li>
               </ol>
             </nav>
@@ -371,7 +371,7 @@
               <div class="col-lg-12 grid-margin stretch-card">
                   <div class="card">
                     <div class="card-body">
-                      <h4 class="card-title">公司户</h4>
+                      <h4 class="card-title">ksher商户</h4>
                       <div class="buttons-toolbar">
                         <button class="btn btn-sm btn-secondary" onclick="javascript:$('#editAlipayAccount').modal()"><i class="mdi mdi-account-plus"></i></button>
                         <button class="btn btn-sm btn-secondary" onclick="javascript:$('#editAlipaySettings').modal()"><i class="mdi mdi-settings"></i></button>
@@ -386,7 +386,7 @@
                         data-show-columns="true"
                         data-show-pagination-switch="true"
                         data-buttons-class=" btn-sm btn-secondary"
-                        data-url="pvd/alipay/listAccounts"
+                        data-url="pvd/ksher/listAccounts"
                         data-toolbar=".buttons-toolbar"
                         data-response-handler="formatRes">
                         <thead>
@@ -407,6 +407,7 @@
                             </th>
                             <th data-field="daily" data-sortable="true" data-formatter="showincoming">净收入(日/总)</th>
                             <th data-field="gross.daily" data-sortable="true" data-formatter="showGrossIncoming">毛收入(日/总)</th>
+                            <th data-field="thb">泰铢</th>
                             <th data-field="succrate" data-sortable="true">成功率</th>
                             <th data-field="failstr"  data-sortable="true">失败情况</th>
                             <th data-field="" data-formatter="showop" data-width="130px">
@@ -476,7 +477,7 @@
     $('#addAlipayAccount').toggle();
   }
   $('#editAlipaySettings').on('shown.bs.modal', function (e) {
-    accIntf('pvd/alipay/alipaySettings', (err, r)=>{
+    accIntf('pvd/ksher/ksherSettings', (err, r)=>{
       for (var key in r) {
         $(`#editAlipaySettings #${key}`).val(r[key]);
       } 
@@ -488,7 +489,7 @@
         if (jv=='') return true;
         params[ele.id]=jv.trim();
       });
-      accIntf('pvd/alipay/alipaySettings', params, err=>{
+      accIntf('pvd/ksher/ksherSettings', params, err=>{
         if (err) return showerr(err);
       });
     });
@@ -525,7 +526,7 @@
             params[ele.id]=jv.trim();
         }
       });
-      accIntf('/pvd/alipay/updateAccount', params, err=>{
+      accIntf('/pvd/ksher/updateAccount', params, err=>{
         if (err) return showerr(err);
         getlist();
       });
@@ -566,7 +567,7 @@
     return res;
   }
   function remove(appId) {
-      accIntf('/pvd/alipay/removeAccount', {appId:appId}, err=>{
+      accIntf('/pvd/ksher/removeAccount', {appId:appId}, err=>{
           if (err) return alert(err);
           getlist();
       });

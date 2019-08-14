@@ -19,6 +19,10 @@ var q=async.queue(function (extern_callback, queue_callback) {
         {'alipay_accounts':{index:['disable', 'occupied', 'in']}},
         {'alipay_logs':{capped:true, size:200*1024*1024, max:3650000}},
         'alipay_settings',
+        {'ksher_accounts':{index:['disable', 'occupied', 'in']}},
+        {'ksher_logs':{capped:true, size:200*1024*1024, max:3650000}},
+        'ksher_settings',
+        'ksher_orders',
         {'withdrawals':{index:['userid', 'done', {_t:-1, userid:1, money:1, name:-1}, 'money', 'name']}},
         {notify:{capped:true, size:100*1024, max:1000000, index:'read'}},
         ]}, 
@@ -35,4 +39,3 @@ var q=async.queue(function (extern_callback, queue_callback) {
 module.exports=function(callback) {
   q.push(callback);
 }
-

@@ -19,7 +19,11 @@ exports.getProvider=function(pid) {
 const filter = require('filter-object');
 function order(orderid, money,mer, mer_userid, host, callback) {
     if (!mer.providers) return callback('联系对接小伙伴，他忘记给商户配置渠道了');
-    async.map(filter(external_provider, Object.keys(mer.providers)), function(prd, cb) {
+    async.map(filter(external_provider, (v, k)=>{
+        var opt= mer.providers[k];
+        if (!opt) return false;
+        return !opt.disabled;
+    }), function(prd, cb) {
         if (!prd.bestPair) return cb(null, {gap:Number.MAX_VALUE, coinType:''});
         prd.bestPair(money, function(err, gap, coinType){
             if (err) return cb(null, {gap:Number.MAX_VALUE, coinType:''});
