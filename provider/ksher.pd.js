@@ -267,11 +267,14 @@ function init(err, db) {
 			res.send('充值完成');
 		})
     })
-	router.all('/done', httpf({code:'number', data:'object', callback:true}, function(code, data, callback) {
+	router.all('/done', function(req, res) {
         console.log(this.req.body);
         if (code!=0) return callback('code is not zero');
-		makeItDone(data.mch_order_no, data.total_fee*data.rate, data, callback);
-	}));
+		makeItDone(data.mch_order_no, data.total_fee*data.rate, data, (err)=>{
+            if (err) return res.send({code:'-1', status_msg:err});
+            res.send({code:'0', status_msg:'done'});
+        });
+	});
 	function makeItDone(orderid, total_amount, data, callback) {
 		callback=callback||function(){};
 		var acc=usedAccount[orderid], net, succrate;
