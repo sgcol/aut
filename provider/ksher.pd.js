@@ -268,6 +268,7 @@ function init(err, db) {
 		})
     })
 	router.all('/done', httpf({code:'number', data:'object', callback:true}, function(code, data, callback) {
+        console.log(this.req.body);
         if (code!=0) return callback('code is not zero');
 		makeItDone(data.mch_order_no, data.total_fee*data.rate, data, callback);
 	}));
