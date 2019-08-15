@@ -197,8 +197,8 @@ function notifyMerchant(orderdata) {
             return pify(request)({uri:orderdata.cb_url, form:merSign(mer, Object.assign(custom_params, {orderid:orderdata.merchantOrderId, money:orderdata.paidmoney}))});
         }).then((header, body)=>{
             return new Promise((resolve, reject)=>{
-                body=body;
-                if (body.trim()=='') return resolve('');
+                console.log('notify merchant ret', header, body);
+                if (!body || body.trim()=='') return resolve('');
                 try {
                     var ret=JSON.parse(body);
                 } catch(e) {
