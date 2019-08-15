@@ -139,8 +139,8 @@
     //   return Number(s).toLocaleString(undefined, {maximumFractionDigits:digitNumber||2});
     }
     window.fix2=(n)=>{
-        return n;
-        // return Number(Number(n).toFixed(2));
+        // return n;
+        return Number(Number(n).toFixed(2));
     }
     window.addAllFields=(o)=>{
         if (typeof o!="object") return o;

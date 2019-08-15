@@ -190,28 +190,29 @@ function normalizeError(e) {
     return e;
 }
 function notifyMerchant(orderdata) {
-    getDB((err, db)=>{
-        var body;
-        pify(getMerchant)(orderdata.merchantid).then((mer)=>{
-            var custom_params=url.parse(orderdata.cb_url, true).query;
-            return pify(request)({uri:orderdata.cb_url, form:merSign(mer, Object.assign(custom_params, {orderid:orderdata.merchantOrderId, money:orderdata.paidmoney}))});
-        }).then((header, body)=>{
-            return new Promise((resolve, reject)=>{
-                console.log('notify merchant ret', header, body);
-                if (!body || body.trim()=='') return resolve('');
-                try {
-                    var ret=JSON.parse(body);
-                } catch(e) {
-                    return reject(e);
-                }
-                if (body.err) return reject(body.err);
-                resolve(ret);
-            });
-        }).then((ret)=>{
-            retryNotifyList.delete(orderdata._id);
-            db.bills.update({_id:orderdata._id}, {$set:{status:'complete', lasttime:new Date(), merchant_return:body}});
-        }).catch((e)=>{
-            // put into retry list
+    var db, body;
+    async.waterfall([
+        getDB,
+        function queryMerchantDate(_db, cb) {
+            db=_db;
+            getMerchant(orderdata.merchantid, cb);
+        },
+        function notify(mer, cb) {
+            request({uri:orderdata.cb_url, form:merSign(mer, Object.assign(custom_params, {orderid:orderdata.merchantOrderId, money:orderdata.paidmoney}))}, cb);
+        },
+        function resolveRet(header, body, cb) {
+            console.log('notify merchant ret', header, body);
+            if (!body || body.trim()=='') return cb();
+            try {
+                var ret=JSON.parse(body);
+            } catch(e) {
+                return cb(e);
+            }
+            if (body.err) return cb(body.err);
+            cb(null, body);
+        }
+    ], (err, body)=>{
+        if (err) {
             var rn=retryNotifyList.get(orderdata._id);
             if (!rn) {
                 rn=orderdata;
@@ -226,8 +227,34 @@ function notifyMerchant(orderdata) {
                     retryNotifyList.delete(orderdata._id);
                 }
             }
-        });    
-    });
+            return;
+        }
+        retryNotifyList.delete(orderdata._id);
+        db.bills.update({_id:orderdata._id}, {$set:{status:'complete', lasttime:new Date(), merchant_return:body}});
+    })
+    // getDB((err, db)=>{
+    //     pify(getMerchant)(orderdata.merchantid).then((mer)=>{
+    //         var custom_params=url.parse(orderdata.cb_url, true).query;
+    //         return pify(request)({uri:orderdata.cb_url, form:merSign(mer, Object.assign(custom_params, {orderid:orderdata.merchantOrderId, money:orderdata.paidmoney}))});
+    //     }).then((header, body)=>{
+    //         return new Promise((resolve, reject)=>{
+    //             console.log('notify merchant ret', header, body);
+    //             if (!body || body.trim()=='') return resolve('');
+    //             try {
+    //                 var ret=JSON.parse(body);
+    //             } catch(e) {
+    //                 return reject(e);
+    //             }
+    //             if (body.err) return reject(body.err);
+    //             resolve(ret);
+    //         });
+    //     }).then((ret)=>{
+    //         retryNotifyList.delete(orderdata._id);
+    //         db.bills.update({_id:orderdata._id}, {$set:{status:'complete', lasttime:new Date(), merchant_return:body}});
+    //     }).catch((e)=>{
+    //         // put into retry list
+    //     });    
+    // });
 }
 var retryNotifyList=new Map();
 (function() {

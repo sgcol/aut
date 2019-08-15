@@ -60,8 +60,20 @@
           };
           ds.push(s);
         }
-        s.data.push(ele.net);
+        // s.data.push(ele.net);
       });
+      var idx=0;
+      for (var item in data) {
+        var monthly=data[item];
+        for (var prd in monthly) {
+          if (prd=='count' || prd=='total') continue;
+          var s=ds.find(data=>data.label==prd);
+          if (s) {
+            s.data[idx]=monthly[prd];
+          }
+        }
+        idx++;
+      }
       var today=new Date(), thisMonth=dateToYM(new Date());
       var previousMonthDay=new Date();
       previousMonthDay.setMonth(today.getMonth()-1);
