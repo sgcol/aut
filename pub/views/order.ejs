@@ -120,6 +120,18 @@
             if (ret.to) return (location.href=ret.to);
             var url=ret.url||ret.message;
             handleQR(err, url);
+
+            setInterval(checkStatus, 3000);
+        }
+        function checkStatus() {
+            getAjax('pay/result', {orderid:'<%= orderid%>'}, (err, ret)=>{
+                if (ret.message=='已支付'||ret.message=='complete') {
+                    $('.login100-form p').text('支付完成，返回');
+                    setTimeout(() =>{
+                        location.href='<%= return_url%>';
+                    }, 500);
+                }
+            })
         }
         getAjax('/doOrder', params, handleResult);
     })

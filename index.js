@@ -287,6 +287,18 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			callback(e);
 		})
 	}))
+	app.all('/pay/result', httpf({orderid:'string', callback:true}, function(orderid,  callback) {
+		var query={merchantOrderId:orderid};
+		var cursor=db.bills.find(query, {status:1});
+		cursor.toArray()
+		.then((r)=>{
+			if (r.length==0) return callback('no such order');
+			callback(null, r[0].status);
+		})
+		.catch((e)=>{
+			callback(e);
+		})
+	}))
 	app.all('/admin/listOutgoingOrders', verifyAuth, httpf({name:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, async function(name, from, to, sort, order, count, offset, callback) {
 		try {
 			var op=[];
@@ -363,8 +375,11 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.all('/admin/confirmOutgoing', verifyAuth, verifyManager, httpf({outids:'string', callback:true}, function(outidstr, callback) {
 		db.withdrawals.updateMany({_id:{$in:outidstr.split(',').map(v=>ObjectID(v))}}, {$set:{done:true}}, callback);
 	}))
-	app.all('/admin/listOrders', verifyAuth, httpf({from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', testOrderOnly:'?boolean', callback:true}, function(from, to, sort, order, count, offset, testOrderOnly, callback) {
+	app.all('/admin/listOrders', verifyAuth, httpf({orderid:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', testOrderOnly:'?boolean', callback:true}, function(orderid, from, to, sort, order, count, offset, testOrderOnly, callback) {
 		var query={};
+		if (orderid) {
+			query._id=ObjectID(orderid);
+		}
 		if (from ||to) {
 			var times={};
 			if (from) times.$gte=from;
@@ -439,7 +454,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		var res=this.res;
 		createOrder(merchantid, userid, orderid, money, 'alipay', cb_url, return_url, function(err, sysOrderId) {
 			if (err) return res.render('error.ejs', {err:err});
-			return res.render('order.ejs', {orderid:sysOrderId, money:money, merchantid:merchantid});
+			return res.render('order.ejs', {orderid:sysOrderId, money:money, merchantid:merchantid, return_url:return_url});
 		});
 	}));
 	app.all('/doOrder', httpf({orderid:'string', callback:true}, function(sysOrderId, callback) {
