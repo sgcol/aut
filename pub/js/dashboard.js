@@ -199,7 +199,7 @@
         _in.label.push(k);
         _in.total+=fix2(rs.in[k].net);  
       }
-      if (_in.total!=_out.total) {
+      if (Math.abs(_in.total-_out.total)>0.01) {
         if (_in.total>_out.total) {
           _out.data.push(fix2(_in.total-_out.total));
           _out.bg.push(colors.gray);
