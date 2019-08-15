@@ -193,11 +193,12 @@ function notifyMerchant(orderdata) {
     var db, body;
     async.waterfall([
         getDB,
-        function queryMerchantDate(_db, cb) {
+        function queryMerchantDate(_db, unused, cb) {
             db=_db;
             getMerchant(orderdata.merchantid, cb);
         },
         function notify(mer, cb) {
+            var custom_params=url.parse(orderdata.cb_url, true).query;
             request({uri:orderdata.cb_url, form:merSign(mer, Object.assign(custom_params, {orderid:orderdata.merchantOrderId, money:orderdata.paidmoney}))}, cb);
         },
         function resolveRet(header, body, cb) {
