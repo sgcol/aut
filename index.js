@@ -288,7 +288,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		})
 	}))
 	app.all('/pay/result', httpf({orderid:'string', callback:true}, function(orderid,  callback) {
-		var query={merchantOrderId:orderid};
+		var query={_id:ObjectID(orderid)};
 		var cursor=db.bills.find(query, {status:1});
 		cursor.toArray()
 		.then((r)=>{
