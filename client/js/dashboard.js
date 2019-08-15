@@ -26,6 +26,7 @@
     system:'#9a55ff',
     '支付宝':'#0e9dec',
     '微信':'#346b21',
+    'ksher':'rgb(255, 157, 166)'
   }
 
   function dateToYM(date) {
