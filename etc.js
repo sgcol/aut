@@ -41,7 +41,7 @@ function dec2num(dec) {
 	exports.dec2num=dec2num;
 	function dedecimal(obj) {
 		for (var k in obj) {
-			if (typeof obj[k]!='object') continue;
+			if (!obj[k] || typeof obj[k]!='object') continue;
 			if (obj[k]._bsontype && obj[k]._bsontype=='Decimal128') obj[k]=Number(obj[k].toString());
 			else dedecimal(obj[k]);
 		}
