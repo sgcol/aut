@@ -182,10 +182,7 @@
       if (err) return;
       var _in={data:[], bg:[], label:[], total:0}, _out={data:[], bg:[], label:[], total:0};
       for (var k in rs.out) {
-        var subtotal=0;
-        for (var m in rs.out[k]) {
-          subtotal+=fix2(rs.out[k][m]);
-        }
+        var subtotal=addAllFields(rs.out[k]);
         _out.data.push(subtotal);
         _out.bg.push(colors[k]||colors.white);
         _out.label.push(k);
