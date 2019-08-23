@@ -376,7 +376,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		db.withdrawals.updateMany({_id:{$in:outidstr.split(',').map(v=>ObjectID(v))}}, {$set:{done:true}}, callback);
 	}))
 	app.all('/admin/listOrders', verifyAuth, httpf({orderid:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', testOrderOnly:'?boolean', callback:true}, function(orderid, from, to, sort, order, count, offset, testOrderOnly, callback) {
-		var query={};
+		var query={}, prj={};
 		if (orderid) {
 			query._id=ObjectID(orderid);
 		}
@@ -388,6 +388,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}
 		if (this.req.auth.acl!='admin' && this.req.auth.acl!='manager') {
 			query.merchantid=this.req.auth.merchantid;
+			Object.assign(prj, {lasterr:1, lasttime:1, mer_userid:1, merchantOrderId:1, merchant_return:1, merchantid:1, mername:1, money:1, net:1, share:1, provider:1, providerOrderId:1, status:1, time:1});
 		}
 		if (testOrderOnly) {
 			query.merchantOrderId=/TESTORDER/;
