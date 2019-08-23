@@ -276,6 +276,7 @@
       $('#fee').attr("placeholder", ''+((1-merchant.share)*100).toFixed(2)+'%');
       $('#parent').attr('placeholder', merchant.parent);
       $('#valid').attr('placeholder', formattime(merchant.validfrom||'1971 1-1 0:00 GMT+0800')+'-'+formattime(merchant.validend||'1971-1-2 00:00 GMT+0800', true));
+      $('#limitation').attr('placeholder', merchant.limitation);
     }
     $('#adjustMerchant').off('click').click(function(e) {
       var params={};

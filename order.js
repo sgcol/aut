@@ -24,7 +24,7 @@ function createOrder(merchantid, userid, merchantOrderId, money, preferredPay, c
             if (err) return callback(err);
             if (r.length>0) return callback('orderid重复');
             pify(getMerchant)(merchantid).then((mer)=>{
-                if ((mer.daily||0)+money>(mer.limitation||2000000)) throw '超出每日收款上限';
+                if (((mer.daily||0)+money)>(mer.limitation||2000000)) throw '超出每日收款上限';
                 var start=new Date(mer.validfrom||Date.UTC(1971, 0,1, 0, 0, 0))
                 , end=new Date(mer.validend||Date.UTC(1971, 0, 1, 13, 0, 0));
                 var nowtime=new Date();

@@ -1,4 +1,4 @@
-const merge=require('gy-merge'), md5=require('md5'), qs=require('querystring'),sortObj=require('sort-object');
+const merge=require('gy-merge'), md5=require('md5'), qs=require('querystring'),sortObj=require('sort-object'), _=require('./etc.js');
 const getDB=require('./db.js');
 
 function getMerchant(merchantid, cb) {
@@ -7,7 +7,7 @@ function getMerchant(merchantid, cb) {
 		db.users.find({merchantid:merchantid}).toArray((err, r) =>{
 			if (err) return cb(err);
 			if (r.length==0) return cb('no such merchant');
-			return cb(null, r[0]);
+			return cb(null, _.dedecimal(r[0]));
 		})
 	})
 }

@@ -437,7 +437,13 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		db.bills.find({_id:ObjectID(orderid)}).toArray(function(err, r) {
 			if (err) return callback(err);
 			if (r.length==0) return callback('没有这个订单');
-			if (r[0].status!='通知失败') return callback('通知失败之后才可以重发');
+			switch (r[0].status) {
+				case '通知失败':
+				case '已支付':
+					break;
+				default:
+					return callback('通知失败之后才可以重发');
+			}
 			notifyMerchant(r[0]);
 			callback();
 		});
