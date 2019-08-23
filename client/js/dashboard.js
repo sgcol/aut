@@ -47,8 +47,8 @@
       r.forEach((ele)=>{
         var prd=ele._id.provider||'unknown';
         if (!data[ele._id.month]) data[ele._id.month]={total:0, count:{total:0}};
-        data[ele._id.month][prd]=ele.money;
-        data[ele._id.month].total+=ele.money;
+        data[ele._id.month][prd]=ele.net;
+        data[ele._id.month].total+=ele.net;
         data[ele._id.month].count[prd]=ele.count;
         data[ele._id.month].count.total+=ele.count;
         var s=ds.find(data=>data.label==prd);

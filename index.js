@@ -814,8 +814,10 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		});
 	}));
 	app.all('/admin/getIncomingByMonth', verifyAuth, httpf({callback:true}, function(callback) {
+		var isAdmin=false;
 		if (this.req.auth.acl=='admin' || this.req.auth.acl=='manager') {
 			var query={used:true};
+			isAdmin=true;
 		}else {
 			var query={userid:this.req.auth._id, used:true};
 		}
@@ -837,7 +839,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		]).toArray().then((r)=>{
 			r.forEach(item=>{
 				item.money=dec2num(item.money);
-				item.net=dec2num(item.net);
+				item.net=isAdmin?dec2num(item.net):item.money;
 			})
 			callback(null, httpf.json(r));
 		}).catch(callback);
