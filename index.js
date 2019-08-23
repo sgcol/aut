@@ -393,7 +393,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		if (testOrderOnly) {
 			query.merchantOrderId=/TESTORDER/;
 		}
-		var cursor=db.bills.find(query);
+		var cursor=db.bills.find(query, prj);
 		if (sort) {
 			var so={};
 			so[sort]=(order=='asc'?1:-1);
