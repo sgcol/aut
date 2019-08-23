@@ -452,7 +452,10 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	}));
 	app.all('/account/me', verifyAuth, httpf({}, function() {
 		var arr=['!password', '!salt', '!limitation'];
-		var ret=filter(this.req.auth, arr);
+		var ret =clone(this.req.auth);
+		ret.password=undefined;
+		ret.salt=undefined;
+		ret.limitation=undefined;
 		ret.validUntil=undefined;
 		if (!this.req.auth.debugMode) ret.key=undefined;
 		
