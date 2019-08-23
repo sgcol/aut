@@ -388,7 +388,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}
 		if (this.req.auth.acl!='admin' && this.req.auth.acl!='manager') {
 			query.merchantid=this.req.auth.merchantid;
-			Object.assign(prj, {lasterr:1, lasttime:1, mer_userid:1, merchantOrderId:1, merchant_return:1, merchantid:1, mername:1, money:1, net:1, share:1, provider:1, providerOrderId:1, status:1, time:1});
+			Object.assign(prj, {lasterr:1, lasttime:1, mer_userid:1, merchantOrderId:1, merchant_return:1, merchantid:1, mername:1, money:1, share:1, provider:1, providerOrderId:1, status:1, time:1});
 		}
 		if (testOrderOnly) {
 			query.merchantOrderId=/TESTORDER/;
@@ -451,7 +451,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		});
 	}));
 	app.all('/account/me', verifyAuth, httpf({}, function() {
-		var arr=['!password', '!salt'];
+		var arr=['!password', '!salt', '!limitation'];
 		var ret=filter(this.req.auth, arr);
 		ret.validUntil=undefined;
 		if (!this.req.auth.debugMode) ret.key=undefined;
