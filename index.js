@@ -439,6 +439,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			if (r.length==0) return callback('没有这个订单');
 			switch (r[0].status) {
 				case '通知失败':
+				case '通知商户':
 				case '已支付':
 					break;
 				default:

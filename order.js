@@ -219,11 +219,11 @@ function notifyMerchant(orderdata) {
                 rn=orderdata;
                 rn.retrytimes=1;
                 retryNotifyList.set(orderdata._id, rn);
-                db.bills.update({_id:orderdata._id}, {$set:{lasttime:new Date(), status:'通知商户', lasterr:normalizeError(e), merchant_return:body}});
+                db.bills.update({_id:orderdata._id}, {$set:{lasttime:new Date(), status:'通知商户', lasterr:normalizeError(err), merchant_return:body}});
             }
             else {
                 rn.retrytimes++;
-                db.bills.update({_id:orderdata._id}, {$set:{lasttime:new Date(), status:'通知失败', lasterr:normalizeError(e), merchant_return:body}});
+                db.bills.update({_id:orderdata._id}, {$set:{lasttime:new Date(), status:'通知失败', lasterr:normalizeError(err), merchant_return:body}});
                 if (rn.retrytimes>5) {
                     retryNotifyList.delete(orderdata._id);
                 }
