@@ -30,6 +30,7 @@ function createOrder(merchantid, userid, merchantOrderId, money, preferredPay, c
                 var nowtime=new Date();
                 nowtime.setFullYear(1971, 0, 1);
                 if (nowtime<start || nowtime>end) throw '本时段不开放充值';
+                if (money>5000) throw "单笔订单不能超出5000"
                 return db.bills.insertOne({merchantOrderId:merchantOrderId, userid:mer._id, merchantid:merchantid, mer_userid:userid, provider:'', providerOrderId:'', share:mer.share, money:money, paidmoney:-1, time:new Date(), lasttime:new Date(), lasterr:'', preferredPay:preferredPay, cb_url:cb_url, return_url:return_url, status:'created'}, {w:1});
             })
             .then((r)=>{
