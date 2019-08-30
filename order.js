@@ -203,7 +203,6 @@ function notifyMerchant(orderdata) {
             request({uri:orderdata.cb_url, form:merSign(mer, Object.assign(custom_params, {orderid:orderdata.merchantOrderId, money:orderdata.paidmoney}))}, cb);
         },
         function resolveRet(header, body, cb) {
-            console.log('notify merchant ret', header, body);
             if (!body || body.trim()=='') return cb();
             try {
                 var ret=JSON.parse(body);

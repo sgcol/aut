@@ -242,7 +242,6 @@ function init(err, db) {
 		})
     })
 	router.all('/done', function(req, res) {
-        console.log(req.body);
         try {
             var r=JSON.parse(req.body);
         } catch(e) {
@@ -250,7 +249,6 @@ function init(err, db) {
         }
         if (r.code!=0) return res.send({code:'-1', status_msg:'code is not zero'});
 		makeItDone(r.data.mch_order_no, r.data.cash_fee/100, r.data, (err)=>{
-            console.log('after makedone', err);
             if (err) return res.send({code:'-1', status_msg:err});
             res.send({code:'0', status_msg:'done'});
         });
