@@ -208,9 +208,9 @@ function notifyMerchant(orderdata) {
             try {
                 var ret=JSON.parse(body);
             } catch(e) {
-                return cb(e);
+                return cb(e, body);
             }
-            if (body.err) return cb(body.err);
+            if (body.err) return cb(body.err, body);
             cb(null, body);
         }
     ], (err, body)=>{
