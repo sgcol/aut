@@ -13,7 +13,12 @@ function getUser(id, cb) {
         })
     })
 }
-
+function getr(t1, isEnd) {
+    var h=(t1.getUTCHours()-16)%24;
+    if (h<0) h+=24;
+    if (h==0 && isEnd) h=24;
+    return h*3600+t1.getUTCMinutes()*60+t1.getUTCSeconds()
+}
 function createOrder(merchantid, userid, merchantOrderId, money, preferredPay, cb_url, return_url, callback) {
     if (typeof preferredPay=='function') {
         callback=preferredPay;
@@ -28,8 +33,7 @@ function createOrder(merchantid, userid, merchantOrderId, money, preferredPay, c
                 var start=new Date(mer.validfrom||Date.UTC(1970, 11,31, 16, 0, 0))
                 , end=new Date(mer.validend||Date.UTC(1971, 0, 1, 16, 0, 0));
                 var nowtime=new Date();
-                nowtime.setFullYear(1971, 0, 1);
-                if (nowtime<start || nowtime>end) throw '本时段不开放充值';
+                if (getr(nowtime)<getr(start) || getr(nowtime)>getr(end, true)) throw '本时段不开放充值';
                 if (money>5000) throw "单笔订单不能超出5000"
                 return db.bills.insertOne({merchantOrderId:merchantOrderId, userid:mer._id, merchantid:merchantid, mer_userid:userid, provider:'', providerOrderId:'', share:mer.share, money:money, paidmoney:-1, time:new Date(), lasttime:new Date(), lasterr:'', preferredPay:preferredPay, cb_url:cb_url, return_url:return_url, status:'created'}, {w:1});
             })
@@ -37,6 +41,7 @@ function createOrder(merchantid, userid, merchantOrderId, money, preferredPay, c
                 sysevents.emit('orderCreated', r.ops[0]);
                 callback(null, r.insertedId.toHexString());            
             }).catch((e)=>{
+                console.error(e);
                 callback(e);
             })
         })

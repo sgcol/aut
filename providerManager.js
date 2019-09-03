@@ -24,7 +24,7 @@ function order(orderid, money,mer, mer_userid, host, callback) {
         if (!opt) return false;
         return !opt.disabled;
     }), function(prd, cb) {
-        if (!prd.bestPair) return cb(null, {gap:Number.MAX_VALUE, coinType:''});
+        if (!prd.bestPair) return cb(null, {gap:Number.MAX_VALUE, coinType:'rmb'});
         prd.bestPair(money, function(err, gap, coinType){
             if (err) return cb(null, {gap:Number.MAX_VALUE, coinType:''});
             return cb(null, {gap:gap, coinType:coinType, prd:prd});
