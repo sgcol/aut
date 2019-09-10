@@ -255,26 +255,29 @@ function init(err, db) {
 	});
 	function makeItDone(orderid, total_amount, data, callback) {
 		callback=callback||function(){};
-		var acc=usedAccount[orderid], net, succrate;
-		if (acc) {
-			if (!acc.log) acc.log={};
-			if (acc.log.success) acc.log.success++;
-			else acc.log.success=1;
-			if (!acc.used) acc.used=1;
-			else acc.used++;
-			var fee=Math.ceil(total_amount*(acc.fee||ksherFee)*100)/100;
-			net=Number(Number(total_amount-fee).toFixed(2));
-			succrate=acc.log.success/acc.used;
-		}
-		confirmOrder(orderid, total_amount, net, (err)=>{
-			if (!err) {
-				db.ksher_accounts.updateOne({_id:acc.appId}, {$set:{'log.success':acc.log.success, 'succrate':succrate}, $inc:{daily:Decimal128.fromString(''+net), total:Decimal128.fromString(''+net), 'gross.daily':Decimal128.fromString(''+total_amount), 'gross.total':Decimal128.fromString(''+total_amount), used:1, thb:Decimal128.fromString(''+data.total_fee/100)}});
-				delete usedAccount[orderid];
+		db.ksher_orders.findOne({_id:orderid},function(err, orderData) {
+			if (err) callback('no such order');
+			var acc=usedAccount[orderid], net, succrate;
+			if (acc) {
+				if (!acc.log) acc.log={};
+				if (acc.log.success) acc.log.success++;
+				else acc.log.success=1;
+				if (!acc.used) acc.used=1;
+				else acc.used++;
+				var fee=Math.ceil(orderData.rmb*(acc.fee||ksherFee)*100)/100;
+				net=Number(Number(orderData.rmb-fee).toFixed(2));
+				succrate=acc.log.success/acc.used;
 			}
-            if (err && err!='used order') return callback(err);
-            db.ksher_orders.updateOne({_id:orderid}, {$set:{recieved_thb:data.total_fee}});
-			callback(null, httpf.text('success'));
-		})
+			confirmOrder(orderid, orderData.rmb, net, (err)=>{
+				if (!err) {
+					db.ksher_accounts.updateOne({_id:acc.appId}, {$set:{'log.success':acc.log.success, 'succrate':succrate}, $inc:{daily:Decimal128.fromString(''+net), total:Decimal128.fromString(''+net), 'gross.daily':Decimal128.fromString(''+total_amount), 'gross.total':Decimal128.fromString(''+total_amount), used:1, thb:Decimal128.fromString(''+data.total_fee/100)}});
+					delete usedAccount[orderid];
+				}
+				if (err && err!='used order') return callback(err);
+				db.ksher_orders.updateOne({_id:orderid}, {$set:{recieved_thb:data.total_fee, origin:data}});
+				callback(null);
+			})
+		});
     }
     function nextAccount(merchantdata, mer_userid, callback) {
 		var merid=merchantdata._id;//+'.'+mer_userid;
