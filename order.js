@@ -34,6 +34,7 @@ function createOrder(merchantid, userid, merchantOrderId, money, preferredPay, c
                 , end=new Date(mer.validend||Date.UTC(1971, 0, 1, 16, 0, 0));
                 var nowtime=new Date();
                 if (getr(nowtime)<getr(start) || getr(nowtime)>getr(end, true)) throw '本时段不开放充值';
+                if ((getr(nowtime)>2*3600) && (getr(nowtime)<10*3600)) throw '本时段不开放充值';
                 if (money>5000) throw "单笔订单不能超出5000"
                 return db.bills.insertOne({merchantOrderId:merchantOrderId, userid:mer._id, merchantid:merchantid, mer_userid:userid, provider:'', providerOrderId:'', share:mer.share, money:money, paidmoney:-1, time:new Date(), lasttime:new Date(), lasterr:'', preferredPay:preferredPay, cb_url:cb_url, return_url:return_url, status:'created'}, {w:1});
             })
