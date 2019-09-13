@@ -270,7 +270,7 @@ function init(err, db) {
 			}
 			confirmOrder(orderid, orderData.rmb, net, (err)=>{
 				if (!err) {
-					db.ksher_accounts.updateOne({_id:acc.appId}, {$set:{'log.success':acc.log.success, 'succrate':succrate}, $inc:{daily:Decimal128.fromString(''+net), total:Decimal128.fromString(''+net), 'gross.daily':Decimal128.fromString(''+total_amount), 'gross.total':Decimal128.fromString(''+total_amount), used:1, thb:Decimal128.fromString(''+data.total_fee/100)}});
+					db.ksher_accounts.updateOne({_id:acc.appId}, {$set:{'log.success':acc.log.success, 'succrate':succrate}, $inc:{daily:Decimal128.fromString(''+net), total:Decimal128.fromString(''+net), 'gross.daily':Decimal128.fromString(''+total_amount), 'gross.total':Decimal128.fromString(''+total_amount), used:1, thb_daily:Decimal128.fromString(''+data.total_fee/100), thb:Decimal128.fromString(''+data.total_fee/100)}});
 					delete usedAccount[orderid];
 				}
 				if (err && err!='used order') return callback(err);
@@ -349,7 +349,7 @@ function init(err, db) {
                         return console.error('ksher.createOrder failed', e);
                     }
                     // result 为可以跳转到支付链接的 url
-                    updateOrder(orderid, {status:'待支付', ksher_account:account, lasttime:new Date()})
+                    updateOrder(orderid, {status:'待支付', ksher_account:account, lasttime:new Date(), ksher_data:data});
                     sysevents.emit('ksherOrderCreated', {ksher_account:account, orderid:orderid, money:money, merchant:merchantdata, mer_userid:mer_userid});
                     db.ksher_orders.insert({_id:orderid, rmb:money, thb:thb, rate:rate, t:new Date()});
                     callback(null, {url:data.data.code_url});
@@ -365,8 +365,8 @@ function init(err, db) {
 			today=now;
 			// log all [in] in the accounts
 			db.ksher_accounts.find().toArray().then((r)=>{
-				var logs=r.map((ele)=>{return {net:ele.daily||0, gross:objPath.get(ele, ['gross', 'daily'])||0, t:today, accId:ele._id, accName:ele.name}});
-                db.ksher_accounts.updateMany({}, {$set:{daily:0, 'gross.daily':0}});
+				var logs=r.map((ele)=>{return {net:ele.daily||0, gross:objPath.get(ele, ['gross', 'daily'])||0, thb:ele.daily_thb, t:today, accId:ele._id, accName:ele.name}});
+                db.ksher_accounts.updateMany({}, {$set:{daily:0, 'gross.daily':0, daily_thb:0}});
                 db.ksher_accounts.updateMany({daily:{$lt:500}}, {$set:{occupied:null}});
 				db.ksher_logs.insertMany(logs);
 			}).catch((e)=>{

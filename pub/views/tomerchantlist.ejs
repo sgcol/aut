@@ -109,7 +109,11 @@
                               金额
                             </th>
                             <th data-field="bank" data-formatter="showBankInfo">提款账户</th>
+                            <% if (acl=='admin' || acl=='manager') {  %>
                             <th data-formatter="showOp">操作</th>
+                            <% } else { %>
+                            <th data-field="done" data-formatter="showStatus">状态</th>
+                            <% } %>
                           </tr>
                         </thead> 
                         <tbody>
@@ -168,18 +172,26 @@
   function showTotalOutgoing() {
     return data?data.sum:undefined;
   }
+  <% if (acl=='admin' || acl=='manager') {  %>
   function showOp(v, o, idx) {
+    if (o.done) return '已付';
     return `<button class="btn btn-outline-primary btn-sm tooltipfy" title="已支付" onclick="javascript:sendNotify('${o.involved}')">支付完成</button>`;
-  }
-  function showBankInfo(v, o) {
-    o.bank=o.bank||{};
-    return `<ul><li>${o.bank.name}<li>${o.bank.no}<li>${o.bank.account}</ul>  `
   }
   function sendNotify(arr) {
     accIntf('admin/confirmOutgoing', {outids:arr}, function(err) {
       if (err) return alert(err);
       querydata();
     })
+  }
+  <% } else { %>
+  function showStatus(v, o, idx) {
+    if (!v) return "处理中";
+    else return '已下发 '+timestring(o.lasttime);
+  }
+  <% } %>
+  function showBankInfo(v, o) {
+    o.bank=o.bank||{};
+    return `<ul><li>${o.bank.name}<li>${o.bank.no}<li>${o.bank.account}</ul>  `
   }
   function querydata() {
     var querys={};

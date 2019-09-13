@@ -301,17 +301,18 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	}))
 	app.all('/admin/listOutgoingOrders', verifyAuth, httpf({name:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, async function(name, from, to, sort, order, count, offset, callback) {
 		try {
-			var op=[];
+			var op=[],query={money:{$gt:0}};
 			if (this.req.auth.acl=='agent' || this.req.auth.acl=='merchant') {
 				name=this.req.auth.name;
+			} else {
+				query.done={$ne:true};
 			}
-			var query={done:{$ne:true}};
 			if (from ||to) {
 				var times={};
 				if (from) times.$gte=from;
 				if (to) times.$lte=to;
 				query.time=times;
-				query.done={$ne:true};
+				// query.done={$ne:true};
 			}
 			var results =await Promise.all([
 				db.withdrawals.aggregate([
@@ -325,17 +326,23 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 					if (name) {
 						query.name=name;
 						var cursor=db.withdrawals.find(query);
-						if (sort) {
-							var so={};
-							so[sort]=(order=='asc'?1:-1);
-							cursor=cursor.sort(so);
-						}
+						var so={};
+						so[sort]=(order=='asc'?1:-1);
+						cursor=cursor.sort(so);
 						if (offset) {
 							cursor=cursor.skip(offset);
 						}
 						if (count) cursor=cursor.limit(count);
 						return await Promise.all([
-							cursor.toArray(), cursor.count()
+							new Promise((resolve, reject)=>{
+								cursor.toArray().then((r)=>{
+									r.forEach((item)=>{
+										item._id=item.userid;
+									})
+									resolve(r);
+								}).catch(e=>reject(e));
+							})
+							, cursor.count()
 						])
 					} else {
 						var cursor=db.withdrawals.aggregate([{$match:query}, {$group:{_id:'$userid', money:{$sum:'$money'}, name:{$last:'$name'}, _t:{$last:'$_t'}, involved:{$addToSet:{$convert:{input:'$_id', to:"string"}}} }}]);
@@ -367,13 +374,13 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 				var p=paymaps[it._id];
 				if (p) Object.assign(it, p);
 			})
-			callback(null, {total:c, rows:r, sum:objPath.get(results, [0,0,'total'], 0)});
+			callback(null, {total:c, rows:r, sum:Number(objPath.get(results, [0,0,'total'], 0)).toFixed(2)});
 		} catch (e) {
 			callback(e);
 		}
 	}))
 	app.all('/admin/confirmOutgoing', verifyAuth, verifyManager, httpf({outids:'string', callback:true}, function(outidstr, callback) {
-		db.withdrawals.updateMany({_id:{$in:outidstr.split(',').map(v=>ObjectID(v))}}, {$set:{done:true}}, callback);
+		db.withdrawals.updateMany({_id:{$in:outidstr.split(',').map(v=>ObjectID(v))}}, {$set:{done:true, lasttime:new Date()}}, callback);
 	}))
 	app.all('/admin/listOrders', verifyAuth, httpf({orderid:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', testOrderOnly:'?boolean', callback:true}, function(orderid, from, to, sort, order, count, offset, testOrderOnly, callback) {
 		var query={}, prj={};
@@ -867,6 +874,16 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			})
 			callback(null, {in:incoming, out:outgoing});
 		})		
+	}));
+	app.all('/merchant/changePass', verifyAuth, httpf({op:'string', np:'string', callback:'true'}, function(op, np, callback) {
+		var mer=this.req.auth;
+		if (mer.password!=op) return callback('密码输入有误');
+		mer.salt=randomstring();
+		mer.password=md5(mer.salt+np);
+		db.users.updateOne({_id:mer._id}, {$set:{password:mer.password, salt:mer.salt}}, (err)=>{
+			if (err) return callback(err);
+			callback();
+		})
 	}));
 	app.all('/merchant/debug/callback', verifyAuth, verifyDebugMode, httpf({cb_url:'string', orderid:'string', money:'number', callback:true}, function(url, orderid, money, callback) {
 		var mer=this.req.auth;
