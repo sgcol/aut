@@ -281,7 +281,7 @@ function init(err, db) {
     }
     function nextAccount(merchantdata, mer_userid, callback) {
 		var merid=merchantdata._id;//+'.'+mer_userid;
-		db.ksher_accounts.findOne({occupied:merid, daily:{$lt:ksherLimitation}}, {sort:{daily:1}}).then((acc)=>{
+		db.ksher_accounts.findOne({occupied:merid, daily:{$lt:ksherLimitation}, disable:{$ne:true}}, {sort:{daily:1}}).then((acc)=>{
 			if (acc) return callback(null, acc);
 			// 商户没有足够的ksherAccount了
 			// 增加商户的ksherAccount
