@@ -307,6 +307,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			} else {
 				query.done={$ne:true};
 			}
+			if (name) query.name=name;
 			if (from ||to) {
 				var times={};
 				if (from) times.$gte=from;
@@ -324,7 +325,6 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 				).toArray(),
 				(async function() {
 					if (name) {
-						query.name=name;
 						var cursor=db.withdrawals.find(query);
 						var so={};
 						so[sort]=(order=='asc'?1:-1);
