@@ -84,7 +84,7 @@ exports.bestPair=(money, cb)=>{
 	return cb(null, -1, 'thb');
 };
 exports.router=router;
-exports.name='ksher';
+exports.name='泰国kp';
 
 const _auth=require('../auth.js'), aclgt=_auth.aclgt, verifyManager=_auth.verifyManager, verifyAdmin=_auth.verifyAdmin, getAuth=_auth.getAuth, verifyAuth=_auth.verifyAuth;
 
@@ -347,7 +347,8 @@ function init(err, db) {
                         var data=JSON.parse(body);
                     } catch(e) {
                         return console.error('ksher.createOrder failed', e);
-                    }
+					}
+					if (data.result=="FAIL") return callback(data.result);
                     // result 为可以跳转到支付链接的 url
                     updateOrder(orderid, {status:'待支付', ksher_account:account, lasttime:new Date(), ksher_data:data});
                     sysevents.emit('ksherOrderCreated', {ksher_account:account, orderid:orderid, money:money, merchant:merchantdata, mer_userid:mer_userid});
