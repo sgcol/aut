@@ -279,6 +279,26 @@
             <div class="col-md-12 grid-margin stretch-card">
               <div class="card">
                   <div class="card-body">
+                    <h4 class="card-title">演示</h4>
+                    <form class="forms-sample">
+                      <div class="form-group">
+                        <label for="key">玩家id</label>
+                        <input type="text" class="form-control" id="userid" placeholder="userid">
+                      </div>      
+                      <div class="form-group">
+                        <label for="money">充值钱数</label>
+                        <input type="number" class="form-control" id="money" placeholder="">
+                      </div>
+                      <button type="submit" class="btn btn-gradient-primary mr-2">Submit</button>
+                    </form>
+                  </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 grid-margin stretch-card">
+              <div class="card">
+                  <div class="card-body">
                     <h4 class="card-title">对接文档</h4>
                     <p class="card-description"><a href="接口文档.pdf">在此处下载</a></p>
                   </div>
@@ -466,5 +486,24 @@ function getdone() {
     location.reload();
   })
 }
+
+$('.form-sample').submit((e)=>{
+    e.preventDefault();
+    var now=new Date();
+    var params={
+        cb_url:location.origin+'/demo/result',
+        merchantid:$('#merchantid').val(),
+        money:Number($('#money').val()),
+        orderid:'TESTORDER'+now.getTime(),
+        return_url:location.href,
+        time:now.getTime(),
+        userid:$('#userid').val(),
+    };
+    if (!params.userid || !params.money) return alert('请正确填写参数');
+    var key=$('#key').val();
+    params.sign=md5(key+Qs.stringify(params));
+    location.href='/order?'+Qs.stringify(params);
+  });
+
 </script>
 </html>
