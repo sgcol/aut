@@ -353,7 +353,7 @@ function init(err, db) {
                     updateOrder(orderid, {status:'待支付', ksher_account:account, lasttime:new Date(), ksher_data:data});
                     sysevents.emit('ksherOrderCreated', {ksher_account:account, orderid:orderid, money:money, merchant:merchantdata, mer_userid:mer_userid});
                     db.ksher_orders.insert({_id:orderid, rmb:money, thb:thb, rate:rate, t:new Date()});
-                    callback(null, {url:data.data.code_url});
+                    callback(null, {url:data.data.code_url, pay_msg:'请使用微信扫描二维码'});
                 })
             })
 		})

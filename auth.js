@@ -1,5 +1,5 @@
 const argv = require('yargs')
-	.default('authtimeout', 3*60*1000)
+	.default('authtimeout', 20*60*1000)
     .argv;
     
 const auth_timeout=argv.authtimeout;
