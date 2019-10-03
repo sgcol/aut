@@ -93,7 +93,7 @@
     $(()=>{
         var params = {orderid:'<%= orderid%>'};
         var retryNum=0;
-        function handleQR(err, url) {
+        function handleQR(err, url, pay_msg) {
             if (mobileAndTabletcheck()) {
                 location.href=url;
                 return;
@@ -108,6 +108,7 @@
             });
             $('.wrap-login100').toggle();
             $('.sk-double-bounce').toggle();
+            if (pay_msg && typeof pay_msg=='string') $('.login100-form p').text(pay_msg);
         }
         function handleResult(err, ret) {
             if (err) {
@@ -119,7 +120,7 @@
             }
             if (ret.to) return (location.href=ret.to);
             var url=ret.url||ret.message;
-            handleQR(err, url);
+            handleQR(err, url, ret.pay_msg);
 
             setInterval(checkStatus, 3000);
         }
