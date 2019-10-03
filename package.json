@@ -43,11 +43,14 @@
     "debugout": "^1.0.0",
     "gulp": "^3.9.1",
     "gulp-ejs": "^3.2.0",
-    "webpack": "^4.33.0",
+    "phonegap": "^8.2.2",
+    "webpack": "^4.41.0",
     "webpack-cli": "^3.3.3"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "app-init": "phonegap create ./app",
+    "app-add-plugin": "phonegap plugin add "
   },
   "author": "",
   "license": "ISC"

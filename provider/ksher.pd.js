@@ -335,7 +335,7 @@ function init(err, db) {
                     'appid' : account.appId,
                     'nonce_str' : randomstring(16),
                     'mch_order_no' : orderid,
-                    'channel' : 'alipay',
+                    'channel' : 'wechat',
                     'total_fee' : thb,
                     'fee_type' : 'THB',
                     // 'img_type' : 'png',
