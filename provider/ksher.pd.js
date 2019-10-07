@@ -298,7 +298,7 @@ function init(err, db) {
 						}
 						notifier.add('ksher账号不足');
 
-						db.ksher_accounts.find().sort({daily:1}).limit(1).toArray().then((backupAccounts)=>{
+						return db.ksher_accounts.find().sort({daily:1}).limit(1).toArray().then((backupAccounts)=>{
 							return callback(null, backupAccounts[0]);
 						});
 					}
