@@ -294,9 +294,13 @@ function init(err, db) {
 						// send a notify that accounts not enough;
 						if (!freeAccounts.length) {
 							notifier.add('ksher账号已用完，请添加');
-							throw '暂时没有可用通道';	
+							// throw '暂时没有可用通道';	
 						}
 						notifier.add('ksher账号不足');
+
+						db.ksher_accounts.find().sort({daily:1}).limit(1).toArray().then((backupAccounts)=>{
+							return callback(null, backupAccounts[0]);
+						});
 					}
 					 
 					db.ksher_accounts.updateMany({_id:{$in:freeAccounts.map(acc=>acc._id)}}, {$set:{occupied:merid, daily:0}}, {w:1}).then(()=>{
