@@ -269,6 +269,13 @@
               }
               return ret;
             })():''}
+            ${allp[i].options?(()=>{
+              var ret='<div class="form-group">';
+              for (var j=0; j<allp[i].options.length; j++) {
+                ret+='<div class="form-check form-check-primary"><label class="form-check-label"><input type="radio" class="form-check-input" name="opt"'+(j==0?'checked':'')+'>'+allp[i].options[j]+'<i class="input-helper"></i></label></div>'
+              }
+              return ret+'</div>';
+            })():''}
           </div>
           `)
         }

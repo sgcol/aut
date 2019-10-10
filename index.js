@@ -178,7 +178,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	var getProviders = require('./providerManager.js').getProvider;
 	if (argv.debugout) {
 		app.use(function (req, res, next) {
-			debugout('access', req.url);
+			debugout('access', req.url, req.body||'');
 			next();
 		});
 	}
@@ -188,17 +188,20 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	});
 	app.use('/pvd/:provider', function (req, res, next) {
 		debugout('provider', req.provider);
-		if (getProviders(req.provider)) return getProviders(req.provider).router.call(null, req, res, function (err) { 
-			if (err) {
-				if (err instanceof Error) {
-					var o={message:err.message};
-					if (argv.debugout) o.stack=err.stack;
-					err=o;
+		if (getProviders(req.provider)) {
+			console.log('access pvd', req.url, req.body||'');
+			return getProviders(req.provider).router.call(null, req, res, function (err) { 
+				if (err) {
+					if (err instanceof Error) {
+						var o={message:err.message};
+						if (argv.debugout) o.stack=err.stack;
+						err=o;
+					}
+					return res.status(500).send({err:err});
 				}
-				return res.status(500).send({err:err});
-			}
-			return res.status(404).send({err:'no such function ' + req.url, detail:arguments}); 
-		});
+				return res.status(404).send({err:'no such function ' + req.url, detail:arguments}); 
+			});
+		}
 		res.end('pf ' + req.provider + ' not defined');
 	});
 
@@ -543,7 +546,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.all('/admin/listAccount', verifyAuth, verifyManager, httpf({identity:'any', search:'?string', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, function(identity, search, sort, order, offset, limit, callback) {
 		if (!identity) identity=['merchant', 'agent'];
 		if (Array.isArray(identity)) identity={$in:identity};
-		var cur=db.users.find({acl:identity}, {password:0, salt:0});
+		var cur=db.users.find({acl:identity}, {projection:{password:0, salt:0}});
 		if (sort) {
 			var so={};
 			so[sort]=(order=='asc'?1:-1);
@@ -1025,7 +1028,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		var ret=[];
 		for (var i in external_provider) {
 			var p=external_provider[i];
-			ret.push({id:i, name:p.name, params:p.params});
+			ret.push({id:i, name:p.name, params:p.params, options:p.options});
 		}
 		return ret;
 	}));

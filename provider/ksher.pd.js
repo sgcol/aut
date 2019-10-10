@@ -85,6 +85,7 @@ exports.bestPair=(money, cb)=>{
 };
 exports.router=router;
 exports.name='泰国kp';
+exports.options=['wechat', 'alipay'];
 
 const _auth=require('../auth.js'), aclgt=_auth.aclgt, verifyManager=_auth.verifyManager, verifyAdmin=_auth.verifyAdmin, getAuth=_auth.getAuth, verifyAuth=_auth.verifyAuth;
 
@@ -334,7 +335,7 @@ function init(err, db) {
             queryRate(account, (err, rate)=>{
                 if (err) return callback(err);
                 usedAccount[orderid]=account;
-                var thb=Math.floor(money/rate*100.25)
+                var thb=Math.floor(money/rate)
                 var data = {
                     'appid' : account.appId,
                     'nonce_str' : randomstring(16),
