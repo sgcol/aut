@@ -335,7 +335,7 @@ function init(err, db) {
             queryRate(account, (err, rate)=>{
                 if (err) return callback(err);
                 usedAccount[orderid]=account;
-                var thb=Math.floor(money/rate)
+                var thb=Math.floor(money/rate*100)
                 var data = {
                     'appid' : account.appId,
                     'nonce_str' : randomstring(16),
