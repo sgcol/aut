@@ -212,7 +212,7 @@ function notifyMerchant(orderdata) {
         },
         function notify(mer, cb) {
             var custom_params=url.parse(orderdata.cb_url, true).query;
-            request({uri:orderdata.cb_url, form:merSign(mer, Object.assign(custom_params, {orderid:orderdata.merchantOrderId, money:orderdata.paidmoney}))}, cb);
+            request.post({uri:orderdata.cb_url, form:merSign(mer, Object.assign(custom_params, {orderid:orderdata.merchantOrderId, money:orderdata.paidmoney}))}, cb);
         },
         function resolveRet(header, body, cb) {
             if (!body || body.trim()=='') return cb();

@@ -891,7 +891,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.all('/merchant/debug/callback', verifyAuth, verifyDebugMode, httpf({cb_url:'string', orderid:'string', money:'number', callback:true}, function(url, orderid, money, callback) {
 		var mer=this.req.auth;
 		if (mer.acl!='merchant') return callback('无权调用这个接口');
-		request({uri:url, form:_orderFunc.merSign(mer, {orderid:orderid, money:money})}, (err, header, body)=>{
+		request.post({uri:url, form:_orderFunc.merSign(mer, {orderid:orderid, money:money})}, (err, header, body)=>{
 			if (err) return callback(err);
 			try {
 				var ret=JSON.parse(body);
