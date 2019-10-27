@@ -31,7 +31,7 @@
                     <i class="zmdi zmdi-font">Pay</i>
                 </span>
                 <div class="p-b-26" id="qrcode" style="margin-left: 12px;"></div>
-                <p style="float:right">请使用支付宝扫描二维码</p>
+                <p style="float:right"></p>
 
             </form>
         </div>
@@ -93,8 +93,9 @@
     $(()=>{
         var params = {orderid:'<%= orderid%>'};
         var retryNum=0;
-        function handleQR(err, url, pay_msg) {
-            if (mobileAndTabletcheck()) {
+        function handleQR(err, url, pay_type, pay_msg) {
+            var isMobile=mobileAndTabletcheck();
+            if (isMobile && pay_type!='wechat') {
                 location.href=url;
                 return;
             }
@@ -108,7 +109,16 @@
             });
             $('.wrap-login100').toggle();
             $('.sk-double-bounce').toggle();
-            if (pay_msg && typeof pay_msg=='string') $('.login100-form p').text(pay_msg);
+            if (pay_msg && typeof pay_msg=='string') return $('.login100-form p').text(pay_msg);
+            switch (pay_type) {
+                case 'wechat' :
+                    if (isMobile) $('.login100-form p').text('请截屏保存，打开微信扫一扫，选择相册');
+                    else $('.login100-form p').text('请使用微信扫描二维码');
+                break;
+                case 'alipay':
+                    $('.login100-form p').text('请使用支付宝扫描二维码');
+                break;
+            }
         }
         function handleResult(err, ret) {
             if (err) {
@@ -120,7 +130,7 @@
             }
             if (ret.to) return (location.href=ret.to);
             var url=ret.url||ret.message;
-            handleQR(err, url, ret.pay_msg);
+            handleQR(err, url, ret.pay_type, ret.pay_msg);
 
             setInterval(checkStatus, 3000);
         }

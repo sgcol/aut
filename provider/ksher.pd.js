@@ -85,7 +85,7 @@ exports.bestPair=(money, cb)=>{
 };
 exports.router=router;
 exports.name='泰国kp';
-exports.options=['wechat', 'alipay'];
+exports.options=[{name:'充值通道', values:['wechat', 'alipay']}];
 
 const _auth=require('../auth.js'), aclgt=_auth.aclgt, verifyManager=_auth.verifyManager, verifyAdmin=_auth.verifyAdmin, getAuth=_auth.getAuth, verifyAuth=_auth.verifyAuth;
 
@@ -331,7 +331,8 @@ function init(err, db) {
 		nextAccount(merchantdata, mer_userid, (err, account)=>{
 			if (err) return callback(err);
 			if (!account) return callback('没有可用的ksher账号');
-            account.appId=account._id;
+			account.appId=account._id;
+			var tongdao=merchantdata.providers.ksher['充值通道']||'wechat';
             queryRate(account, (err, rate)=>{
                 if (err) return callback(err);
                 usedAccount[orderid]=account;
@@ -340,7 +341,7 @@ function init(err, db) {
                     'appid' : account.appId,
                     'nonce_str' : randomstring(16),
                     'mch_order_no' : orderid,
-                    'channel' : 'wechat',
+                    'channel' : tongdao,
                     'total_fee' : thb,
                     'fee_type' : 'THB',
                     // 'img_type' : 'png',
@@ -357,8 +358,10 @@ function init(err, db) {
                     // result 为可以跳转到支付链接的 url
                     updateOrder(orderid, {status:'待支付', ksher_account:account, lasttime:new Date(), ksher_data:data});
                     sysevents.emit('ksherOrderCreated', {ksher_account:account, orderid:orderid, money:money, merchant:merchantdata, mer_userid:mer_userid});
-                    db.ksher_orders.insert({_id:orderid, rmb:money, thb:thb, rate:rate, t:new Date()});
-                    callback(null, {url:data.data.code_url, pay_msg:'请使用微信扫描二维码'});
+					db.ksher_orders.insert({_id:orderid, rmb:money, thb:thb, rate:rate, t:new Date()});
+					var ret={url:data.data.code_url};
+					ret.pay_type=tongdao;
+                    callback(null, ret);
                 })
             })
 		})

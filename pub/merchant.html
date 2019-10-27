@@ -519,11 +519,16 @@
               return ret;
             })():''}
             ${allp[i].options?(()=>{
-              var ret='<div class="form-group">';
+              var ret='';
               for (var j=0; j<allp[i].options.length; j++) {
-                ret+='<div class="form-check form-check-primary"><label class="form-check-label"><input type="radio" class="form-check-input" name="opt"'+(j==0?'checked':'')+'>'+allp[i].options[j]+'<i class="input-helper"></i></label></div>'
+                var opt=allp[i].options[j];
+                ret+=`<div class="form-group" id="providers.${allp[i].id}.${opt.name}" for="${opt.name}">`;
+                for (var z=0; z<opt.values.length; z++) {
+                  ret+=`<div class="form-check form-check-primary"><label class="form-check-label"><input type="radio" class="form-check-input" name="${opt.name}" `+((activedProvider[opt.name]==opt.values[z])?'checked':'')+' value="'+opt.values[z]+'">'+opt.values[z]+`<i class="input-helper"></i></label></div>`
+                }
+                ret+='</div>'
               }
-              return ret+'</div>';
+              return ret;
             })():''}
           </div>
           `)
@@ -539,6 +544,7 @@
       $('#editMerchant form input').each(function(idx, ele) {
         var je=$(ele), jv=je.val();
         if (jv=='') return;
+        if (je.is(':radio')) return;
         if (ele.id=='fee') {
           var s=jv.trim(), v=parseFloat(s);
           if (isNaN(v)) return;
@@ -551,6 +557,10 @@
           params.validfrom=new Date('1971-1-1 '+timerange[1]+' GMT+0800');
           params.validend=new Date('1971-1-1 '+timerange[2]+' GMT+0800');
         } else params[ele.id]=jv;
+      });
+      $('#editMerchant form div[id]').each((idx, ele)=>{
+        var je=$(ele);
+        params[ele.id]=$(`input[name='${je.attr('for')}']:checked`). val();
       });
       params.id=merchant._id;
       accIntf('/admin/updateAccount', params, err=>{
