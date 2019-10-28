@@ -219,7 +219,7 @@ function notifyMerchant(orderdata) {
             try {
                 var ret=JSON.parse(body);
             } catch(e) {
-                return cb(e, body);
+                return cb(null, body);
             }
             if (body.err) return cb(body.err, body);
             cb(null, body);
