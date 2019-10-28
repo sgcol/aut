@@ -950,6 +950,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}
 		else userid=this.req.auth._id;
 		var user=this.req.auth;
+		if (want<5000) return callback('最少提取5000元');
 		db.users.findOneAndUpdate({_id:userid, profit:{$gte:Decimal128.fromString(''+want)}}, {$inc:{profit:Decimal128.fromString(''+(-want))}}, {w:'majority'}, (err, r)=>{
 			if (err) return callback(err);
 			if (!r.value) {
