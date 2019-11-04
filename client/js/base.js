@@ -72,14 +72,21 @@
     }
     window.bell=bell;
     
+    function queryMe(callback) {
+      callback=callback||function(){};
+      accIntf('/account/me', function(err, me) {
+        if (err) return callback(err);
+        window.me=me;
+        $('.username').text(me.name||'');
+        $('.acl').text(me.acl||'访客');
+        callback();
+      });  
+    }
+    window.queryMe=queryMe;
     $(function() {
-        accIntf('/account/me', function(err, me) {
-          if (err) return;
-          window.me=me;
-          $('.username').text(me.name||'');
-          $('.acl').text(me.acl||'访客');
+        queryMe(()=>{
           typeof window.initpage=='function' && window.initpage();
-        });
+        })
         var oldNotifications={};
         function receiveNotifications() {
             accIntf('/sysnotification', function(err, notifications) {

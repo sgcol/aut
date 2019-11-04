@@ -191,10 +191,10 @@ function init(err, db) {
 	router.all('/statements', httpf({account:'?string', startTime:'?date', endTime:'?date', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, function(account, startTime, endTime, sort, order, offset, limit, callback) {
 		var key={provider:'ksher'};
 		if (account) key['ksher_account.name']=account;
-		if (startTime) key.lasttime={'&gte':startTime}
+		if (startTime) key.lasttime={'$gte':startTime}
 		if (endTime) {
-			if (key.lasttime) key.lasttime['&lte']=endTime;
-			else key.lasttime={'&lte':endTime}
+			if (key.lasttime) key.lasttime['$lte']=endTime;
+			else key.lasttime={'$lte':endTime}
 		}
 		var cur=db.bills.find(key);
 		if (sort) {

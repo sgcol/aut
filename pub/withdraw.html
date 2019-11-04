@@ -217,6 +217,7 @@
       </a>
       <div class="collapse" id="ui-details">
         <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="dailyreport.html">日报表</a></li>
           <li class="nav-item"> <a class="nav-link" href="fromuserlist.html">充值订单</a></li>
           <li class="nav-item"> <a class="nav-link" href="tomerchantlist.html">清帐订单</a></li>
         </ul>
@@ -388,6 +389,7 @@ $('#apply').click(function() {
     var take=$('#take').val();
     if (take && take!="0") accIntf('user/take', {take:take}, (err)=>{
         if (err) return alert(err);
+        queryMe(window.initpage);
         alert('提交成功，一般在第二天会到账')
     });
 });

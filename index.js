@@ -878,6 +878,51 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			callback(null, {in:incoming, out:outgoing});
 		})		
 	}));
+	app.all('/admin/dailystat', verifyAuth, httpf({account:'?string', startTime:'?date', endTime:'?date', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, function(account, startTime, endTime, sort, order, offset, limit, callback) {
+		var key={used:true};
+		if (aclgt(this.req.auth.acl, 'manager')) {
+			if (account) key['userid']=account;
+		}
+		else key['userid']=this.req.auth._id;
+		if (startTime) key.time={'$gte':startTime}
+		if (endTime) {
+			if (key.time) key.time['$lte']=endTime;
+			else key.time={'$lte':endTime}
+		}
+		var cur=db.bills.find(key, {projection:{merchantOrderId:1, userid:1, 'provider':1, money:1, paidmoney:1, net:1, providerOrderId:1, status:1, share:1, time:1}});
+		if (sort) {
+			var so={};
+			so[sort]=(order=='asc'?1:-1);
+			cur=cur.sort(so);
+		}
+		if (offset) cur=cur.skip(offset);
+		if (limit) cur=cur.limit(limit);
+
+		cur.toArray()
+		.then(r=>{
+			r.forEach((ele)=>{
+				ele.net=(ele.paidmoney||ele.money)*(ele.share||1);
+			})
+			cur.count((err, c)=>{
+				if (err) return callback(err);
+				db.bills.aggregate([
+					{$match:key},
+					{$addFields:{'neat':{$multiply:['$paidmoney', '$share']}}},
+					{$group:{_id:null, totalMoney:{$sum:'$paidmoney'}, net:{$sum:'$neat'}}}
+				]).toArray((err, tm)=>{
+					var totalmoney, totalnet;
+					if (!err && tm.length>0) {
+						totalmoney=dec2num(tm[0].totalMoney); 
+						totalnet=dec2num(tm[0].net);
+					}
+					callback(null, {total:c, rows:r, totalmoney:totalmoney, totalnet:totalnet});
+				})
+			});
+		})
+		.catch(e=>{
+			callback(e);
+		})
+    }))
 	app.all('/merchant/changePass', verifyAuth, httpf({op:'string', np:'string', callback:'true'}, function(op, np, callback) {
 		var mer=this.req.auth;
 		if (mer.password!=op) return callback('密码输入有误');
@@ -950,7 +995,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}
 		else userid=this.req.auth._id;
 		var user=this.req.auth;
-		if (want<5000) return callback('最少提取5000元');
+		if (process.env.NODE_ENV!='debugmode' && want<5000) return callback('最少提取5000元');
 		db.users.findOneAndUpdate({_id:userid, profit:{$gte:Decimal128.fromString(''+want)}}, {$inc:{profit:Decimal128.fromString(''+(-want))}}, {w:'majority'}, (err, r)=>{
 			if (err) return callback(err);
 			if (!r.value) {
