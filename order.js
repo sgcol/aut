@@ -225,6 +225,12 @@ function notifyMerchant(orderdata) {
             cb(null, body);
         }
     ], (err, body)=>{
+        // db.bills.findOne({_id:orderdata._id}).then((b)=>{
+        //     if (b.used && b.paidmoney<0) {
+        //         db.bills.update({_id:orderdata._id}, {$set:{paidmoney:b.money}});
+        //         db.bills.update({_id:orderdata._id, status:'待付款'}, {$set:{status:'收到款项'}});
+        //     }
+        // });
         if (err) {
             var rn=retryNotifyList.get(orderdata._id);
             if (!rn) {

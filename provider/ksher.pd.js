@@ -258,6 +258,11 @@ function init(err, db) {
 		callback=callback||function(){};
 		db.ksher_orders.findOne({_id:orderid},function(err, orderData) {
 			if (err) callback('no such order');
+			// function getAccount(orderid, callback) {
+			// 	var acc=usedAccount[orderid], net, succrate;
+			// 	if (acc) return callback(null, acc);
+			// 	db.bills.find({_id:ObjectId})
+			// }
 			var acc=usedAccount[orderid], net, succrate;
 			if (acc) {
 				if (!acc.log) acc.log={};

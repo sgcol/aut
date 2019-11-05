@@ -308,6 +308,7 @@
                         <th data-field="_id" data-sortable="true">提供商单号</th>
                         <th data-field="provider" data-sortable="true">提供商</th>
                         <th data-field="time" data-sort-order="desc" data-formatter="timestring"  data-sortable="true">时间</th>
+                        <th data-formatter="showOp">操作</th>
                       </thead>
                       <tbody></tbody>
                     </table>
@@ -386,6 +387,18 @@
     // });
     // if (allclear) $('#detail').bootstrapTable('refresh', {query:querys});
     $('#detail').bootstrapTable('refresh');
+  }
+  function sendNotify(orderid) {
+    accIntf('/admin/notifyMerchant', {orderid:orderid}, (err)=>{
+      if (err) return showerr(err);
+      querydata();
+    });
+  }
+
+  function showOp(v, o) {
+    var ret=`<button class="btn btn-outline-primary btn-icon-sm tooltipfy" title="重发通知" onclick="javascript:sendNotify('${o._id}')"><i class="mdi mdi-replay"></i></button>`;
+    if (me.acl=='admin'||me.acl=='manager') ret+=`<button style="margin-left:5px" class="btn btn-outline-danger btn-icon-sm tooltipfy" title="强制结单" onclick="javascript:forceconfirm('${o._id}')"><i class="mdi mdi-archive"></i></button>`;
+    return ret;
   }
   function getQueryParams(querys) {
     $('#params input').each(function(idx, ele) {

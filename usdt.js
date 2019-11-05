@@ -140,8 +140,10 @@ function retryallfails() {
 }
 
 setInterval(()=>{
-    collectallusdt();
-    retryallfails();
+    if (bitcoincli) {
+        collectallusdt();
+        retryallfails();    
+    }
 }, 10*60*1000);
 
 module.exports={

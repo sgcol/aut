@@ -263,7 +263,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		if (orderid) {
 			query.merchantOrderId=orderid;
 		}
-		var cursor=db.bills.find(query, {merchantOrderId:1, merchantid:1, providerOrderId:1, status:1, lasterr:1, paidmoney:1});
+		var cursor=db.bills.find(query, {projection:{merchantOrderId:1, merchantid:1, providerOrderId:1, status:1, lasterr:1, paidmoney:1}});
 		if (sort) {
 			var so={};
 			so[sort]=(order=='asc'?1:-1);
@@ -398,7 +398,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}
 		if (this.req.auth.acl!='admin' && this.req.auth.acl!='manager') {
 			query.merchantid=this.req.auth.merchantid;
-			Object.assign(prj, {lasterr:1, lasttime:1, mer_userid:1, merchantOrderId:1, merchant_return:1, merchantid:1, mername:1, money:1, share:1, provider:1, providerOrderId:1, status:1, time:1});
+			Object.assign(prj, {lasterr:1, lasttime:1, used:1, mer_userid:1, merchantOrderId:1, merchant_return:1, merchantid:1, mername:1, money:1, share:1, provider:1, providerOrderId:1, status:1, time:1});
 		}
 		if (testOrderOnly) {
 			query.merchantOrderId=/TESTORDER/;
@@ -448,13 +448,16 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		db.bills.find({_id:ObjectID(orderid)}).toArray(function(err, r) {
 			if (err) return callback(err);
 			if (r.length==0) return callback('没有这个订单');
+			if (!r[0].used) return callback('用户尚未支付');
 			switch (r[0].status) {
-				case '通知失败':
-				case '通知商户':
-				case '已支付':
-					break;
+				case 'complete':
+				// case '通知商户':
+				// case '已支付':
+					// break;
+					return callback('已完成的订单');
 				default:
-					return callback('通知失败之后才可以重发');
+					// return callback('通知失败之后才可以重发');
+					break;
 			}
 			notifyMerchant(r[0]);
 			callback();
