@@ -218,8 +218,8 @@
       <div class="collapse" id="ui-details">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> <a class="nav-link" href="dailyreport.html">日报表</a></li>
-          <li class="nav-item"> <a class="nav-link" href="fromuserlist.html">充值订单</a></li>
-          <li class="nav-item"> <a class="nav-link" href="tomerchantlist.html">清帐订单</a></li>
+          <li class="nav-item"> <a class="nav-link" href="fromuserlist.ae">充值订单</a></li>
+          <li class="nav-item"> <a class="nav-link" href="tomerchantlist.ae">清帐订单</a></li>
         </ul>
       </div>
     </li>
@@ -230,11 +230,11 @@
       </a>
     </li> 
     <li class="nav-item">
-        <a class="nav-link" href="changepassword.html">
-          <span class="menu-title">修改密码</span>
-          <i class="mdi mdi-alert-octagon menu-icon"></i>
-        </a>
-      </li>
+      <a class="nav-link" href="changepassword.html">
+        <span class="menu-title">修改密码</span>
+        <i class="mdi mdi-alert-octagon menu-icon"></i>
+      </a>
+    </li>
   </ul>
 </nav>
 
@@ -268,7 +268,7 @@
                             <div class="input-group col-xs-12">
                                 <input type="text" class="form-control" id="take" placeholder="全部">
                                 <span class="input-group-append">
-                                <button class="btn btn-gradient-primary" onclick="$('#take').val(availble)" type="button">All</button>
+                                <button class="btn btn-gradient-primary apply" type="button">Submit</button>
                                 </span>
                             </div>
                             </div>
@@ -305,19 +305,19 @@
                     <div class="card-body">
                     <h4 class="card-title">支付宝</h4>
                     <p class="card-description">
-                        也可以使用支付宝账号
+                        暂不支持支付宝账号
                     </p>
                     <form class="forms-extra">
                         <div class="form-group">
                         <label for="alipayAccount">收款账户</label>
-                        <input type="text" class="form-control" id="alipay_account" placeholder="支付宝账户/手机号码">
+                        <input type="text" class="form-control" id="alipay_account" placeholder="支付宝账户/手机号码" readonly>
                         </div>
                     </form>
                     </div>
                 </div>
             </div>
             <div class="col-12">
-                <button type="submit" class="btn btn-gradient-primary mr-2" id="apply">Submit</button>
+                <button type="submit" class="btn btn-gradient-primary mr-2 apply">Submit</button>
                 <button class="btn btn-light">Cancel</button>        
             </div>
         </div>
@@ -358,6 +358,7 @@
 var availble;
 window.initpage=()=>{
     availble=fix2(me.profit);
+    $('#take').val(availble);
     $('.breadcrumb-item span').text('余额'+availble);
 
     if (me.bank) {
@@ -380,7 +381,7 @@ function setparam(o, path, v) {
     n[path[path.length-1]]=v;
     return o;
 }
-$('#apply').click(function() {
+$('.apply').click(function() {
     var params={};
     $('.forms-extra [id]').each(function(idx, ele) {
         if ($(ele).val()) params[ele.id.split('_').join('.')]=$(ele).val();

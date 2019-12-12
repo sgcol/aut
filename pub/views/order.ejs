@@ -95,10 +95,10 @@
         var retryNum=0;
         function handleQR(err, url, pay_type, pay_msg) {
             var isMobile=mobileAndTabletcheck();
-            if (isMobile && pay_type!='wechat') {
-                location.href=url;
-                return;
-            }
+            // if (isMobile && pay_type!='wechat') {
+            //     location.href=url;
+            //     return;
+            // }
             var qrcode = new QRCode("qrcode", {
                 text: url,
                 width: 256,
@@ -116,7 +116,8 @@
                     else $('.login100-form p').text('请使用微信扫描二维码');
                 break;
                 case 'alipay':
-                    $('.login100-form p').text('请使用支付宝扫描二维码');
+                    if (isMobile) $('.login100-form p').text('请截屏保存，打开支付宝扫码一扫，选择相册');
+                    else $('.login100-form p').text('请使用支付宝扫描二维码');
                 break;
             }
         }

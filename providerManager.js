@@ -4,8 +4,13 @@ var tt = require('gy-module-loader')(path.join(__dirname, 'provider/*.pd.js'), f
     var keys = Object.keys(tt);
     for (var i = 0; i < keys.length; i++) {
         var prd=tt[keys[i]];
-        external_provider[path.basename(keys[i], '.pd.js')] = prd;
-        if (prd.name) providerNameMap[prd.name]=path.basename(keys[i], '.pd.js');
+        if (prd.debugMode && process.env.NODE_ENV=='production') {
+            console.log((path.basename(keys[i])+' is a debugMode provider, abandoned').yellow);
+            continue;
+        }
+        prd.internal_name=path.basename(keys[i], '.pd.js')
+        external_provider[prd.internal_name] = prd;
+        if (prd.name) providerNameMap[prd.name]=prd.internal_name;
     }
 });
 
@@ -17,11 +22,13 @@ exports.getProvider=function(pid) {
 }
 
 const filter = require('filter-object');
-function order(orderid, money,mer, mer_userid, host, callback) {
+function bestProvider(money,mer, options, callback) {
+    if (typeof options=='function') {callback=options; options=null}
     if (!mer.providers) return callback('联系对接小伙伴，他忘记给商户配置渠道了');
     async.map(filter(external_provider, (v, k)=>{
         var opt= mer.providers[k];
-        if (!opt) return false;
+        if (options && options.forecoreOnly && !(v.forecore)) return false;
+        if (!opt) return true;
         return !opt.disabled;
     }), function(prd, cb) {
         if (!prd.bestPair) return cb(null, {gap:Number.MAX_VALUE, coinType:'rmb'});
@@ -30,16 +37,21 @@ function order(orderid, money,mer, mer_userid, host, callback) {
             return cb(null, {gap:gap, coinType:coinType, prd:prd});
         });
     }, function(err, r) {
-        r.sort((a, b)=>{return a.gap-b.gap});
+        if (r.legnth>1) r.sort((a, b)=>{return a.gap-b.gap});
         for (var i=0; i<r.length; i++) {
             if (r[i].coinType) break;
         }
         if (!r[i].coinType) return callback('没有可用的交易提供方');
-        updateOrder(orderid, {provider:r[i].prd.name, providerOrderId:orderid, coin:r[i].coinType});
-        r[i].prd.order(orderid, money, mer, mer_userid, r[i].coinType, host, callback);
+        callback(null, r[i].prd, r[i].coinType);
     });
 }
-
+function order(orderid, money,mer, mer_userid, host, callback) {
+    bestProvider(money, mer, (err, prd, coinType)=>{
+        if (err) return callback(err);
+        prd.order(orderid, money, mer, mer_userid, coinType, host, callback);
+    });
+}
+exports.bestProvider=bestProvider;
 exports.order=order;
 
 function sellOrder(orderid, money, providername, callback) {

@@ -57,7 +57,7 @@ exports.bestSell=null;
 exports.getBalance=_noop;
 exports.sell=_noop;
 exports.bestPair=(money, cb)=>{
-	return cb(null, -1, 'rmb');
+	return cb(null, -1, 'CNY');
 };
 exports.router=router;
 exports.name='支付宝';

@@ -175,6 +175,8 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 
 	var db=dbp[0];
 
+	app.use('/forecore', require('./forecore.js').router);
+	
 	var getProviders = require('./providerManager.js').getProvider;
 	if (argv.debugout) {
 		app.use(function (req, res, next) {
@@ -188,9 +190,11 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	});
 	app.use('/pvd/:provider', function (req, res, next) {
 		debugout('provider', req.provider);
-		if (getProviders(req.provider)) {
+		var pvd=getProviders(req.provider);
+		if (pvd) {
 			console.log('access pvd', req.url, req.body||'');
-			return getProviders(req.provider).router.call(null, req, res, function (err) { 
+			var router=pvd.router;
+			return router && router.call(null, req, res, function (err) { 
 				if (err) {
 					if (err instanceof Error) {
 						var o={message:err.message};
@@ -291,16 +295,18 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		})
 	}))
 	app.all('/pay/result', httpf({orderid:'string', callback:true}, function(orderid,  callback) {
-		var query={_id:ObjectID(orderid)};
-		var cursor=db.bills.find(query, {status:1});
-		cursor.toArray()
-		.then((r)=>{
-			if (r.length==0) return callback('no such order');
-			callback(null, r[0].status);
-		})
-		.catch((e)=>{
-			callback(e);
-		})
+		try {
+			var query={_id:ObjectID(orderid)};
+			var cursor=db.bills.find(query, {status:1});
+			cursor.toArray()
+			.then((r)=>{
+				if (r.length==0) return callback('no such order');
+				callback(null, r[0].status);
+			})
+			.catch((e)=>{
+				callback(e);
+			})
+		}catch(e) {callback(e)}
 	}))
 	app.all('/admin/listOutgoingOrders', verifyAuth, httpf({name:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, async function(name, from, to, sort, order, count, offset, callback) {
 		try {
@@ -445,23 +451,25 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		})
 	}));
 	app.all('/admin/notifyMerchant', verifyAuth, httpf({orderid:'string', callback:true}, function(orderid, callback) {
-		db.bills.find({_id:ObjectID(orderid)}).toArray(function(err, r) {
-			if (err) return callback(err);
-			if (r.length==0) return callback('没有这个订单');
-			if (!r[0].used) return callback('用户尚未支付');
-			switch (r[0].status) {
-				case 'complete':
-				// case '通知商户':
-				// case '已支付':
-					// break;
-					return callback('已完成的订单');
-				default:
-					// return callback('通知失败之后才可以重发');
-					break;
-			}
-			notifyMerchant(r[0]);
-			callback();
-		});
+		try {
+			db.bills.find({_id:ObjectID(orderid)}).toArray(function(err, r) {
+				if (err) return callback(err);
+				if (r.length==0) return callback('没有这个订单');
+				if (!r[0].used) return callback('用户尚未支付');
+				switch (r[0].status) {
+					case 'complete':
+					// case '通知商户':
+					// case '已支付':
+						// break;
+						return callback('已完成的订单');
+					default:
+						// return callback('通知失败之后才可以重发');
+						break;
+				}
+				notifyMerchant(r[0]);
+				callback();
+			});
+		}catch(e) {callback(e)}
 	}));
 	app.all('/account/me', verifyAuth, httpf({}, function() {
 		var arr=['!password', '!salt', '!limitation'];
@@ -474,12 +482,20 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		
 		return ret;
 	}));
-	app.all('/order', verifySign, httpf({orderid:'string', money:'number', merchantid:'string', userid:'string', cb_url:'string', return_url:'?string', time:'string', no_return:true}, function(orderid, money, merchantid, userid, cb_url, return_url, time) {
-		var res=this.res;
-		createOrder(merchantid, userid, orderid, money, 'alipay', cb_url, return_url, function(err, sysOrderId) {
-			if (err) return res.render('error.ejs', {err:err});
+	app.all('/order', verifySign, httpf({orderid:'string', money:'number', merchantid:'string', userid:'string', cb_url:'string', return_url:'?string', time:'string', no_return:true}, async function(orderid, money, merchantid, userid, cb_url, return_url, time) {
+		try {
+			var res=this.res, req=this.req;
+			var sysOrderId =await pify(createOrder)(merchantid, userid, orderid, money, 'alipay', cb_url, return_url);
+			var mer =await pify(getMerchant)(merchantid);
+			var provider= await pify(paysys.bestProvider)(money, mer);
+			var basepath=argv.host||url.format({protocol:req.protocol, host:req.headers.host, pathname:url.parse(req.originalUrl).pathname});
+			if (basepath.slice(-1)!='/') basepath=basepath+'/';
+			var scanModeOrderApi=(provider.scanMode && provider.scanMode(mer, basepath));
+			if (scanModeOrderApi) return res.render('orderup.ejs', {orderid:sysOrderId, api:scanModeOrderApi, money:money, merchantid:merchantid, return_url:return_url});
 			return res.render('order.ejs', {orderid:sysOrderId, money:money, merchantid:merchantid, return_url:return_url});
-		});
+		} catch(err) {
+			return res.render('error.ejs', {err:err});
+		}
 	}));
 	app.all('/doOrder', httpf({orderid:'string', callback:true}, function(sysOrderId, callback) {
 		var req=this.req;
@@ -575,8 +591,9 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 				db.users.find({parent:{$in:agent_ids}}).toArray((err, mers)=>{
 					if (err) return cb(err);
 					mers.forEach((mer)=>{
-						if (!agents[mer.parent].subordinates) agents[mer.parent].subordinates=[mer.name];
-						else agents[mer.parent].subordinates.push(mer.name);
+						var sub=agents[mer.parent].subordinates
+						if (!sub || !Array.isArray(sub)) agents[mer.parent].subordinates=[mer.name];
+						else sub.push(mer.name);
 					})
 					cb(null, rs);
 				})
@@ -1021,7 +1038,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			var errmsg=null;
 			if (total<want) {
 				errmsg='取现时数据异常，profit小于in-out';
-				sysnotifier.add(errmsg+' '+userdata.name||userdata._id);
+				sysnotifier.add(errmsg+' '+usrdata.name||usrdata._id);
 			}
 
 			var takesop=[], now=new Date(), inc={};
@@ -1063,14 +1080,16 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		})
 	}))
 	app.all('/manager/approval', verifyAuth, verifyManager, httpf({all:'?boolean', ids:'?array', callback:true}, function(all, ids, callback) {
-		if (!all && !ids) all=true;
-		var key={done:false};
-		if (ids) key._id={$in:ids.map(id=>ObjectID(id))};
-		db.withdrawals.find(key).then((err,r)=>{
-			
-		}).catch(err=>{
-			callback(err);
-		})
+		try {
+			if (!all && !ids) all=true;
+			var key={done:false};
+			if (ids) key._id={$in:ids.map(id=>ObjectID(id))};
+			db.withdrawals.find(key).then((err,r)=>{
+				
+			}).catch(err=>{
+				callback(err);
+			})
+		}catch(e) {callback(e)}
 	}))
 	app.all('/admin/providers', verifyAuth, httpf(function() {
 		var external_provider=getProviders();
@@ -1100,20 +1119,25 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		if (err.err=='no auth') return res.redirect('/login.html');
 		return next(err);
 	}
-	app.all('/fromuserlist.html', verifyAuth, err_h, (req, res) =>{
-		res.render('fromuserlist', {acl:req.auth.acl});
+	app.all('/*.ae', verifyAuth, err_h, (req, res) =>{
+		res.render(path.basename(req.path, '.ae'), {acl:req.auth.acl});
 	})
-	app.all('/tomerchantlist.html', verifyAuth, err_h, (req, res)=>{
-		res.render('tomerchantlist', {acl:req.auth.acl});
-	})
+	// app.all('/tomerchantlist.html', verifyAuth, err_h, (req, res)=>{
+	// 	res.render('tomerchantlist', {acl:req.auth.acl});
+	// })
 	/////////////////must be last one
+	if (process.env.NODE_ENV!='production') {
+		app.all('*.ejs', (req, res)=>{
+			res.render(path.basename(req.path, '.ejs'), {orderid:'', api:'', return_url:''});
+		})
+	}
 	app.use(function(req, res, next){
 		res.status(404);
 		res.render('404', {});
 	});
 	app.use(function(err, req, res, next) {
 		if (err.err=='no auth') return res.send(err);
-		res.render('error', err);
+		res.render('error', {err:err});
 	})
 	
 	if (appStarted) return console.log('normal server is running'.green);

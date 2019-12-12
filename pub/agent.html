@@ -53,14 +53,14 @@
               </div>
               <div class="input-group">
                 <div class="input-group-prepend"><span for="subordinates" class="input-group-text">下级</span></div>
-                <input type="text" class="form-control" id="subordinates" placeholder="下级代理id">
+                <input type="text" class="form-control" id="subordinates" placeholder="下级代理id" readonly>
               </div>
             </div>
             <div class="form-group">
               <!-- <p class="card-description">请勾选提供商(otc平台)</p>
               <div class="form-group" id="providers">
               </div> -->
-              <button type="button" id="adjustAgent" class="btn btn-gradient-primary mr-2">Submit</button>
+              <button type="button" id="adjustAgent" class="btn btn-gradient-primary mr-2" data-dismiss="modal">Submit</button>
               <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
             </div>
           </div>
@@ -270,8 +270,8 @@
       </a>
       <div class="collapse" id="ui-details">
         <ul class="nav flex-column sub-menu">
-          <li class="nav-item"> <a class="nav-link" href="fromuserlist.html">充值订单</a></li>
-          <li class="nav-item"> <a class="nav-link" href="tomerchantlist.html">清帐订单</a></li>
+          <li class="nav-item"> <a class="nav-link" href="fromuserlist.ae">充值订单</a></li>
+          <li class="nav-item"> <a class="nav-link" href="tomerchantlist.ae">清帐订单</a></li>
         </ul>
       </div>
     </li>
@@ -311,6 +311,25 @@
       </div>
     </li> 
 
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="collapse" href="#ui-snappay" aria-expanded="false" aria-controls="ui-details">
+        <span class="menu-title">SnapPay</span>
+        <i class="menu-arrow"></i>
+        <i class="fab fa-alipay menu-icon"></i>
+      </a>
+      <div class="collapse" id="ui-snappay">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="settingOfSnappay.html">账号管理</a></li>
+          <li class="nav-item"> <a class="nav-link" href="statementOfSnappay.html">流水详单</a></li>
+        </ul>
+      </div>
+    </li> 
+    <li class="nav-item">
+      <a class="nav-link" href="forecore.html">
+        <span class="menu-title">四方平台</span>
+        <i class="mdi mdi-book-open-variant menu-icon"></i>
+      </a>
+    </li>  
     <li class="nav-item">
       <a class="nav-link" href="demoOrder.html">
         <span class="menu-title">支付演示</span>
@@ -460,28 +479,43 @@
     }
     $('#addUser').toggle();
   }
+  function showSub(sub) {
+    if (Array.isArray(sub)) return sub.join(',');
+    if (!sub) return '-';
+    return sub.toString();
+  }
   $('#editMerchant').on('shown.bs.modal', function (e) {
+    $('#editMerchant input:not([type="hidden"])').val('');
     var idx=$(e.relatedTarget).data('id');
     var agent=$('#accounts').bootstrapTable('getData', {useCurrentPage:true})[idx];
     if (agent) {
-      $('#fee').attr("placeholder", ''+(1-agent.share)*100+'%');
+      $('#fee').attr("placeholder", ''+((1-agent.share)*100).toFixed(2)+'%');
       $('#parent').attr('placeholder', agent.parent);
-      $('#subordinates').attr('placeholder', agent.subordinates?agent.subordinates.join(','):'-')
+      $('#subordinates').attr('placeholder', showSub(agent.subordinates))
     }
     $('#adjustAgent').off('click').click(function(e) {
       var params={};
       $('#editMerchant form [id]').each(function(idx, ele) {
+        var je=$(ele), jv=je.val();
+        if (jv=='') return;
+        if (je[0].hasAttribute('readonly')) return;
         if (ele.id=='fee') {
-          var s=$(ele).val().trim(), v=parseFloat(s);
-          if (isNaN(v)) continue;
-          if (s[s.length-1]=='%') {
-            // this is a percentage
-            params.share=1-(v/100);
-          } else params.share=1-v;
+          var s=jv.trim(), v=parseFloat(s);
+          if (isNaN(v)) return;
+          params.share=Number((1-(v/100)).toFixed(5));
+          // var s=$(ele).val().trim(), v=parseFloat(s);
+          // if (isNaN(v)) return;
+          // if (s[s.length-1]=='%') {
+          //   // this is a percentage
+          //   params.share=1-(v/100);
+          // } else params.share=1-v;
         } else params[ele.id]=$(ele).val();
       });
-      params.id=agentid;
-      accIntf('/admin/updateAccount', params);
+      params.id=agent._id;
+      accIntf('/admin/updateAccount', params, (err)=>{
+        if (err) return alert(err);
+        $('#accounts').bootstrapTable('refresh');
+      });
     })
 });
 

@@ -284,8 +284,8 @@
       </a>
       <div class="collapse" id="ui-details">
         <ul class="nav flex-column sub-menu">
-          <li class="nav-item"> <a class="nav-link" href="fromuserlist.html">充值订单</a></li>
-          <li class="nav-item"> <a class="nav-link" href="tomerchantlist.html">清帐订单</a></li>
+          <li class="nav-item"> <a class="nav-link" href="fromuserlist.ae">充值订单</a></li>
+          <li class="nav-item"> <a class="nav-link" href="tomerchantlist.ae">清帐订单</a></li>
         </ul>
       </div>
     </li>
@@ -325,6 +325,25 @@
       </div>
     </li> 
 
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="collapse" href="#ui-snappay" aria-expanded="false" aria-controls="ui-details">
+        <span class="menu-title">SnapPay</span>
+        <i class="menu-arrow"></i>
+        <i class="fab fa-alipay menu-icon"></i>
+      </a>
+      <div class="collapse" id="ui-snappay">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="settingOfSnappay.html">账号管理</a></li>
+          <li class="nav-item"> <a class="nav-link" href="statementOfSnappay.html">流水详单</a></li>
+        </ul>
+      </div>
+    </li> 
+    <li class="nav-item">
+      <a class="nav-link" href="forecore.html">
+        <span class="menu-title">四方平台</span>
+        <i class="mdi mdi-book-open-variant menu-icon"></i>
+      </a>
+    </li>  
     <li class="nav-item">
       <a class="nav-link" href="demoOrder.html">
         <span class="menu-title">支付演示</span>
@@ -503,7 +522,7 @@
         var allp=ret.message;
         merchant.providers=merchant.providers||{};
         for (var i=0; i<allp.length; i++) {
-          var activedProvider=merchant.providers[allp[i].id];
+          var activedProvider=merchant.providers[allp[i].id]||{disabled:false};
           providers.append(`
           <div class="form-check form-check">
             <label class="form-check-label">
@@ -522,9 +541,9 @@
               var ret='';
               for (var j=0; j<allp[i].options.length; j++) {
                 var opt=allp[i].options[j];
-                ret+=`<div class="form-group" id="providers.${allp[i].id}.${opt.name}" for="${opt.name}">`;
+                ret+=`<div class="form-group" id="providers.${allp[i].id}.${opt.name}" for="${allp[i].id}.${opt.name}">`;
                 for (var z=0; z<opt.values.length; z++) {
-                  ret+=`<div class="form-check form-check-primary"><label class="form-check-label"><input type="radio" class="form-check-input" name="${opt.name}" `+((activedProvider[opt.name]==opt.values[z])?'checked':'')+' value="'+opt.values[z]+'">'+opt.values[z]+`<i class="input-helper"></i></label></div>`
+                  ret+=`<div class="form-check form-check-primary"><label class="form-check-label"><input type="radio" class="form-check-input" name="${allp[i].id}.${opt.name}" `+((activedProvider[opt.name]==opt.values[z])?'checked':'')+' value="'+opt.values[z]+'">'+opt.values[z]+`<i class="input-helper"></i></label></div>`
                 }
                 ret+='</div>'
               }

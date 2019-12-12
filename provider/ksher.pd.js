@@ -81,7 +81,7 @@ exports.bestSell=null;
 exports.getBalance=_noop;
 exports.sell=_noop;
 exports.bestPair=(money, cb)=>{
-	return cb(null, -1, 'thb');
+	return cb(null, -1, 'THB');
 };
 exports.router=router;
 exports.name='泰国kp';
