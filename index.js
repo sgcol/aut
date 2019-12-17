@@ -167,7 +167,7 @@ function initmode(db, cb) {
 } 
 function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.use(compression());
-	app.use(express.static(path.join(__dirname, (argv.forecoreOnly?'fore':'pub')), { index: 'index.html' }));
+	app.use(express.static(path.join(__dirname, (argv.forecoreOnly?'fore':'pub')), { maxAge: 31536000, index: 'index.html' }));
 	app.use(cookieParser());
 	app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 	app.use(bodyParser.json());
