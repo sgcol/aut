@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+<style>
+  .wrong {
+    border-bottom-color: red;
+  }
+</style>
+</head>
+<body>
+  <!-- dialog  -->
+    
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+  <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
+    <a class="navbar-brand brand-logo" href="dashboard.html"><i class="zmdi zmdi-font">Pay</i></a>
+    <a class="navbar-brand brand-logo-mini" href="dashboard.html"><i class="zmdi zmdi-font" alt="logo">&nbsp;</i></a>
+  </div>
+  <div class="navbar-menu-wrapper d-flex align-items-stretch">
+    <ul class="navbar-nav navbar-nav-right">
+      <li class="nav-item nav-profile dropdown">
+        <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
+          <div class="nav-profile-img">
+            <img src="images/faces/face1.jpg" alt="image">
+            <span class="availability-status online"></span>             
+          </div>
+          <div class="nav-profile-text">
+            <p class="mb-1 text-black username"></p>
+          </div>
+        </a>
+        <div class="dropdown-menu navbar-dropdown" aria-labelledby="profileDropdown">
+          <a class="dropdown-item" href="#">
+            <i class="mdi mdi-cached mr-2 text-success"></i>
+            Activity Log
+          </a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="javascript:logout();">
+            <i class="mdi mdi-logout mr-2 text-primary"></i>
+            Signout
+          </a>
+        </div>
+      </li>
+      <li class="nav-item d-none d-lg-block full-screen-link">
+        <a class="nav-link">
+          <i class="mdi mdi-fullscreen" id="fullscreen-button"></i>
+        </a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-toggle="dropdown">
+          <i class="mdi mdi-bell-outline"></i>
+          <span class="count-symbol bg-danger" id="hasNewNotification"></span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="notificationDropdown">
+          <h6 class="p-3 mb-0">Notifications</h6>
+          <div class="dropdown-divider"></div>
+          <div class="notifications">
+            <a class="dropdown-item preview-item">
+              <div class="preview-thumbnail">
+                <div class="preview-icon bg-success">
+                  <i class="mdi mdi-calendar"></i>
+                </div>
+              </div>
+              <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
+                <h6 class="preview-subject font-weight-normal mb-1">Event today</h6>
+                <p class="text-gray ellipsis mb-0">
+                  Just a reminder that you have an event today
+                </p>
+              </div>
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item preview-item">
+              <div class="preview-thumbnail">
+                <div class="preview-icon bg-warning">
+                  <i class="mdi mdi-settings"></i>
+                </div>
+              </div>
+              <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
+                <h6 class="preview-subject font-weight-normal mb-1">Settings</h6>
+                <p class="text-gray ellipsis mb-0">
+                  Update dashboard
+                </p>
+              </div>
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item preview-item">
+              <div class="preview-thumbnail">
+                <div class="preview-icon bg-info">
+                  <i class="mdi mdi-link-variant"></i>
+                </div>
+              </div>
+              <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
+                <h6 class="preview-subject font-weight-normal mb-1">Launch Admin</h6>
+                <p class="text-gray ellipsis mb-0">
+                  New admin wow!
+                </p>
+              </div>
+            </a>
+            <div class="dropdown-divider"></div>
+            <h6 class="p-3 mb-0 text-center">See all notifications</h6>
+          </div>
+        </div>
+      </li>
+      <li class="nav-item nav-logout d-none d-lg-block">
+        <a class="nav-link" href="javascript:logout();">
+          <i class="mdi mdi-power"></i>
+        </a>
+      </li>
+      <!-- <li class="nav-item nav-settings d-none d-lg-block">
+        <a class="nav-link" href="#">
+          <i class="mdi mdi-format-line-spacing"></i>
+        </a>
+      </li> -->
+    </ul>
+    <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+      <span class="mdi mdi-menu"></span>
+    </button>
+  </div>
+</nav>
+
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <nav class="sidebar sidebar-offcanvas" id="sidebar">
+  <ul class="nav">
+    <li class="nav-item nav-profile">
+      <a href="#" class="nav-link">
+        <div class="nav-profile-image">
+          <img src="images/faces/face1.jpg" alt="profile">
+          <span class="login-status online"></span> <!--change to offline or busy as needed-->              
+        </div>
+        <div class="nav-profile-text d-flex flex-column">
+          <span class="font-weight-bold mb-2 username"></span>
+          <span class="text-secondary text-small acl"></span>
+        </div>
+        <i class="mdi mdi-bookmark-check text-success nav-profile-badge"></i>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="merentry.html">
+        <span class="menu-title">总览</span>
+        <i class="mdi mdi-home menu-icon"></i>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="withdraw.html">
+        <span class="menu-title">提款</span>
+        <i class="mdi mdi-cash menu-icon"></i>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="extrainfo.html">
+        <span class="menu-title">联系人</span>
+        <i class="mdi mdi-contact-mail menu-icon"></i>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="collapse" href="#ui-details" aria-expanded="false" aria-controls="ui-details">
+        <span class="menu-title">明细</span>
+        <i class="menu-arrow"></i>
+        <i class="mdi mdi-chart-bar menu-icon"></i>
+      </a>
+      <div class="collapse" id="ui-details">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="dailyreport.html">日报表</a></li>
+          <li class="nav-item"> <a class="nav-link" href="fromuserlist.ae">充值订单</a></li>
+          <li class="nav-item"> <a class="nav-link" href="tomerchantlist.ae">清帐订单</a></li>
+        </ul>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="adapter.html">
+        <span class="menu-title">对接</span>
+        <i class="mdi mdi-human-greeting menu-icon"></i>
+      </a>
+    </li> 
+    <li class="nav-item">
+      <a class="nav-link" href="changepassword.html">
+        <span class="menu-title">修改密码</span>
+        <i class="mdi mdi-alert-octagon menu-icon"></i>
+      </a>
+    </li>
+  </ul>
+</nav>
+
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              对账
+            </h3>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">对账</a></li>
+                <li class="breadcrumb-item active" aria-current="page">日报表</li>
+              </ol>
+            </nav>
+          </div>
+          <div class="row">
+            <div class="col-12 grid-margin">
+              <div class="card">
+                <div class="card-body">
+                  <div class="buttons-toolbar">
+                    <form class="form-inline" id="params">
+                      <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-calendar-today"></i></span>
+                        </div>
+                        <input type="text" class="form-control mr-sm-2" name="dates" placeholder="日期">
+                      </div> 
+                      <div class="form-group">
+                        <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:querydata();"><i class="mdi mdi-magnify"></i></a>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="table-responsive">
+                    <table id="detail"
+                     class="table table-hover"
+                     data-classes="table-no-bordered table-hover"
+                     data-toggle="table"
+                     data-show-refresh="true"
+                     data-show-columns="true"
+                     data-show-pagination-switch="true"
+                     data-pagination="true" 
+                     data-page-size="30" 
+                     data-page-list="[10, 25, 50, 100, ALL]" 
+                     data-side-pagination="server" 
+                     data-url="admin/dailystat"
+                     data-query-params="getQueryParams" 
+                     data-buttons-class=" btn-sm btn-secondary"
+                     data-toolbar=".buttons-toolbar"
+                     data-show-footer="true"
+                     data-response-handler="handleData"
+                     data-sort-name="time"
+                     data-sort-order="desc">
+                      <thead>
+                        <th data-field="merchantOrderId" data-footer-formatter="showTotalText" data-sortable="true">商户单号</th>
+                        <th data-field="status" data-footer-formatter="showTotalNumber">状态</th>
+                        <th data-field="money" data-footer-formatter="showTotalMoney" data-sortable="true">毛收入</th>
+                        <th data-field="net" data-footer-formatter="showTotalNet" data-sortable="true">净收入</th>
+                        <th data-field="userid" data-visible="false" data-sortable="true">账号</th>
+                        <th data-field="_id" data-sortable="true">提供商单号</th>
+                        <th data-field="provider" data-sortable="true">提供商</th>
+                        <th data-field="time" data-sort-order="desc" data-formatter="timestring"  data-sortable="true">时间</th>
+                        <th data-formatter="showOp">操作</th>
+                      </thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <footer class="footer">
+  <div class="d-sm-flex justify-content-center justify-content-sm-between">
+    <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright &copy; 2019.Project APay All rights reserved.</span>
+  </div>
+</footer>
+
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/base.js"></script>
+  <!-- End custom js for this page-->
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+  <!-- End custom js for this page-->
+</body>
+<script>
+  var data;
+  function handleData(res) {
+    data=res;
+    return res;
+  }
+  function showTotalText() {
+    return "Total";
+  }
+  function showTotalNumber() {
+      return (data?data.total:'-')+'条记录';
+  }
+  function showTotalMoney() {
+    return data?data.totalmoney:undefined;
+  }
+  function showTotalNet() {
+    return data?data.totalnet:undefined;
+  }
+  var urlparam=new URL(location.href).searchParams;
+  $(()=>{
+    var today=new Date();
+    $('input[name="dates"]').daterangepicker({startDate:today, endDate:today});
+  });
+  function querydata() {
+    // var allclear=true, querys={};
+    // $('#params input').each(function(idx, ele) {
+    //   var je=$(ele), jv=je.val();
+    //   if (ele.name=='dates') {
+    //     var drp=$('input[name="dates"]').data('daterangepicker');
+    //     querys.startTime=drp.startDate._d;
+    //     querys.endTime=drp.endDate._d;
+    //   }
+    //   else querys[ele.name]=jv.trim();
+    // });
+    // if (allclear) $('#detail').bootstrapTable('refresh', {query:querys});
+    $('#detail').bootstrapTable('refresh');
+  }
+  function sendNotify(orderid) {
+    accIntf('/admin/notifyMerchant', {orderid:orderid}, (err)=>{
+      if (err) return showerr(err);
+      querydata();
+    });
+  }
+
+  function showOp(v, o) {
+    var ret=`<button class="btn btn-outline-primary btn-icon-sm tooltipfy" title="重发通知" onclick="javascript:sendNotify('${o._id}')"><i class="mdi mdi-replay"></i></button>`;
+    if (me.acl=='admin'||me.acl=='manager') ret+=`<button style="margin-left:5px" class="btn btn-outline-danger btn-icon-sm tooltipfy" title="强制结单" onclick="javascript:forceconfirm('${o._id}')"><i class="mdi mdi-archive"></i></button>`;
+    return ret;
+  }
+  function getQueryParams(querys) {
+    $('#params input').each(function(idx, ele) {
+      var je=$(ele), jv=je.val();
+      if (ele.name=='dates') {
+        var drp=$('input[name="dates"]').data('daterangepicker');
+        if (drp) {
+            querys.startTime=drp.startDate._d;
+            querys.endTime=drp.endDate._d;
+        } else {
+            querys.startTime=moment().startOf('date').toDate();
+            querys.endTime=moment().endOf('date').toDate();
+        }
+      }
+      else querys[ele.name]=jv.trim();
+    });
+    return querys;
+  }
+</script>
+</html>

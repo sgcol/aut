@@ -7,6 +7,10 @@ var waitToSell={}, balance={};
 
 var db,sellOrder, getBalance, getProvider;
 getDB((err, _db)=>{
+    if (err) {
+        console.error(err);
+        return process.exit(-1);
+    }
     db=_db;
     db.balance.find({_id:'default'}).toArray((err, r)=>{
         if (err) return;

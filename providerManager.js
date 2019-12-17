@@ -1,14 +1,22 @@
-var external_provider ={}, providerNameMap={};
-const updateOrder=require('./order.js').updateOrder, path=require('path'), async=require('async');
+var external_provider ={}, providerNameMap={}, processed={};
+const updateOrder=require('./order.js').updateOrder, path=require('path'), async=require('async'), argv=require('yargs').argv;
 var tt = require('gy-module-loader')(path.join(__dirname, 'provider/*.pd.js'), function () {
     var keys = Object.keys(tt);
     for (var i = 0; i < keys.length; i++) {
         var prd=tt[keys[i]];
+        prd.internal_name=path.basename(keys[i], '.pd.js')
+        if (processed[prd.internal_name]) continue;
+        processed[prd.internal_name]=prd;
+
         if (prd.debugMode && process.env.NODE_ENV=='production') {
             console.log((path.basename(keys[i])+' is a debugMode provider, abandoned').yellow);
             continue;
         }
-        prd.internal_name=path.basename(keys[i], '.pd.js')
+        if (argv.forecoreOnly && !prd.forecore) {
+            console.log((path.basename(keys[i])+' is not a forecore provider, abandoned').yellow);
+            continue;
+        }
+        
         external_provider[prd.internal_name] = prd;
         if (prd.name) providerNameMap[prd.name]=prd.internal_name;
     }
@@ -37,7 +45,7 @@ function bestProvider(money,mer, options, callback) {
             return cb(null, {gap:gap, coinType:coinType, prd:prd});
         });
     }, function(err, r) {
-        if (r.legnth>1) r.sort((a, b)=>{return a.gap-b.gap});
+        if (r.length>1) r.sort((a, b)=>{return (a.gap-b.gap)});
         for (var i=0; i<r.length; i++) {
             if (r[i].coinType) break;
         }

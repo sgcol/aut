@@ -3,6 +3,7 @@ const getDB=require('./db.js'), pify=require('pify'), getMerchant=require('./mer
     , sortObj=require('sort-object'), qs=require('querystring').stringify, url=require('url'), sysnotifier=require('./sysnotifier.js')
     , md5=require('md5'), sysevents=require('./sysevents.js');
 
+const decimalfy=require('./etc').decimalfy
 const onlineUsers=require('./auth.js').onlineUsers
 function getUser(id, cb) {
     getDB((err, db)=>{
@@ -42,7 +43,7 @@ function createOrder(merchantid, userid, merchantOrderId, money, preferredPay, c
                 }
                 // if ((getr(nowtime)>2*3600) && (getr(nowtime)<10*3600)) throw '本时段不开放充值';
                 if (money>5000) throw "单笔订单不能超出5000"
-                return db.bills.insertOne({merchantOrderId:merchantOrderId, userid:mer._id, merchantid:merchantid, mer_userid:userid, provider:'', providerOrderId:'', share:mer.share, money:money, paidmoney:-1, time:new Date(), lasttime:new Date(), lasterr:'', preferredPay:preferredPay, cb_url:cb_url, return_url:return_url, status:'created'}, {w:1});
+                return db.bills.insertOne(decimalfy({merchantOrderId:merchantOrderId, userid:mer._id, merchantid:merchantid, mer_userid:userid, provider:'', providerOrderId:'', share:mer.share, money:money, paidmoney:-1, time:new Date(), lasttime:new Date(), lasterr:'', preferredPay:preferredPay, cb_url:cb_url, return_url:return_url, status:'created'}), {w:1});
             })
             .then((r)=>{
                 sysevents.emit('orderCreated', r.ops[0]);
@@ -189,7 +190,7 @@ function confirmOrder(orderid, money, net, callback) {
                 //     notifySellSystem(r[0]);
                 // })    
                 var upd={status:'已支付', paidmoney:money, net:net, lasttime:new Date()};
-                db.bills.update({_id:ObjectID(orderid)}, {$set:upd}, {w:1}, function(_e) {
+                db.bills.update({_id:ObjectID(orderid)}, {$set:decimalfy(upd)}, {w:1}, function(_e) {
                     if (_e || err) return callback(_e||err);
                     notifyMerchant(r);
                     // callback();

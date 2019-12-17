@@ -44,6 +44,8 @@ const server = require('http').createServer()
 	.boolean('debugout')
 	.boolean('dev')
 	.default('authtimeout', 3*60*1000)
+	.boolean('forecoreOnly')
+	.default('forecoreOnly', false)
 	.describe('host', 'bypass default host for testing alipay notification')
 	.argv
 , debugout=require('debugout')(argv.debugout)
@@ -165,12 +167,12 @@ function initmode(db, cb) {
 } 
 function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.use(compression());
-	app.use(express.static(path.join(__dirname, 'pub'), { index: 'index.html' }));
+	app.use(express.static(path.join(__dirname, (argv.forecoreOnly?'fore':'pub')), { index: 'index.html' }));
 	app.use(cookieParser());
 	app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 	app.use(bodyParser.json());
 	app.use(bodyParser.text());
-	app.set('views', path.join(__dirname, 'pub/views'));
+	app.set('views', path.join(__dirname, (argv.forecoreOnly?'fore':'pub'), 'views'));
 	app.set('view engine', 'ejs');
 
 	var db=dbp[0];
@@ -439,7 +441,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 				}
 				cursor.count(false, (err, c)=>{
 					if (err) return callback(err);
-					callback(null, {total:c, rows:r});
+					callback(null, dedecimal({total:c, rows:r}));
 				});
 			})
 			.catch((e)=>{
@@ -657,9 +659,10 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 				}
 			}
 			res.cookie('a',rstr);
+			if (argv.forecoreOnly) return callback(null, {to:'/statementOfSnappay-toll.html', token:rstr});
 			if (o.acl=='admin'||o.acl=='manager') return callback(null, {to:'/dashboard.html', token:rstr});
-			else if (o.acl=='merchant') return callback(null, {to:'/merentry.html', token:rstr});
-			else return callback(null, {to:'/agententry.html', token:rstr});
+			if (o.acl=='merchant') return callback(null, {to:'/merentry.html', token:rstr});
+			return callback(null, {to:'/agententry.html', token:rstr});
 		})
 	}));
 	app.all('/admin/addAccount', verifyAuth, verifyAdmin, httpf({name:'string', account:'string', password:'string', identity:'string', callback:true}, function(name, account, password, identity, callback) {
@@ -1120,7 +1123,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		return next(err);
 	}
 	app.all('/*.ae', verifyAuth, err_h, (req, res) =>{
-		res.render(path.basename(req.path, '.ae'), {acl:req.auth.acl});
+		res.render(path.basename(req.path, '.ae'), Object.assign(argv, {acl:req.auth.acl}));
 	})
 	// app.all('/tomerchantlist.html', verifyAuth, err_h, (req, res)=>{
 	// 	res.render('tomerchantlist', {acl:req.auth.acl});
