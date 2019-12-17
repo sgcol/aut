@@ -464,7 +464,8 @@
   }
   var response;
   function formatRes(res) {
-    res.rows.forEach((record)=>{
+    if (res.err) return alert(res.err);
+    res.rows && res.rows.forEach((record)=>{
       var _id=record._id;
       record._id=undefined;
       Object.assign(record, _id);
@@ -476,8 +477,8 @@
       record.orderCount=record.orderCount[0]||0;
       if (record.orderCount) record.succrate=''+(Math.round(record.succOrder/record.orderCount*10000)/100)+'%'
     })
-    res.total_amount=res.total_amount.toFixed(2);
-    res.total_profit=res.total_profit.toFixed(2);
+    res.total_amount=(res.total_amount||0).toFixed(2);
+    res.total_profit=(res.total_profit||0).toFixed(2);
     response=res;
     return res;
   }
