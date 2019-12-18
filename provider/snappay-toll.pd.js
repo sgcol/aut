@@ -433,7 +433,7 @@ function init(err, db) {
 		}
 		if (limit) cursor=cursor.limit(limit);
 		var ret =await cursor.toArray();
-		callback(null, ret[0]);
+		callback(null, dedecimal(ret[0]));
 	} catch(e) {callback(e)}
 	}))
 	router.all('/return', (req, res)=>{
