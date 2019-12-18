@@ -66,11 +66,11 @@
     </div>
   </div>
   <!-- edit alipay general settings  -->
-  <div class="modal fade" id="editAlipaySettings" tabindex="-1" role="dialog" data-backdrop="static"  aria-labelledby="editAlipaySettings" aria-hidden="true">
+  <div class="modal fade" id="editSnappaySettings" tabindex="-1" role="dialog" data-backdrop="static"  aria-labelledby="editSnappaySettings" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
         <div class="modal-header">
-          <h5 class="card-title">支付宝通用设置</h5>
+          <h5 class="card-title">SnapPay通用设置</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -78,15 +78,11 @@
         <form>
           <div class="card-body">
             <div class="form-group">
-              <label for="limitation">收款限额</label>
-              <input type="text" class="form-control" id="limitation" placeholder="默认20万">
-            </div>  
-            <div class="form-group">
               <label for="fee">费率</label>
-              <input type="text" class="form-control" id="fee" placeholder="默认6‰">
+              <input type="text" class="form-control" id="fee" placeholder="默认7‰">
             </div>    
             <div class="form-group">
-              <button type="button" id="adjustAlipaySetting" class="btn btn-gradient-primary mr-2" data-dismiss="modal">Submit</button>
+              <button type="button" id="adjustSnappaySetting" class="btn btn-gradient-primary mr-2" data-dismiss="modal">Submit</button>
               <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
             </div>
           </div>
@@ -306,9 +302,13 @@
               <div class="col-lg-12 grid-margin stretch-card">
                   <div class="card">
                     <div class="card-body">
-                      <div class="buttons-toolbar">
-                        <button class="btn btn-sm btn-secondary" onclick="javascript:$('#editSnappaySettings').modal()"><i class="mdi mdi-settings"></i></button> 
-                        <button class="btn btn-sm btn-secondary" onclick="javascript:$('#exportBTFDlg').modal()"><i class="mdi mdi-file-document-box"></i></button> 
+                      <div class="buttons-toolbar form-inline">
+                        <button class="btn btn-sm btn-secondary mr-1" onclick="javascript:$('#editSnappaySettings').modal()"><i class="mdi mdi-settings"></i></button> 
+                        <button class="btn btn-sm btn-secondary mr-1" onclick="javascript:$('#exportBTFDlg').modal()"><i class="mdi mdi-file-document-box"></i></button> 
+                        <select class="form-control form-control-sm"></select>
+                        <span class="input-group-append">
+                          <button class="btn btn-sm btn-secondary" onclick="getlist()"><i class="mdi mdi-magnify"></i></button>
+                        </span>
                       </div>
                       <div class="table-responsive">
                       <table class="table table-hover" id="statement"
@@ -392,10 +392,13 @@
   <!-- End custom js for this page-->
 </body>
 <script>
-  function queryParams(params) {
+  function currentTimezone() {
     var tz=new Date().getTimezoneOffset(), hh=Math.floor(tz/60), mm=tz-hh*60;
-    if (hh>=0) params.timezone='-'+('00'+hh).slice(-2)+':'+('00'+mm).slice(-2);
-    else params.timezone='+'+('00'+(-hh)).slice(-2)+':'+('00'+mm).slice(-2);
+    if (hh>=0) return '-'+('00'+hh).slice(-2)+':'+('00'+mm).slice(-2);
+    else return '+'+('00'+(-hh)).slice(-2)+':'+('00'+mm).slice(-2);
+  }
+  function queryParams(params) {
+    params.timezone=$('.buttons-toolbar select').val();
     return params;
   }
   function exportBTF(testMode) {
@@ -453,6 +456,17 @@
       } 
     });
   });
+  $('#adjustSnappaySetting').click((e)=>{
+    var querys={};
+    $('#editSnappaySetting input').each((idx, ele)=>{
+      var je=$(ele), jv=je.val().trim();
+      if (jv) querys[ele.id]=jv;
+    })
+    accIntf('/pvd/snappay-toll/settings', querys, (err)=>{
+      if (err) return alert(err);
+      alert('设置已更新');
+    })
+  });
   function getlist() {
     $('#statement').bootstrapTable('refresh');
   }
@@ -491,5 +505,59 @@
   function showTotalCount(data) {
     return response?response.total_count:'';
   }
+
+  var tzInts = [
+    {"label":"(GMT-12:00)","value":"-12:00"},
+    {"label":"(GMT-11:00)","value":"-11:00"},
+    {"label":"(GMT-10:00)","value":"-10:00"},
+    {"label":"(GMT-09:00)","value":"-09:00"},
+    {"label":"(GMT-08:00)","value":"-08:00"},
+    {"label":"(GMT-07:00)","value":"-07:00"},
+    {"label":"(GMT-06:00)","value":"-06:00"},
+    {"label":"(GMT-05:00)","value":"-05:00"},
+    {"label":"(GMT-04:00)","value":"-04:00"},
+    {"label":"(GMT-03:30)","value":"-03:30"},
+    {"label":"(GMT-03:00)","value":"-03:00"},
+    {"label":"(GMT-02:00)","value":"-02:00"},
+    {"label":"(GMT-01:00)","value":"-01:00"},
+    {"label":"(GMT+00:00)","value":"+00:00"},
+    {"label":"(GMT+01:00)","value":"+01:00"},
+    {"label":"(GMT+02:00)","value":"+02:00"},
+    {"label":"(GMT+03:00)","value":"+03:00"},
+    {"label":"(GMT+03:30)","value":"+03:30"},
+    {"label":"(GMT+04:00)","value":"+04:00"},
+    {"label":"(GMT+04:30)","value":"+04:30"},
+    {"label":"(GMT+05:00)","value":"+05:00"},
+    {"label":"(GMT+05:30)","value":"+05:30"},
+    {"label":"(GMT+06:00)","value":"+06:00"},
+    {"label":"(GMT+06:30)","value":"+06:30"},
+    {"label":"(GMT+07:00)","value":"+07:00"},
+    {"label":"(GMT+08:00)","value":"+08:00"},
+    {"label":"(GMT+09:00)","value":"+09:00"},
+    {"label":"(GMT+09:30)","value":"+09:30"},
+    {"label":"(GMT+10:00)","value":"+10:00"},
+    {"label":"(GMT+11:00)","value":"+11:00"},
+    {"label":"(GMT+12:00)","value":"+12:00"},
+    {"label":"(GMT+13:00)","value":"+13:00"}
+  ]
+  function timezoneSelect(){
+    var options = [],
+        select = $('.buttons-toolbar select')[0],
+        curTz=currentTimezone();
+
+    for (var i=0; i<tzInts.length; i++){
+      var tz = tzInts[i],
+          option = document.createElement("option");
+      option.value = tz.value
+      if (tz.value==curTz) option.selected="1";
+      option.appendChild(document.createTextNode(tz.label))
+      select.appendChild(option)
+    }
+
+    return select;
+  }
+  $(()=>{
+    timezoneSelect();
+  })
 </script>
 </html>

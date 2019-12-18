@@ -370,7 +370,7 @@ function init(err, db) {
 		var groupby={currency:'$currency', mchId:'$userid'}, af={holding:{$multiply:['$money', '$share', 100]}};
 		if(!cond.time) {
 			//不指定时间按照天统计
-			af.dot={$dateToString:{date:'$time', format:'%Y%j'}};
+			af.dot={$dateToString:{date:'$time', format:'%Y%m%d'}};
 			if (timezone) af.timezone=timezone;
 			groupby.dot='$dot'
 		}
