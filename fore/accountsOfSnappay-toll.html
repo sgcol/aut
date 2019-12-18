@@ -416,6 +416,7 @@
           params.disable=!ele.checked;
         } else if (ele.id=='supportedCurrency') {
           if (!jv) params.supportedCurrency='CAD';
+          else params.supportedCurrency=jv;
         } else{
             if (jv=='') return true;
             params[ele.id]=jv.trim();
