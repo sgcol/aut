@@ -208,7 +208,7 @@ function init(err, db) {
 		supportedCurrency &&(upd.supportedCurrency=supportedCurrency);
 		disable!=null && (upd.disable=disable);
 		var defaultValue={createTime:new Date()};
-		id=ObjectID(id)||new ObjectID();
+		id=id?ObjectID(id):new ObjectID();
 		db.snappay_toll_accounts.updateOne({_id:id}, {$set:upd,$setOnInsert:defaultValue}, {upsert:true, w:1}, (err, r)=>{
 			if (err) return callback(err);
 			if (r.upsertedCount) {
@@ -296,7 +296,7 @@ function init(err, db) {
 			var dbBills=db.db.collection('bills', {readPreference:'secondaryPreferred'});
 			var [rec, stat]=await Promise.all([
 				dbBills.find(
-					{time:{$gte:from, $lt:to}, provider:'snappay-toll', status:{$in:['complete', '已支付']}}, 
+					{time:{$gte:from, $lt:to}, provider:'snappay-toll', used:true}, 
 					{projection:{merchantOrderId:1, mer_userid:1, share:1, money:1, paidmoney:1, currency:1, status:1, time:1, lasttime:1}}
 				).toArray(),
 				dbBills.aggregate([
@@ -382,7 +382,7 @@ function init(err, db) {
 			cond.time=cond.time||{};
 			cond.time.$lt=to;
 		}
-		cond.provider='snappay-toll';cond.status={$in:['complete', '已支付']};
+		cond.provider='snappay-toll';cond.used=true;
 		var groupby={currency:'$currency', mchId:'$userid'}, af={holding:{$multiply:['$money', '$share', 100]}};
 		if(!cond.time) {
 			//不指定时间按照天统计
