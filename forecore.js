@@ -1,6 +1,7 @@
 const router=require('express').Router()
 , httpf =require('httpf')
 , bestProvider =require('./providerManager.js').bestProvider
+, getProvider=require('./providerManager').getProvider
 , getDB=require('./db.js')
 , ObjectId =require('mongodb').ObjectId
 , verifyMchSign =require('./merchants').verifySign
@@ -71,7 +72,7 @@ function start(err, db) {
 		var params =this.req.params;
 		
 		var merchant =this.req.merchant;
-		var provider=await pify(bestProvider)(money, merchant, {forecoreOnly:true});
+		var provider=await pify(bestProvider)(money, merchant, {forecoreOnly:true, currency:currency});
 		
 		var req=this.req;
 		var basepath=argv.host||url.format({protocol:req.protocol, host:req.headers.host, pathname:url.parse(req.originalUrl).pathname});
@@ -118,29 +119,33 @@ function start(err, db) {
 		Object.assign(ret ,{outOrderId:outOrderId, orderId:orderId.toHexString()});
 		callback(null, mchSign(merchant, ret));
 	}));
-	router.all('/exchangeRate', verifyMchSign, httpf({currency:'string', callback:true}, async function(callback) {
-		// var rateParser=CsvParse({delimiter:'|', columns:['date', 'no', 'currency', 'rate', 'unused']}), out=[];
-		// request('https://intlmapi.alipay.com/gateway.do?service=forex_rate_file&sign_type=MD5&partner=2088921303608372&sign=75097bd6553e1e94aabc6e47b54ec42e')
-		// .pipe(rateParser)
-		// .on('readable', ()=>{
-		// 	let record
-		// 	while (record = rateParser.read()) {
-		// 		out.push(record)
-		// 	}
-		// })
-		// .on('error', (err)=>{
-		// 	callback(err);
-		// })
-		// .on('end', ()=>{
-		// 	var ret={};
-		// 	out.forEach((r)=>{
-		// 		ret[r.currency]=Number(r.rate);
-		// 	});
-		// 	callback(null, ret);
-		// })
-		callback('not impl');
-	}));
-	router.all('/stat', httpf({from:'?date', to:'?date', callback:true}, async function (from, to, callback) {
-
+	router.all('/queryOrder', verifyMchSign, httpf({outOrderId:'string', partnerId:'string', callback:true},
+	async function(outOrderId, partnerId, callback) {
+		try {
+			var order = await db.bills.findOne({merchantOrderId:outOrderId}, {projection:{share:0}});
+			if (!order) return callback('无此订单');
+			if (order.partnerId!=partnerId) return callback('该订单不属于指定的partner');
+			order.received=order.paidmoney;
+			callback(null, order);
+		}catch(e) {callback(e)}
 	}))
+	router.all('/exchangeRate', verifyMchSign, httpf({currency:'string', payment:'?string', callback:true}, async function(currency, payment, callback) {
+		try {
+			callback(null, await getProvider('snappay-toll').exchangeRate(currency, payment||'WECHATH5'));
+		}catch(e) {callback(e)}
+	}));
+	router.all('/refund', verifyMchSign, httpf({partnerId:'string', outOrderId:'string', money:'number', callback:true}, async function(partnerId, outOrderId, money, callback) {
+		try {
+			var order=await db.bills.findOne({merchantOrderId:outOrderId});
+			if (!order) return callback('无此订单');
+			if (order.partnerId!=partnerId) return callback('该订单不属于指定的partner');
+			if (!order.provider || !order.paidmoney) return callback('订单尚未支付');
+			var pvd=getProvider(order.provider);
+			if (!pvd) return callback('订单尚未支付');
+			if (!pvd.refund) return callback('提供方不支持退单')
+			var result=await pvd.refund(order, money);
+			await db.bills.updateOne({_id:order._id}, {$set:{status:'refund'}}, {w:1});
+			callback(null, result);
+		} catch(e) {callback(e)}
+	}));
 }

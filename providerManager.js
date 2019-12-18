@@ -35,13 +35,16 @@ function bestProvider(money,mer, options, callback) {
     if (!mer.providers) return callback('联系对接小伙伴，他忘记给商户配置渠道了');
     async.map(filter(external_provider, (v, k)=>{
         var opt= mer.providers[k];
-        if (options && options.forecoreOnly && !(v.forecore)) return false;
+        if (options) {
+            if (options.forecoreOnly && !(v.forecore)) return false;
+        }
         if (!opt) return true;
         return !opt.disabled;
     }), function(prd, cb) {
         if (!prd.bestPair) return cb(null, {gap:Number.MAX_VALUE, coinType:'rmb'});
         prd.bestPair(money, function(err, gap, coinType){
             if (err) return cb(null, {gap:Number.MAX_VALUE, coinType:''});
+            // if (options && options.currency && options.currency!=coinType) return cb(null, {gap:Number.MAX_VALUE, coinType:''});
             return cb(null, {gap:gap, coinType:coinType, prd:prd});
         });
     }, function(err, r) {

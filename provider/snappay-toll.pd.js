@@ -23,6 +23,7 @@ const url = require('url')
 const _noop=function() {};
 const supportedType={'WECHATPAYH5':{type:'WECHATPAY', method:'pay.h5pay'}, 'ALIPAYH5':{type:'ALIPAY', method:'pay.h5pay'}}
 , supportedCurrency=['CAD', 'USD'];
+const testAccount={_id:'testAccount', merchant_no:'901800000116', app_id:'9f00cd9a873c511e', key:'7e2083699dd510575faa1c72f9e35d43', supportedCurrency:'CAD'};
 const request_post=pify(request.post, {multiArgs:true});
 
 Number.prototype.pad = function(size) {
@@ -51,27 +52,7 @@ const makeSign=function(data, account, options) {
 	o['sign'] = encoded_sign.toLowerCase();
 	return o;
 }
-function queryRate(acc, callback) {
-	var rateParser=CsvParse({delimiter:'|', columns:['date', 'no', 'currency', 'rate', 'unused']}), out=[];
-	request('https://intlmapi.alipay.com/gateway.do?service=forex_rate_file&sign_type=MD5&partner=2088921303608372&sign=75097bd6553e1e94aabc6e47b54ec42e')
-	.pipe(rateParser)
-	.on('readable', ()=>{
-		let record
-		while (record = rateParser.read()) {
-		  out.push(record)
-		}
-	})
-	.on('error', (err)=>{
-		callback(err);
-	})
-	.on('end', ()=>{
-		var ret={};
-		out.forEach((r)=>{
-			ret[r.currency]=Number(r.rate);
-		});
-		callback(null, ret);
-	})
-}
+
 var order=function() {
 	var callback=arguments[arguments.length-1];
 	if (typeof callback=='function') callback('启动中');
@@ -87,6 +68,8 @@ function normalizeFee(f) {
 	return f;
 }
 
+const request_url = 'https://open.snappay.ca/api/gateway';
+
 exports.order=function() {
 	order.apply(null, arguments);
 };
@@ -97,13 +80,44 @@ exports.bestSell=null;
 exports.getBalance=_noop;
 exports.sell=_noop;
 exports.bestPair=(money, cb)=>{
-	return cb(null, 0.007, 'USD/CAD');
+	return cb(null, 0.007, ['USD', 'CAD']);
 };
 exports.router=router;
 exports.name='snappay';
 exports.params=['accountNumber', 'customName', 'customNumber'];
 exports.forecore=true;
-
+exports.refund=async function(orderData, money, callback) {
+	callback=callback||((err, r)=>{
+		if (err) throw err;
+		else return r
+	});
+	if (!orderData.snappay_account) return callback('订单不属于snapppay');
+	var data={
+		method:'pay.orderrefund',
+		merchant_no:orderData.snappay_account.merchant_no,
+		out_order_no: orderData.merchantOrderId,
+		out_refund_no:new ObjectID().toHexString(),
+		refund_amount:money
+	}
+	var [, ret]=await request_post({uri:request_url, json:makeSign(data, orderData.snappay_account)});
+	if (ret.code!='0') return callback(ret.msg);
+	if (ret.data[0].trans_status=='CLOSE') return callback('transaction closed, refund failed');
+	return callback(null, ret.data);
+}
+exports.exchangeRate=async function(currency, payment, callback) {
+	callback=callback||((err, r)=>{
+		if (err) throw err;
+		else return r
+	});
+	var data={
+		method:'pay.exchangerate',
+		basic_currency_unit:currency,
+		payment_method:supportedType[payment].type,
+	};
+	var [,ret]=request_post({uri:request_url, json:makeSign(data, testAccount)});
+	if (ret.code!='0') return callback(ret.msg);
+	return callback(null, ret.data[0].exchange_rate);
+}
 //'merchant_no', 'app_id', 'key', 'supportedCurrency'
 
 const _auth=require('../auth.js'), aclgt=_auth.aclgt, verifyManager=_auth.verifyManager, verifyAdmin=_auth.verifyAdmin, getAuth=_auth.getAuth, verifyAuth=_auth.verifyAuth;
@@ -512,7 +526,6 @@ function init(err, db) {
 			'notify_url' : url.resolve(params._host, '../pvd/snappay-toll/done'),
 			'return_url' : url.resolve(params._host, '../pvd/snappay-toll/return'),
 		};            
-		var request_url = 'https://open.snappay.ca/api/gateway';
 		var [, body] =await request_post({url:request_url, json:makeSign(data, account)});
 		var ret=body;
 		if (ret.code!='0') return callback(ret.msg);
