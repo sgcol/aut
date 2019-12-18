@@ -198,7 +198,7 @@ var snappayGlobalSetting, snappayFee;
 })(init);
 function init(err, db) {
 	if (err) return console.log('启动snappay-toll.pd失败', err);
-	router.all('/updateAccount', verifyAuth, verifyManager, httpf({_id:'string', app_id:'?string', key:'?string', merchant_no:'string', name:'?string', disable:'?boolean', callback:true}, 
+	router.all('/updateAccount', verifyAuth, verifyManager, httpf({_id:'?string', app_id:'?string', key:'?string', merchant_no:'string', name:'?string', disable:'?boolean', callback:true}, 
 	function(id, app_id, key, merchant_no, name, disable, callback) {
 		var upd={}
 		app_id && (upd.app_id=app_id);
@@ -207,7 +207,8 @@ function init(err, db) {
 		name && (upd.name=name);
 		disable!=null && (upd.disable=disable);
 		var defaultValue={createTime:new Date()};
-		db.snappay_toll_accounts.updateOne({_id:ObjectID(id)}, {$set:upd,$setOnInsert:defaultValue}, {upsert:true, w:1}, (err, r)=>{
+		id=ObjectID(id)||new ObjectID();
+		db.snappay_toll_accounts.updateOne({_id:id}, {$set:upd,$setOnInsert:defaultValue}, {upsert:true, w:1}, (err, r)=>{
 			if (err) return callback(err);
 			if (r.upsertedCount) {
 				sysevents.emit('newSnapPayTollAccount', upd);
