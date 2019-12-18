@@ -421,7 +421,7 @@
             params[ele.id]=jv.trim();
         }
       });
-      params._id=account._id;
+      if (account) params._id=account._id;
       accIntf('/pvd/snappay-toll/updateAccount', params, err=>{
         if (err) return showerr(err);
         getlist();
