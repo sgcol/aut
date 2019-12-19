@@ -297,7 +297,7 @@ function init(err, db) {
 			var [rec, stat]=await Promise.all([
 				dbBills.find(
 					{time:{$gte:from, $lt:to}, provider:'snappay-toll', used:true}, 
-					{projection:{merchantOrderId:1, mer_userid:1, share:1, money:1, paidmoney:1, currency:1, status:1, time:1, lasttime:1}}
+					{projection:{merchantOrderId:1, merchantName:1, mer_userid:1, share:1, money:1, paidmoney:1, currency:1, status:1, time:1, lasttime:1}}
 				).toArray(),
 				dbBills.aggregate([
 					{$match:{time:{$gte:from, $lt:to}, provider:'snappay-toll', status:{$in:['complete', '已支付']}}},
