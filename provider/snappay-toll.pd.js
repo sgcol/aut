@@ -171,7 +171,7 @@ function makeBTF(currency, arr, testMode, setting) {
 		total+=ret.total;
 	}
 	// finally, Z record
-	out+=`Z${(++count).pad(9)}${clientNumber}${uniqueTag}${''.padEnd(22, '0')}${total.pad(14)}${Number(9).pad(8)}${''.padEnd(1396, '0')}`
+	out+=`Z${(++count).pad(9)}${clientNumber}${uniqueTag}${''.padEnd(22, '0')}${total.pad(14)}${arr.length.pad(8)}${''.padEnd(1396, '0')}`
 	out+='\r\n';
 	return out;
 }
