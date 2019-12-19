@@ -355,7 +355,7 @@ function init(err, db) {
 							return ((t+8*3600)/86400+70*365+19).toFixed(5);
 						}
 					}
-					, columns:['orderId', 'outOrderId', 'mer_userid', 'money', 'received', 'earning', 'share', 'currency', 'time', 'lasttime', 'status']
+					, columns:['orderId', 'outOrderId', 'merchantName', 'mer_userid', 'money', 'received', 'earning', 'share', 'currency', 'time', 'lasttime', 'status']
 				}));
 			var v =await zip.generateAsync({type : "nodebuffer"});
 			callback(null, {src:v.toString('base64')});
