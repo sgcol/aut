@@ -414,7 +414,7 @@ function init(err, db) {
 		if(!cond.time) {
 			//不指定时间按照天统计
 			af.dot={$dateToString:{date:'$time', format:'%Y%m%d'}};
-			if (timezone) af.timezone=timezone;
+			if (timezone) af.dot.$dateToString.timezone=timezone;
 			groupby.dot='$dot'
 		}
 		var dbBills=db.db.collection('bills', {readPreference:'secondaryPreferred'});
