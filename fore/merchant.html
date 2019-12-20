@@ -454,7 +454,7 @@
               var ret='';
               for (var j=0; j<allp[i].params.length; j++) {
                 var p=allp[i].params[j];
-                ret+=`<div class="input-group"><div class="input-group-prepend"><span class="input-group-text">${p}</span></div><input class=" form-control" placeholder="${(activedProvider && activedProvider[p])||'必填'}" id="providers.${allp[i].id}.${p}"></div>`
+                ret+=`<div class="input-group"><div class="input-group-prepend"><span class="input-group-text">${p}</span></div><input class=" form-control" value="${(activedProvider && activedProvider[p])}" placeholder="必填" id="providers.${allp[i].id}.${p}"></div>`
               }
               return ret;
             })():''}
