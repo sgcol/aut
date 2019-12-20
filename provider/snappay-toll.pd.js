@@ -136,20 +136,45 @@ Number.prototype.pad=function(size) {
 function daysIntoYear(date){
 	return Math.floor((Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - Date.UTC(date.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000);
 }
-function transaction(arr, dates, setting) {
+function transaction(arr, dates, setting, warning, c_record) {
 	var {transactionCode, CADFinancialInstitution, clientName,clientNumber}=setting;
 	var total=0, ret='';
 	for (var i=0; i<(arr.length); i++) {
-		var {amount, accountNumber, customName, customNumber}=Object.assign({accountNumber:'', customName:'', customNumber:''}, arr[i]);
+		var {amount, accountNumber, customName, customNumber, mchName}=Object.assign({accountNumber:'', customName:'', customNumber:''}, arr[i]);
+		if (!amount) {
+			amount=0;
+			warning.push(`C${c_record+1}/${i+1}支付金额异常，已调整为0`);
+		}
+		if (!customName) {
+			customName='';
+			warning.push(`C${c_record+1}/${i+1} clientName为空`);
+		} else if (customName.length>15) {
+			customName=customName.substring(0, 15);
+			warning.push(`${customName} 超过15Bytes，截短`);
+		}
+		if (!accountNumber) {
+			accountName='';
+			warning.push(`C${c_record+1}/${i+1} ${mchName} accountNumber为空`);
+		} else if (accountNumber.length>12) {
+			accountNumber=accountNumber.substring(0, 12);
+			warning.push(`C${c_record+1}/${i+1} ${mchName} accountNumber超过12byts`)
+		}
+		if (!customNumber) {
+			customNumber='XXXXXXXXXX';
+			warning.push(`C${c_record+1}/${i+1} ${mchName} clientNumber为空`);
+		} else if (customNumber.length>10) {
+			customNumber=customNumber.substring(0, 10);
+			warning.push(`C${c_record+1}/${i+1} ${mchName} clientNumber超过10byts`)
+		}
 		// var money=Math.floor(Math.random()*100000), accountNumber=randstring(12), customName=randstring(5), customNumber=randstring(19);
 		total+=amount;
-		var trans=`${transactionCode}${amount.pad(10)}${dates}${CADFinancialInstitution}${accountNumber.padEnd(12, 'X')}${''.padEnd(25, '0')}${clientName.padEnd(15, ' ')}${customName.padEnd(30, ' ')}${clientName.padEnd(30, ' ')}${clientNumber}${customNumber.padEnd(19, ' ')}${''.padEnd(9, '0')}${''.padEnd(12, ' ')}${'settlement'.padEnd(15, ' ')}${''.padEnd(35, ' ')}`;
+		var trans=`${transactionCode}${amount.pad(10)}${dates}${CADFinancialInstitution}${accountNumber.padEnd(12, ' ')}${''.padEnd(25, '0')}${clientName.padEnd(15, ' ')}${customName.padEnd(30, ' ')}${clientName.padEnd(30, ' ')}${clientNumber}${customNumber.padEnd(19, ' ')}${''.padEnd(9, '0')}${''.padEnd(12, ' ')}${'settlement'.padEnd(15, ' ')}${''.padEnd(35, ' ')}`;
 		ret+=trans;
 	}
 	return {str:ret.padEnd(1464-24, ' '), total:total};
 }
 
-function makeBTF(currency, arr, testMode, setting) {
+function makeBTF(currency, arr, testMode, setting, warning) {
 	setting=Object.assign(defaultBankData, setting)
 	var {clientNumber, RoyalBankProcessingCentre} =setting;
 	var year=String(new Date().getUTCFullYear()), doy=daysIntoYear(new Date()), dates=`${year.substring(year.length-3)}${doy.pad(3)}`;
@@ -161,12 +186,14 @@ function makeBTF(currency, arr, testMode, setting) {
 
 	var out=`$$AA01CPA1464[${testMode?'TEST':'PROD'}[NL$$\r\n`, count=0;
 	// first, a A record
+	if (!clientNumber||clientNumber.length!=10) warning.push('clientNumber必须是10Bytes的字符串');
+	if (!RoyalBankProcessingCentre||RoyalBankProcessingCentre.length!=5) warning.push('RoyalBankProcessingCentre必须是5Bytes的字符串');
 	out+=`A${(++count).pad(9)}${clientNumber}${uniqueTag}${dates}${RoyalBankProcessingCentre}${''.padEnd(20, ' ')}${currency}${''.padEnd(1406, ' ')}\r\n`;
 	// next a C record
-	var total=0;
+	var total=0, c_record=0;;
 	for (var i=0; i<arr.length; i+=6) {
 		out+=`C${(++count).pad(9)}${clientNumber}${uniqueTag}`
-		var ret =transaction(arr.slice(i, i+6), dates, setting);
+		var ret =transaction(arr.slice(i, i+6), dates, setting, warning, (++c_record));
 		out+=ret.str+'\r\n';
 		total+=ret.total;
 	}
@@ -337,13 +364,13 @@ function init(err, db) {
 					amount:item.amount,
 					currency:item._id.currency,
 					mchId:item._id.mchId,
-					mchName: item.userData[0].name
-				}, item.userData[0].providers['snappay-toll']));
+					mchName: objPath.get(item, ['userData', 0, 'name'], '')
+				}, objPath.get(item, ['userData', 0, 'providers', 'snappay-toll'], {})));
 			});
 
 			var zip=new JSZip();
 			BTFs.forEach((arr, currency)=>{
-				zip.file(`${currency}.txt`, makeBTF(currency, arr, testMode, setting));
+				zip.file(`${currency}.txt`, makeBTF(currency, arr, testMode, setting, warning));
 			})
 			if (warning.length) zip.file('warning.txt', warning.join('\r\n'));
 			zip.file('orders.csv', stringify(rec, 

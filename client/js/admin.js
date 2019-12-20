@@ -1,8 +1,10 @@
 function remove(account) {
+  if (confirm('确定要删除账号?\r\n删除会导致账号下所有信息消失，禁用账号往往更好')) {
     accIntf('/admin/removeAccount', {account:account}, (err)=>{
         if (err) return showerr(err);
         getlist();
     });
+  }
 }
 var url=location.pathname, filename = url.substring(url.lastIndexOf('/')+1);
 const etc={

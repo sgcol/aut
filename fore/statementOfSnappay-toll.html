@@ -398,7 +398,7 @@
     else return '+'+('00'+(-hh)).slice(-2)+':'+('00'+mm).slice(-2);
   }
   function queryParams(params) {
-    params.timezone=$('.buttons-toolbar select').val();
+    params.timezone=$('.buttons-toolbar select').val()||currentTimezone();
     return params;
   }
   function exportBTF(testMode) {
