@@ -147,7 +147,7 @@ function transaction(arr, dates, setting, warning, c_record) {
 		}
 		if (!customName) {
 			customName='';
-			warning.push(`C${c_record+1}/${i+1} clientName为空`);
+			warning.push(`C${c_record+1}/${i+1} customName`);
 		} else if (customName.length>15) {
 			customName=customName.substring(0, 15);
 			warning.push(`${customName} 超过15Bytes，截短`);
@@ -161,10 +161,10 @@ function transaction(arr, dates, setting, warning, c_record) {
 		}
 		if (!customNumber) {
 			customNumber='XXXXXXXXXX';
-			warning.push(`C${c_record+1}/${i+1} ${mchName} clientNumber为空`);
+			warning.push(`C${c_record+1}/${i+1} ${mchName} customNumber`);
 		} else if (customNumber.length>10) {
 			customNumber=customNumber.substring(0, 10);
-			warning.push(`C${c_record+1}/${i+1} ${mchName} clientNumber超过10byts`)
+			warning.push(`C${c_record+1}/${i+1} ${mchName} customNumber超过10byts`)
 		}
 		// var money=Math.floor(Math.random()*100000), accountNumber=randstring(12), customName=randstring(5), customNumber=randstring(19);
 		total+=amount;
