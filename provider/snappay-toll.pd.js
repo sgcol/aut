@@ -175,7 +175,8 @@ function transaction(arr, dates, setting, warning, c_record) {
 }
 
 function renameKeys(o, map) {
-	map.forEach((new_key, old_key)=>{
+	map.forEach((old_key, new_key)=>{
+		if (!o[old_key]) return;
 		if (old_key !== new_key) {
 			Object.defineProperty(o, new_key,
 				Object.getOwnPropertyDescriptor(o, old_key));
@@ -359,7 +360,7 @@ function init(err, db) {
 				, ['Trans No.', 'unknown']
 				, ['Original.Trans No.', 'unknown']
 				, ['Merchant Order No.', 'merchantOrderId']
-				, ['Channel trans No.', 'orderId']
+				, ['Channel trans No.', '_id']
 				, ['Type', 'need to add']
 				, ['Status', 'status']
 				, ['Pay Mode Name', 'need to add']
@@ -388,6 +389,7 @@ function init(err, db) {
 				, ['Time Zone', 'blank']
 			])
 			rec.forEach((item)=>{
+				item._id=item._id.toHexString()
 				item.snappayFee=snappayFee;
 				item.share=Math.floor((1-item.share)*100);
 				renameKeys(item, mapper);

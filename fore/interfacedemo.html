@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+</head>
+<body>
+  <div class="container-scroller">
+    <div class="container-fluid page-body-wrapper">
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              <span class="page-title-icon bg-gradient-primary text-white mr-2">
+                <i class="mdi mdi-android-debug-bridge"></i>
+              </span>
+              Demo for all Interfaces
+            </h3>
+          </div>
+          <div class="row">
+            <div class="col-lg-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">公共参数</h4>
+                  <p class="card-description">all results shown in the console</p>
+                  <div class="form-group">
+                    <label for="partnerId">partnerId</label>
+                    <input type="text" class="form-control" id="partnerId" placeholder="partnerId">
+                  </div>
+                  <div class="form-group">
+                    <label for="key">key</label>
+                    <input type="text" class="form-control" id="key" placeholder="key">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">exchangeRate</h4>
+                  <div class="form-group">
+                    <label>currency</label>
+                    <input type="text" class="form-control" id="currency" placeholder="CAD">
+                  </div>
+                  <div class="form-group">
+                    <label>payment</label>
+                    <input type="text" class="form-control" id="payment" placeholder="WECHATPAYH5">
+                  </div>
+                  <button type="submit" class="btn btn-gradient-primary mr-2">Run</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">order</h4>
+                  <div class="form-group">
+                    <label for="userId">玩家id</label>
+                    <input type="text" class="form-control" id="userId" placeholder="userid">
+                  </div>
+                  <div class="form-group">
+                    <label for="money">充值钱数</label>
+                    <input type="number" class="form-control" id="money" placeholder="">
+                  </div>
+                  <div class="form-group">
+                    <label for="currency">币种</label>
+                    <select class="form-control" id="currency">
+                      <option selected>CAD</option>
+                      <option >USD</option>
+                      <option>CNY</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="type">支付方式</label>
+                    <select class="form-control" id="type">
+                      <option selected>WECHATPAYH5</option>
+                      <option >ALIPAYH5</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn-gradient-primary mr-2">Run</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">queryOrder</h4>
+                  <div class="form-group">
+                    <label>outOrderId</label>
+                    <input type="text" class="form-control" id="outOrderId" placeholder="">
+                  </div>
+                  <button type="submit" class="btn btn-gradient-primary mr-2">Run</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">refund</h4>
+                  <div class="form-group">
+                    <label>outOrderId</label>
+                    <input type="text" class="form-control" id="outOrderId" placeholder="">
+                  </div>
+                  <div class="form-group">
+                    <label>money</label>
+                    <input type="text" class="form-control" id="money" placeholder="">
+                  </div>
+                  <button type="submit" class="btn btn-gradient-primary mr-2">Run</button>
+                </div>
+              </div>
+            </div>  
+          </div>
+          <div class="row">
+          </div>
+          <div class="row">
+          </div>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <footer class="footer">
+  <div class="d-sm-flex justify-content-center justify-content-sm-between">
+    <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright &copy; 2019.Project APay All rights reserved.</span>
+  </div>
+</footer>
+
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/qs.js"></script>
+  <script src="js/md5.js"></script>
+  <!-- End custom js for this page-->
+</body>
+<script>
+const getAjax=function getAjax(_url, data, callback) {
+  if (typeof data ==='function') {  
+      callback =data;
+      data=null;
+  }
+  if (!callback) callback=function(){};
+  var addr=_url;
+  $.ajax({
+      type: "POST",
+      url: addr,
+      data: data,
+      timeout:30000,
+      success: function (chunk) {
+          if (chunk.err) return callback(chunk.err, chunk);
+          return callback(null, chunk);
+      },
+      error: function (e) {
+          callback(e);
+      }
+  })
+}
+
+function sortObj(o) {
+  var arr=Object.keys(o).sort();
+  var ret={};
+  for (const key of arr) {
+    ret[key]=o[key];
+  }
+  return ret;
+}
+
+$(()=>{
+  $('button').click(function(e) {
+    var params={}, partnerId=$('#partnerId').val(), key=$('#key').val();
+    if (!partnerId || !key) return alert('必须先填写partnerId和key');
+    $(this).parent().find('input').each((idx, ele)=>{
+      var je=$(ele), jv=je.val()||je.attr('placeholder');
+      if (jv=='') return true;
+      params[ele.id]=jv;
+    });
+    params.partnerId=partnerId;
+    var interfaceName=$(this).siblings('.card-title').text();
+    if (interfaceName=='order') {
+      var now=new Date();
+      Object.assign(params, {
+        cb_url:location.origin+'/demo/result',
+        currency:'CAD',
+        type:$('#type option:selected').text(),
+        outOrderId:'TESTORDER'+now.getTime(),
+        return_url:location.href,
+        time:now.getTime(),
+      })
+    }
+    params.sign=md5(key+Qs.stringify(sortObj(params)));
+    getAjax('/forecore/'+interfaceName, params, console.log.bind(console));
+  })
+})
+</script>
+</html>

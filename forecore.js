@@ -9,6 +9,7 @@ const router=require('express').Router()
 , pify =require('pify')
 , url =require('url')
 , decimalfy=require('./etc').decimalfy
+, dedecimal=require('./etc').dedecimal
 , argv=require('yargs').argv
 
 const allPayType=['ALIPAYH5', 'WECHATPAYH5', 'UNIONPAYH5', 'ALIPAYAPP', 'WECHATPAYAPP', 'ALIPAYMINI', 'WECHATPAYMINI', 'ALIPAYPC', 'WECHATPAYPC', 'UNIONPAYPC'];
@@ -122,12 +123,13 @@ function start(err, db) {
 	router.all('/queryOrder', verifyMchSign, httpf({outOrderId:'string', partnerId:'string', callback:true},
 	async function(outOrderId, partnerId, callback) {
 		try {
-			var order = await db.bills.findOne({merchantOrderId:outOrderId}, {projection:{share:0}});
+			var order = await db.bills.findOne({merchantOrderId:outOrderId}, {projection:{share:0, provider:0, snappay_account:0, snappay_data:0}});
 			if (!order) return callback('无此订单');
-			if (order.partnerId!=partnerId) return callback('该订单不属于指定的partner');
+			if (order.merchantid!=partnerId) return callback('该订单不属于指定的partner');
 			order.outOrderId=order.merchantOrderId
 			order.received=order.paidmoney;
-			callback(null, order);
+			order.paidmoney=undefined;
+			callback(null, dedecimal(order));
 		}catch(e) {callback(e)}
 	}))
 	router.all('/exchangeRate', verifyMchSign, httpf({currency:'string', payment:'?string', callback:true}, async function(currency, payment, callback) {
@@ -139,7 +141,7 @@ function start(err, db) {
 		try {
 			var order=await db.bills.findOne({merchantOrderId:outOrderId});
 			if (!order) return callback('无此订单');
-			if (order.partnerId!=partnerId) return callback('该订单不属于指定的partner');
+			if (order.merchantid!=partnerId) return callback('该订单不属于指定的partner');
 			if (!order.provider || !order.paidmoney) return callback('订单尚未支付');
 			var pvd=getProvider(order.provider);
 			if (!pvd) return callback('订单尚未支付');
@@ -154,5 +156,5 @@ function start(err, db) {
 
 if (module==require.main) {
 	// debug
-	
+
 }

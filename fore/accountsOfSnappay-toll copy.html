@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+<style>
+  .wrong {
+    border-bottom-color: red;
+  }
+  #upload-photo {
+      opacity: 0;
+      position: absolute;
+      z-index: -1;
+  }
+</style>
+</head>
+<body>
+  <!-- dialogs  -->
+  <!-- edit&add snappay account  -->
+  <div class="modal fade" id="editSnapPayAccount" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="editSnapPayAccount" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
+        <div class="modal-header">
+          <h5 class="card-title" id="exampleModalLabel">设置</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form>
+          <!--merchant_no:'901800000116', app_id:'9f00cd9a873c511e', key:'7e2083699dd510575faa1c72f9e35d43', supportedCurrency:'CAD'-->
+          <div class="card-body">
+            <div class="form-group">
+              <label for="name">name</label>
+              <input type="text" class="form-control" id="name" placeholder="name">
+              <label for="app_id">app_id</label>
+              <input type="text" class="form-control" id="app_id" placeholder="app_id">
+              <label for="merchant_no">merchant_no</label>
+              <input type="text" class="form-control" id="merchant_no" placeholder="merchant_no">
+              <label for="key">key</label>
+              <input type="text" class="form-control" id="key" placeholder="key">
+              <label for="supportedCurrency">supportedCurrency</label>
+              <input type="text" class="form-control" id="supportedCurrency" placeholder="CAD">
+            </div>
+            <div class="form-group">
+              <div class="form-check form-check">
+                <label class="form-check-label">
+                  <input type="checkbox" class="form-check-input" id="enable" for="enable" checked>可用<i class="input-helper"></i>
+                </label>
+              </div>
+              <button type="button" id="adjustSnappayAccount" class="btn btn-gradient-primary mr-2" data-dismiss="modal">Submit</button>
+              <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="addMultiSnapPayAccounts" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="addMultiSnapPayAccounts" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
+        <div class="modal-header">
+          <h5 class="card-title" id="exampleModalLabel">批量导入</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form>
+          <!--merchant_no:'901800000116', app_id:'9f00cd9a873c511e', key:'7e2083699dd510575faa1c72f9e35d43', supportedCurrency:'CAD'-->
+          <div class="card-body">
+            <label for="upload-photo" class="btn btn-gradient-primary">Upload</label>
+            <input type="file" accept=".csv" id="upload-photo">
+            <p class="card-description">导入CSV文件的第一行必须包含<br>merchant_no, app_id, key, supportedCurrency, name</p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+  <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
+    <a class="navbar-brand brand-logo" href="dashboard.html"><i class="zmdi zmdi-font">Pay</i></a>
+    <a class="navbar-brand brand-logo-mini" href="dashboard.html"><i class="zmdi zmdi-font" alt="logo">&nbsp;</i></a>
+  </div>
+  <div class="navbar-menu-wrapper d-flex align-items-stretch">
+    <ul class="navbar-nav navbar-nav-right">
+      <li class="nav-item nav-profile dropdown">
+        <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
+          <div class="nav-profile-img">
+            <img src="images/faces/face1.jpg" alt="image">
+            <span class="availability-status online"></span>             
+          </div>
+          <div class="nav-profile-text">
+            <p class="mb-1 text-black username"></p>
+          </div>
+        </a>
+        <div class="dropdown-menu navbar-dropdown" aria-labelledby="profileDropdown">
+          <a class="dropdown-item" href="#">
+            <i class="mdi mdi-cached mr-2 text-success"></i>
+            Activity Log
+          </a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="javascript:logout();">
+            <i class="mdi mdi-logout mr-2 text-primary"></i>
+            Signout
+          </a>
+        </div>
+      </li>
+      <li class="nav-item d-none d-lg-block full-screen-link">
+        <a class="nav-link">
+          <i class="mdi mdi-fullscreen" id="fullscreen-button"></i>
+        </a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-toggle="dropdown">
+          <i class="mdi mdi-bell-outline"></i>
+          <span class="count-symbol bg-danger" id="hasNewNotification"></span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="notificationDropdown">
+          <h6 class="p-3 mb-0">Notifications</h6>
+          <div class="dropdown-divider"></div>
+          <div class="notifications">
+            <a class="dropdown-item preview-item">
+              <div class="preview-thumbnail">
+                <div class="preview-icon bg-success">
+                  <i class="mdi mdi-calendar"></i>
+                </div>
+              </div>
+              <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
+                <h6 class="preview-subject font-weight-normal mb-1">Event today</h6>
+                <p class="text-gray ellipsis mb-0">
+                  Just a reminder that you have an event today
+                </p>
+              </div>
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item preview-item">
+              <div class="preview-thumbnail">
+                <div class="preview-icon bg-warning">
+                  <i class="mdi mdi-settings"></i>
+                </div>
+              </div>
+              <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
+                <h6 class="preview-subject font-weight-normal mb-1">Settings</h6>
+                <p class="text-gray ellipsis mb-0">
+                  Update dashboard
+                </p>
+              </div>
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item preview-item">
+              <div class="preview-thumbnail">
+                <div class="preview-icon bg-info">
+                  <i class="mdi mdi-link-variant"></i>
+                </div>
+              </div>
+              <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
+                <h6 class="preview-subject font-weight-normal mb-1">Launch Admin</h6>
+                <p class="text-gray ellipsis mb-0">
+                  New admin wow!
+                </p>
+              </div>
+            </a>
+            <div class="dropdown-divider"></div>
+            <h6 class="p-3 mb-0 text-center">See all notifications</h6>
+          </div>
+        </div>
+      </li>
+      <li class="nav-item nav-logout d-none d-lg-block">
+        <a class="nav-link" href="javascript:logout();">
+          <i class="mdi mdi-power"></i>
+        </a>
+      </li>
+      <!-- <li class="nav-item nav-settings d-none d-lg-block">
+        <a class="nav-link" href="#">
+          <i class="mdi mdi-format-line-spacing"></i>
+        </a>
+      </li> -->
+    </ul>
+    <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+      <span class="mdi mdi-menu"></span>
+    </button>
+  </div>
+</nav>
+
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <nav class="sidebar sidebar-offcanvas" id="sidebar">
+  <ul class="nav">
+    <li class="nav-item nav-profile">
+      <a href="#" class="nav-link">
+        <div class="nav-profile-image">
+          <img src="images/faces/face1.jpg" alt="profile">
+          <span class="login-status online"></span> <!--change to offline or busy as needed-->              
+        </div>
+        <div class="nav-profile-text d-flex flex-column">
+          <span class="font-weight-bold mb-2 username"></span>
+          <span class="text-secondary text-small acl"></span>
+        </div>
+        <i class="mdi mdi-bookmark-check text-success nav-profile-badge"></i>
+      </a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+        <span class="menu-title">账号</span>
+        <i class="menu-arrow"></i>
+        <i class="mdi mdi-contacts menu-icon"></i>
+      </a>
+      <div class="collapse" id="ui-basic">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="admin.html">管理员账号</a></li>
+          <li class="nav-item"> <a class="nav-link" href="merchant.html">合作商户</a></li>
+          
+        </ul>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="collapse" href="#ui-details" aria-expanded="false" aria-controls="ui-details">
+        <span class="menu-title">明细</span>
+        <i class="menu-arrow"></i>
+        <i class="mdi mdi-chart-bar menu-icon"></i>
+      </a>
+      <div class="collapse" id="ui-details">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="fromuserlist.ae">充值订单</a></li>
+          
+        </ul>
+      </div>
+    </li>
+    <!-- <li class="nav-item">
+      <a class="nav-link" href="checkBalance.html">
+        <span class="menu-title">对账</span>
+        <i class="mdi mdi-format-list-bulleted menu-icon"></i>
+      </a>
+    </li> -->
+    
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="collapse" href="#ui-snappay" aria-expanded="false" aria-controls="ui-details">
+        <span class="menu-title">四方平台</span>
+        <i class="menu-arrow"></i>
+        <i class="fab fa-alipay menu-icon"></i>
+      </a>
+      <div class="collapse" id="ui-snappay">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="statementOfSnappay-toll.html">SnapPay</a></li>
+          <li class="nav-item"> <a class="nav-link" href="accountsOfSnappay-toll.html">SnapPay商户管理</a></li>
+        </ul>
+      </div>
+    </li> 
+    <!-- <li class="nav-item">
+      <a class="nav-link" href="forecore.html">
+        <span class="menu-title">四方平台</span>
+        <i class="mdi mdi-book-open-variant menu-icon"></i>
+      </a>
+    </li>   -->
+    
+    <li class="nav-item">
+      <a class="nav-link" href="forecoreDemo.html">
+        <span class="menu-title">支付演示</span>
+        <i class="mdi mdi-book-open-variant menu-icon"></i>
+      </a>
+    </li>  
+    
+  </ul>
+</nav>
+
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              <span class="page-title-icon bg-gradient-primary text-white mr-2">
+                <i class="fab fa-alipay"></i>
+              </span>
+              SnapPay账号
+            </h3>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">四方平台</a></li>
+                <li class="breadcrumb-item active" aria-current="page">SnapPay商户管理</li>
+              </ol>
+            </nav>
+          </div>
+          <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="card-body">
+                      <h4 class="card-title">商户</h4>
+                      <div class="buttons-toolbar">
+                        <button class="btn btn-sm btn-secondary" onclick="javascript:$('#editSnapPayAccount').modal()"><i class="mdi mdi-account-plus"></i></button>
+                        <button class="btn btn-sm btn-secondary" onclick="javascript:$('#addMultiSnapPayAccounts').modal()"><i class="mdi mdi mdi-account-multiple-plus"></i></button>
+                      </div>
+                      <div class="table-responsive">
+                      <table class="table table-hover" id="accounts"
+                        data-classes="table-no-bordered table-hover"
+                        data-toggle="table"
+                        data-side-pagination="server"
+                        data-pagination="true"
+                        data-show-refresh="true"
+                        data-show-columns="true"
+                        data-show-pagination-switch="true"
+                        data-buttons-class=" btn-sm btn-secondary"
+                        data-url="pvd/snappay-toll/listAccounts"
+                        data-toolbar=".buttons-toolbar"
+                        data-response-handler="formatRes">
+                        <thead>
+                            <th data-field="name" data-sortable="true">
+                              name
+                            </th>
+                            <th data-field="merchant_no" data-sortable="true" data-visible="true">
+                              merchant_no
+                            </th>  
+                            <th data-field="app_id" data-sortable="false" data-visible="true">
+                              app_id
+                            </th>
+                            <th data-field="key" data-sortable="false" data-visible="false">
+                              key
+                            </th>
+                            <th data-field="supportedCurrency" data-sortable="true">
+                              currency
+                            </th>    
+                            <th data-field="createTime" data-sortable="true" data-formatter="timestring" data-visible="false">
+                              创建时间
+                            </th>
+                            <th data-field="daily" data-sortable="true" data-formatter="showincoming">净收入(日/总)</th>
+                            <th data-field="gross.daily" data-sortable="true" data-formatter="showGrossIncoming">毛收入(日/总)</th>
+                            <th data-field="succrate" data-sortable="true">成功率</th>
+                            <th data-field="" data-formatter="showop" data-min-width="130">
+                              操作
+                            </th>
+                        </thead>
+                        <tbody id="list">
+                        </tbody>
+                      </table>
+                    </div>
+                    </div>
+                  </div>
+                </div>
+          </div>
+          <div class="row">
+          </div>
+          <div class="row">
+          </div>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <footer class="footer">
+  <div class="d-sm-flex justify-content-center justify-content-sm-between">
+    <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright &copy; 2019.Project APay All rights reserved.</span>
+  </div>
+</footer>
+
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/base.js"></script>
+  <script src="js/ejs.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <!-- End custom js for this page-->
+</body>
+<script>
+  $('#editSnapPayAccount').on('shown.bs.modal', function (e) {
+    $('#editSnapPayAccount form input, textarea').val('');
+    var idx=$(e.relatedTarget).data('id');
+    if (idx==null) {
+      $('#editSnapPayAccount #exampleModalLabel').text('新增');
+    } else $('#editSnapPayAccount #exampleModalLabel').text('设置');
+    var account=$('#accounts').bootstrapTable('getData', {useCurrentPage:true})[idx];
+    if (account) {
+        for (var key in account) {
+            if (key=='_id' || key=='enable') continue;
+            $('#'+key).val(account[key]);
+        }
+        $('#enable').prop('checked', !account.disable);
+    } else {
+        $('#enable').prop('checked', true);
+    }
+    $('#adjustSnappayAccount').off('click').click(function(e) {
+      var params={};
+      $('#editSnapPayAccount form input, textarea').each(function(idx, ele) {
+        var je=$(ele), jv=je.val();
+        if (ele.id=='enable') {
+          params.disable=!ele.checked;
+        } else if (ele.id=='supportedCurrency') {
+          if (!jv) params.supportedCurrency='CAD';
+          else params.supportedCurrency=jv;
+        } else{
+            if (jv=='') return true;
+            params[ele.id]=jv.trim();
+        }
+      });
+      if (account) params._id=account._id;
+      accIntf('/pvd/snappay-toll/updateAccount', params, err=>{
+        if (err) return showerr(err);
+        getlist();
+      });
+    })
+  });
+
+  $('#upload-photo').on("change", function(e) {
+      if (e.target.files && e.target.files.length) {
+        const file = e.target.files[0];
+        if (!file) {
+            return;
+        }
+        e.target.value='';
+        var btn=$('#addMultiSnapPayAccounts label'), oldText=btn.text();
+        btn.text('Working...');
+
+        var formData = new FormData();
+        formData.append('file', file);
+        $.ajax({
+          url : '/pvd/snappay-toll/uploadAccounts',
+          type : 'POST',
+          data : formData,
+          processData: false,  // tell jQuery not to process the data
+          contentType: false,  // tell jQuery not to set contentType
+          success : function(data) {
+            btn.text(oldText);
+            if (data.count) alert('成功导入'+data.count+'条记录');
+            if (data.err && data.err.result && data.err.result.nInserted!=null) {
+              alert('导入时有错误，完成'+data.err.result.nInserted+'条记录');
+            }
+            $('#addMultiSnapPayAccounts').modal('hide');
+            getlist();
+          },
+          error(err) {
+            btn.text(oldText);
+            alert(err);
+          }
+        });
+      }
+  });
+
+  function getlist() {
+    $('#accounts').bootstrapTable('refresh');
+  }
+  function showop(value, record, rowIndex) {
+    return `<button type="button" style="display:inline" class="btn btn-icon-sm btn-outline-primary" data-toggle="modal" data-target="#editSnapPayAccount" data-id="${rowIndex}"><i class="mdi mdi-key-change"></i></button>
+            <button type="button" style="display:inline" class="btn btn-icon-sm btn-outline-secondary" onclick="javascript:remove('${record._id}')"><i class="mdi mdi-delete-forever"></i></button>
+          `
+  }
+  function showincoming(value, record) {
+    return `${value||0}/${record.total||0}`;
+  }
+  function showGrossIncoming(value, record) {
+    return `${value||0}/${record.gross?(record.gross.total||0):0} `;
+  }
+  function formatRes(res) {
+    if (res.err) return alert(res.err);
+    res.rows.forEach((record)=>{
+      // record.app_id=record._id;
+      // record.log=record.log||{};
+      // var fails=[];
+      // for (var name in record.log) {
+      //     if (name='success') continue;
+      //     fails.push({name:name, v:record.log[name]});
+      // }
+      // var failstr='';
+      // if (fails.length) {
+      //     fails.sort((a,b)=>{return a.v-b.v});
+      //     for (var i=0; i<fails.length; i++) {
+      //         failstr+=fails[i].name+':'+fails[i].v+' ';
+      //     }
+      // }
+      // record.failstr=failstr;
+    })
+    return res;
+  }
+  function remove(_id) {
+      accIntf('/pvd/snappay-toll/removeAccount', {_id:_id}, err=>{
+          if (err) return alert(err);
+          getlist();
+      });
+  }
+</script>
+</html>
