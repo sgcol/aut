@@ -125,6 +125,7 @@ function start(err, db) {
 			var order = await db.bills.findOne({merchantOrderId:outOrderId}, {projection:{share:0}});
 			if (!order) return callback('无此订单');
 			if (order.partnerId!=partnerId) return callback('该订单不属于指定的partner');
+			order.outOrderId=order.merchantOrderId
 			order.received=order.paidmoney;
 			callback(null, order);
 		}catch(e) {callback(e)}

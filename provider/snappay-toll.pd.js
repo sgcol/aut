@@ -116,7 +116,7 @@ exports.exchangeRate=async function(currency, payment, callback) {
 	};
 	var [,ret]=request_post({uri:request_url, json:makeSign(data, testAccount)});
 	if (ret.code!='0') return callback(ret.msg);
-	return callback(null, ret.data[0].exchange_rate);
+	return callback(null, ret.data[0]);
 }
 //'merchant_no', 'app_id', 'key', 'supportedCurrency'
 
@@ -174,6 +174,15 @@ function transaction(arr, dates, setting, warning, c_record) {
 	return {str:ret.padEnd(1464-24, ' '), total:total};
 }
 
+function renameKeys(o, map) {
+	map.forEach((new_key, old_key)=>{
+		if (old_key !== new_key) {
+			Object.defineProperty(o, new_key,
+				Object.getOwnPropertyDescriptor(o, old_key));
+			o[old_key]=undefined;
+		}	
+	})
+}
 function makeBTF(currency, arr, testMode, setting, warning) {
 	setting=Object.assign(defaultBankData, setting)
 	var {clientNumber, RoyalBankProcessingCentre} =setting;
@@ -344,14 +353,44 @@ function init(err, db) {
 			if (rec.length==0) return callback('没有记录');
 			db.snappay_toll_settings.updateOne({_id:'setting'}, {$set:upd}, {upsert:true});
 			dedecimal(rec);dedecimal(stat);
+			var mapper=new Map([
+				['Created Time', 'time']
+				, ['Completed Time', 'lasttime']
+				, ['Trans No.', 'unknown']
+				, ['Original.Trans No.', 'unknown']
+				, ['Merchant Order No.', 'merchantOrderId']
+				, ['Channel trans No.', 'orderId']
+				, ['Type', 'need to add']
+				, ['Status', 'status']
+				, ['Pay Mode Name', 'need to add']
+				, ['Store ID', 'blank']
+				, ['Device EN', 'blank']
+				, ['Cashier ID', 'blank']
+				, ['Reference No.', 'blank']
+				, ['Batch No.', 'blank']
+				, ['Vouncher No.', 'blank']
+				, ['Merchant ID', 'userid']
+				, ['Terminal ID', 'blank']
+				, ['Agent ID', 'unknown']
+				, ['Trans Amount', 'paidmoney']
+				, ['Order Amount', 'money']
+				, ['Discount by merchant on channel', 'blank']
+				, ['Discount by merchant by acquiring', 'blank']
+				, ['Channel Disc', 'blank']
+				, ['Total Paid', 'paidmoney']
+				, ['Service Fee%', 'snappayFee']
+				, ['Tip', 'blank']
+				, ['Tax', 'blank']
+				, ['Merchant Service Fee', 'share']
+				, ['Custom Service Fee', 'blank']
+				, ['Currency', 'currency']
+				, ['Exchange Rate', 'blank']
+				, ['Time Zone', 'blank']
+			])
 			rec.forEach((item)=>{
-				item.outOrderId=item.merchantOrderId;
-				item.orderId=item._id.toHexString();
-				item.received=item.paidmoney;
-				item.earning=Math.floor(item.paidmoney*item.share*100)/100;
-				delete item.merchantOrderId;
-				delete item._id;
-				delete item.paidmoney;
+				item.snappayFee=snappayFee;
+				item.share=Math.floor((1-item.share)*100);
+				renameKeys(item, mapper);
 			});
 			var BTFs=new Map();
 			stat.forEach((item)=>{
@@ -382,7 +421,7 @@ function init(err, db) {
 							return ((t+8*3600)/86400+70*365+19).toFixed(5);
 						}
 					}
-					, columns:['orderId', 'outOrderId', 'merchantName', 'mer_userid', 'money', 'received', 'earning', 'share', 'currency', 'time', 'lasttime', 'status']
+					, columns:Array.from(mapper.keys())
 				}));
 			var v =await zip.generateAsync({type : "nodebuffer"});
 			callback(null, {src:v.toString('base64')});

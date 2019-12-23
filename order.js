@@ -221,10 +221,10 @@ function notifyMerchant(orderdata) {
             try {
                 var custom_params=url.parse(orderdata.cb_url, true).query;
                 request.post({uri:orderdata.cb_url, form:merSign(mer, Object.assign(custom_params, dedecimal(
-                    {orderid:orderdata.merchantOrderId
+                    {outOrderId:orderdata.merchantOrderId
                     , money:orderdata.paidmoney
                     , currency:orderdata.currency
-                    , sysOrderId:orderdata._id.toHexString()
+                    , orderId:orderdata._id.toHexString()
                     , providerOrderId:orderdata.providerOrderId
                 })))}, cb);
             } catch(e) {
