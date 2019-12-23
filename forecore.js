@@ -150,3 +150,9 @@ function start(err, db) {
 		} catch(e) {callback(e)}
 	}));
 }
+
+
+if (module==require.main) {
+	// debug
+	
+}

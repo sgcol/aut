@@ -114,7 +114,7 @@ exports.exchangeRate=async function(currency, payment, callback) {
 		basic_currency_unit:currency,
 		payment_method:supportedType[payment].type,
 	};
-	var [,ret]=request_post({uri:request_url, json:makeSign(data, testAccount)});
+	var [,ret]=await request_post({uri:request_url, json:makeSign(data, testAccount)});
 	if (ret.code!='0') return callback(ret.msg);
 	return callback(null, ret.data[0]);
 }
@@ -544,6 +544,7 @@ function init(err, db) {
 			db.users.updateOne({_id:orderData.userid}, {$inc:{succOrder:1}});
 			confirmOrder(orderid, orderData.money, net, (err)=>{
 				if (!err) {
+					updateOrder(orderid, {snappay_result:r});
 					var upd={daily:net, total:net, 'gross.daily':total_amount, 'gross.total':total_amount}
 					db.snappay_toll_accounts.updateOne({_id:acc._id}, {
 						$set:{'log.success':acc.log.success, 'succrate':succrate},
