@@ -192,8 +192,10 @@ $(()=>{
   $('button').click(function(e) {
     var params={}, partnerId=$('#partnerId').val(), key=$('#key').val();
     if (!partnerId || !key) return alert('必须先填写partnerId和key');
-    $(this).parent().find('input').each((idx, ele)=>{
-      var je=$(ele), jv=je.val()||je.attr('placeholder');
+    $(this).parent().find('input, select').each((idx, ele)=>{
+      var je=$(ele), jv;
+      if (je.is('input')) jv=je.val()||je.attr('placeholder');
+      else jv=je.children('option:selected').text();
       if (jv=='') return true;
       params[ele.id]=jv;
     });
@@ -203,8 +205,6 @@ $(()=>{
       var now=new Date();
       Object.assign(params, {
         cb_url:location.origin+'/demo/result',
-        currency:'CAD',
-        type:$('#type option:selected').text(),
         outOrderId:'TESTORDER'+now.getTime(),
         return_url:location.href,
         time:now.getTime(),

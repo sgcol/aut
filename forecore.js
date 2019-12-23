@@ -15,44 +15,11 @@ const router=require('express').Router()
 const allPayType=['ALIPAYH5', 'WECHATPAYH5', 'UNIONPAYH5', 'ALIPAYAPP', 'WECHATPAYAPP', 'ALIPAYMINI', 'WECHATPAYMINI', 'ALIPAYPC', 'WECHATPAYPC', 'UNIONPAYPC'];
 
 exports.router=router;
-// exports.confirmOrder=async function(orderid, received, tollfee, callback) {
-// 	received=Number(received); tollfee=Number(tollfee);
-// 	var upd={used:true};
-// 	if (tollfee) var gross=Math.floor((received-tollfee)*100)/100;
-// 	else gross=received;
-// 	upd.net=decimaly(gross);
 
-// 	var db=await pify(getDB)();
-// 	var r=await db.bills.findAndUpdate({_id:ObjectID(orderid), used:{$ne:true}}, {$set:upd}, {w:'majority'});
-// 	var orderdata=r.value;
-// 	if (!orderdata) {
-// 		return db.bills.findOne({_id:ObjectID(orderid)}, (err, r)=>{
-// 			if (r) return callback('used order');
-// 			return callback('no such orderid');
-// 		})
-// 	}
-
-// 	upd.paidmoney=received;
-// 	upd.gross=gross;
-// 	// add money profit to according account
-// 	db.bills.updateOne({_id:ObjectID(orderid)}, {$set:decimalfy(upd)});
-// 	var userId=orderdata.partnerId||orderdata.merchantId;
-// 	var userdata=await db.users.findOne({_id:userId});
-// 	var gross_delta=upd.paidmoney, net_delta=Math.floor(received*userdata.share*100)/100, sysprofit_delta=gross-net_delta;
-// 	var inc={};
-// 	inc[`daily.gross.${orderdata.provider}`]=gross_delta;
-// 	inc[`daily.net.${orderdata.provider}`]=net_delta;
-// 	inc[`gross.${orderdata.provider}`]=gross_delta;
-// 	inc[`net.${orderdata.provider}`]=net_delta;
-// 	db.users.bulkWrite([
-// 		{filter:{_id:userId}, update:{$inc:decimalfy(inc)}},
-// 		{filter:{_id:'system'}, update:{$inc:{profit:decimaly(sysprofit_delta), daily:decimaly(sysprofit_delta)}}}
-// 	],{ordered:false});
-// 	sysevents.emit('forecoreOrderConfirmed', r);
-// 	notifyMerchant()
-// 	callback();
-// }
-
+function err_h(err, req, res, next) {
+	if (err) res.send({err:err});
+	else next();
+}
 (function init(cb) {
 	getDB(cb);
 })(start);
@@ -61,7 +28,7 @@ function start(err, db) {
 	if (err) return console.error(err);
 
 	//currecny defined at https://intlmapi.alipay.com/gateway.do?service=forex_rate_file&sign_type=MD5&partner=2088921303608372&sign=75097bd6553e1e94aabc6e47b54ec42e, uppercase
-	router.all('/order', verifyMchSign, httpf({partnerId:'?string', merchantId:'?string', userId:'string', outOrderId:'string', money:'number', currency:'string', cb_url:'string', return_url:'?string', callback:true}, 
+	router.all('/order', verifyMchSign, err_h, httpf({partnerId:'?string', merchantId:'?string', userId:'string', outOrderId:'string', money:'number', currency:'string', cb_url:'string', return_url:'?string', callback:true}, 
 	async function(partnerId, merchantId, mchuserid, outOrderId, money, currency, cb_url, return_url, callback){
 		// var userId=partnerId||merchantId;
 		// if (!sign) return callback('sign must be set');
@@ -120,7 +87,7 @@ function start(err, db) {
 		Object.assign(ret ,{outOrderId:outOrderId, orderId:orderId.toHexString()});
 		callback(null, mchSign(merchant, ret));
 	}));
-	router.all('/queryOrder', verifyMchSign, httpf({outOrderId:'string', partnerId:'string', callback:true},
+	router.all('/queryOrder', verifyMchSign, err_h, httpf({outOrderId:'string', partnerId:'string', callback:true},
 	async function(outOrderId, partnerId, callback) {
 		try {
 			var order = await db.bills.findOne({merchantOrderId:outOrderId}, {projection:{share:0, provider:0, snappay_account:0, snappay_data:0}});
@@ -132,12 +99,12 @@ function start(err, db) {
 			callback(null, dedecimal(order));
 		}catch(e) {callback(e)}
 	}))
-	router.all('/exchangeRate', verifyMchSign, httpf({currency:'string', payment:'?string', callback:true}, async function(currency, payment, callback) {
+	router.all('/exchangeRate', verifyMchSign, err_h, httpf({currency:'string', payment:'?string', callback:true}, async function(currency, payment, callback) {
 		try {
 			callback(null, await getProvider('snappay-toll').exchangeRate(currency, payment||'WECHATH5'));
 		}catch(e) {callback(e)}
 	}));
-	router.all('/refund', verifyMchSign, httpf({partnerId:'string', outOrderId:'string', money:'number', callback:true}, async function(partnerId, outOrderId, money, callback) {
+	router.all('/refund', verifyMchSign, err_h, httpf({partnerId:'string', outOrderId:'string', money:'number', callback:true}, async function(partnerId, outOrderId, money, callback) {
 		try {
 			var order=await db.bills.findOne({merchantOrderId:outOrderId});
 			if (!order) return callback('无此订单');
