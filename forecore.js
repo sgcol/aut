@@ -8,6 +8,7 @@ const router=require('express').Router()
 , mchSign =require('./order').merSign
 , pify =require('pify')
 , url =require('url')
+, path =require('path')
 , decimalfy=require('./etc').decimalfy
 , dedecimal=require('./etc').dedecimal
 , argv=require('yargs').argv
@@ -43,7 +44,7 @@ function start(err, db) {
 		var provider=await pify(bestProvider)(money, merchant, {forecoreOnly:true, currency:currency});
 		
 		var req=this.req;
-		var basepath=argv.host||url.format({protocol:req.protocol, host:req.headers.host, pathname:url.parse(req.originalUrl).pathname});
+		var basepath=argv.host||url.format({protocol:req.protocol, host:req.headers.host, pathname:path.resolve(req.baseUrl, '..')});
 		if (basepath.slice(-1)!='/') basepath=basepath+'/';
 
 		params._host=basepath;

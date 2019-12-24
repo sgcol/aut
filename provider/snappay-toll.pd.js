@@ -32,8 +32,14 @@ Number.prototype.pad = function(size) {
 	return s;
 }
 
+function pad(n, size) {
+	const temp='00000000000000';
+	size=size||2;
+	return (temp+n).slice(-size);
+}
+
 const timestring =(t)=>{
-	return `${t.getUTCFullYear().pad(4)}-${(t.getUTCMonth()+1).pad()}-${t.getUTCDate().pad()} ${t.getUTCHours().pad()}:${t.getUTCMinutes().pad()}:${t.getUTCSeconds().pad()}`;
+	return `${pad(t.getUTCFullYear(), 4)}-${pad(t.getUTCMonth()+1)}-${pad(t.getUTCDate())} ${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}:${pad(t.getUTCSeconds())}`;
 }
 
 const localtimestring =(t)=>{
@@ -46,6 +52,7 @@ const makeSign=function(data, account, options) {
 	Object.keys(o).sort().map((key)=>{
 		if (key=='sign') return;
 		if (key=='sign_type' && ((!options) || (!options.includeSignType))) return;
+		if (!o[key]) return;
 		message+=''+key+'='+o[key]+'&';
 	})
 	var encoded_sign=md5(message.substr(0, message.length-1)+account.key);
@@ -334,7 +341,7 @@ function init(err, db) {
 			var [rec, stat]=await Promise.all([
 				dbBills.find(
 					{time:{$gte:from, $lt:to}, provider:'snappay-toll', used:true}, 
-					{projection:{merchantOrderId:1, merchantName:1, mer_userid:1, share:1, money:1, paidmoney:1, currency:1, status:1, time:1, lasttime:1}}
+					// {projection:{merchantOrderId:1, merchantName:1, mer_userid:1, share:1, money:1, paidmoney:1, currency:1, status:1, time:1, lasttime:1}}
 				).toArray(),
 				dbBills.aggregate([
 					{$match:{time:{$gte:from, $lt:to}, provider:'snappay-toll', status:{$in:['complete', '已支付']}}},
@@ -357,13 +364,13 @@ function init(err, db) {
 			var mapper=new Map([
 				['Created Time', 'time']
 				, ['Completed Time', 'lasttime']
-				, ['Trans No.', 'unknown']
+				, ['Trans No.', 'trans_no']
 				, ['Original.Trans No.', 'unknown']
 				, ['Merchant Order No.', 'merchantOrderId']
 				, ['Channel trans No.', '_id']
 				, ['Type', 'need to add']
 				, ['Status', 'status']
-				, ['Pay Mode Name', 'need to add']
+				, ['Pay Mode Name', 'payment_method']
 				, ['Store ID', 'blank']
 				, ['Device EN', 'blank']
 				, ['Cashier ID', 'blank']
@@ -383,16 +390,20 @@ function init(err, db) {
 				, ['Service Fee%', 'snappayFee']
 				, ['Tip', 'blank']
 				, ['Tax', 'blank']
-				, ['Merchant Service Fee', 'share']
+				, ['Merchant Service Fee', 'fee']
 				, ['Custom Service Fee', 'blank']
 				, ['Currency', 'currency']
-				, ['Exchange Rate', 'blank']
+				, ['Exchange Rate', 'exchange_rate']
 				, ['Time Zone', 'blank']
 			])
 			rec.forEach((item)=>{
+				var snappay_result=item.snappay_result;
+				item.snappay_result=undefined;
+				Object.assign(item, snappay_result);
 				item._id=item._id.toHexString()
 				item.snappayFee=snappayFee*100;
-				item.share=Math.floor((1-item.share)*100);
+				item.net=Math.floor(item.paidmoney*item.share*100)/100;
+				item.fee=item.paidmoney-item.net;
 				renameKeys(item, mapper);
 			});
 			var BTFs=new Map();
@@ -521,33 +532,36 @@ function init(err, db) {
 			res.send('充值完成');
 		})
 	})
-	router.all('/done', function(req, res) {
-		var r=req.body, sign=r.sign;
-		if (makeSign(r).sign!=sign) return res.send({err:'sign error'});
-		if (r.code!='0') return res.send({err:r.msg});
-		makeItDone(r.out_order_no, r, (err)=>{
-			if (err) return res.send({err:err});
-			res.send({code:'0'});
-		});
+	router.all('/done', async function(req, res) {
+		try {
+			var r=req.body, sign=r.sign, orderId=r.out_order_no;
+			var orderdata=await db.bills.findOne({_id:ObjectID(orderId)});
+			if (makeSign(r, orderdata.snappay_account).sign!=sign) return res.send({err:'sign error'});
+			// if (r.code!='0') return res.send({err:r.msg});
+			makeItDone(r.out_order_no, r, (err)=>{
+				if (err) return res.send({err:err});
+				res.send({code:'0'});
+			});
+		}catch(e) {res.send({err:e})};
 	});
 	function makeItDone(orderid, data, callback) {
 		callback=callback||function(){};
 		db.bills.findOne({_id:ObjectID(orderid)},function(err, orderData) {
 			if (err) callback('no such order');
-			var acc=orderData.snappay_account, net, succrate, total_amount=Number(data.trans_amount), fee=Number(data.c_trans_fee);
+			var acc=orderData.snappay_account, net, succrate, total_amount=Number(data.trans_amount), fee;
 			if (acc) {
 				if (!acc.log) acc.log={};
 				if (acc.log.success) acc.log.success++;
 				else acc.log.success=1;
 				if (!acc.used) acc.used=1;
-				fee=fee||Math.ceil(orderData.money*(acc.fee||snappayFee)*100)/100;
+				fee=Math.ceil(orderData.money*(acc.fee||snappayFee)*100)/100;
 				net=Number(Number(orderData.money-fee).toFixed(2));
 				succrate=acc.log.success/acc.used;
 			}
 			db.users.updateOne({_id:orderData.userid}, {$inc:{succOrder:1}});
-			confirmOrder(orderid, orderData.money, net, (err)=>{
+			confirmOrder(orderid, total_amount, net, (err)=>{
 				if (!err) {
-					updateOrder(orderid, {snappay_result:r});
+					updateOrder(orderid, {snappay_result:data});
 					var upd={daily:net, total:net, 'gross.daily':total_amount, 'gross.total':total_amount}
 					db.snappay_toll_accounts.updateOne({_id:acc._id}, {
 						$set:{'log.success':acc.log.success, 'succrate':succrate},
@@ -595,8 +609,8 @@ function init(err, db) {
 			trans_currency:params.currency,
 			trans_amount:params.money,
 			description:params.desc||'Goods',
-			'notify_url' : url.resolve(params._host, '../pvd/snappay-toll/done'),
-			'return_url' : url.resolve(params._host, '../pvd/snappay-toll/return'),
+			'notify_url' : url.resolve(params._host, '../../pvd/snappay-toll/done'),
+			'return_url' : url.resolve(params._host, '../../pvd/snappay-toll/return'),
 		};            
 		var [, body] =await request_post({url:request_url, json:makeSign(data, account)});
 		var ret=body;

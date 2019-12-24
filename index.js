@@ -1113,7 +1113,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.all('/dismissnotification', getAuth, httpf({id:'number'}, function(id) {
 		sysnotifier.remove(id);
 	}))
-	app.all('/demo/result', httpf({orderid:'string', money:'number'}, function(orderid, money) {
+	app.all('/demo/result', httpf({orderid:'?string', outOrderId:'?string', money:'number'}, function(orderid, outOrderId, money) {
 		return httpf.json({});
 	}));
 
