@@ -379,6 +379,7 @@ function init(err, db) {
 				, ['Discount by merchant by acquiring', 'blank']
 				, ['Channel Disc', 'blank']
 				, ['Total Paid', 'paidmoney']
+				, ['Net Amount', 'net']
 				, ['Service Fee%', 'snappayFee']
 				, ['Tip', 'blank']
 				, ['Tax', 'blank']
@@ -390,7 +391,7 @@ function init(err, db) {
 			])
 			rec.forEach((item)=>{
 				item._id=item._id.toHexString()
-				item.snappayFee=snappayFee;
+				item.snappayFee=snappayFee*100;
 				item.share=Math.floor((1-item.share)*100);
 				renameKeys(item, mapper);
 			});
