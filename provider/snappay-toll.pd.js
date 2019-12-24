@@ -180,7 +180,7 @@ function renameKeys(o, map) {
 		if (old_key !== new_key) {
 			Object.defineProperty(o, new_key,
 				Object.getOwnPropertyDescriptor(o, old_key));
-			o[old_key]=undefined;
+			// o[old_key]=undefined;
 		}	
 	})
 }
