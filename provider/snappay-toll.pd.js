@@ -102,14 +102,14 @@ exports.refund=async function(orderData, money, callback) {
 	var data={
 		method:'pay.orderrefund',
 		merchant_no:orderData.snappay_account.merchant_no,
-		out_order_no: orderData.merchantOrderId,
+		out_order_no: orderData._id.toHexString(),
 		out_refund_no:new ObjectID().toHexString(),
 		refund_amount:money
 	}
 	var [, ret]=await request_post({uri:request_url, json:makeSign(data, orderData.snappay_account)});
 	if (ret.code!='0') return callback(ret.msg);
 	if (ret.data[0].trans_status=='CLOSE') return callback('transaction closed, refund failed');
-	return callback(null, ret.data);
+	return callback(null, ret.data[0]);
 }
 exports.exchangeRate=async function(currency, payment, callback) {
 	callback=callback||((err, r)=>{
@@ -340,11 +340,11 @@ function init(err, db) {
 			var dbBills=db.db.collection('bills', {readPreference:'secondaryPreferred'});
 			var [rec, stat]=await Promise.all([
 				dbBills.find(
-					{time:{$gte:from, $lt:to}, provider:'snappay-toll', used:true}, 
+					{time:{$gte:from, $lt:to}, provider:'snappay-toll', used:true, status:{$ne:'refund'}}, 
 					// {projection:{merchantOrderId:1, merchantName:1, mer_userid:1, share:1, money:1, paidmoney:1, currency:1, status:1, time:1, lasttime:1}}
 				).toArray(),
 				dbBills.aggregate([
-					{$match:{time:{$gte:from, $lt:to}, provider:'snappay-toll', status:{$in:['complete', '已支付']}}},
+					{$match:{time:{$gte:from, $lt:to}, provider:'snappay-toll', used:true, status:{$ne:'refund'}}},
 					{$addFields:{holding:{$multiply:['$money', '$share', 100]}}},
 					{$group:{
 						_id:{currency:'$currency', mchId:'$userid'}
@@ -462,7 +462,7 @@ function init(err, db) {
 			cond.time=cond.time||{};
 			cond.time.$lt=to;
 		}
-		cond.provider='snappay-toll';cond.used=true;
+		cond.provider='snappay-toll';cond.used=true;cond.status={$ne:'refund'}
 		var groupby={currency:'$currency', mchId:'$userid'}, af={holding:{$multiply:['$money', '$share', 100]}};
 		if(!cond.time) {
 			//不指定时间按照天统计

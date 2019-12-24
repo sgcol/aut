@@ -12,7 +12,7 @@ var q=async.queue(function (extern_callback, queue_callback) {
     else new easym.DbProvider().init(argv.mongo, {exists:[
         {bills:{index:['status', 'time', 'type', 
           {userid:1, used:1, time:-1, lasttime:-1, paidmoney:1, money:1},
-          {time:1, provider:1, status:1}
+          {time:1, provider:1, used:1, status:1}
         ]}},
         'knownCard',
         {users:{index:['acl', 'merchantid']}},
