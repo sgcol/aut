@@ -591,7 +591,7 @@ function init(err, db) {
 			params.providerSpec=undefined
 			params=Object.assign(spec, params);
 		}
-		var account =await bestAccount(params.money, params.merchantdata, params.userId, params.currency);
+		var account =await bestAccount(params.money, params.merchant, params.userId, params.currency);
 		if (!account) return callback('没有可用的收款账户');
 		var warnings=[];
 		var payType=supportedType[params.type];
