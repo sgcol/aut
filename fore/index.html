@@ -42,8 +42,10 @@
 <script>
     $(function() {
         setTimeout(accIntf.bind(null, '/account/me', function(err) {
-            if (err) return alert(err);
-            location.href='/dashboard.html';
+			if (err) return alert(err);
+			
+			location.href='/statementOfSnappay-toll.html';
+			
         }), 500);
     });
 </script>
