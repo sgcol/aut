@@ -91,7 +91,7 @@ exports.bestPair=(money, cb)=>{
 };
 exports.router=router;
 exports.name='snappay';
-exports.params=['accountNumber', 'customName', 'customNumber'];
+exports.params=['accountNumber', 'customName', 'customNumber', 'timezone'];
 exports.forecore=true;
 exports.refund=async function(orderData, money, callback) {
 	callback=callback||((err, r)=>{
@@ -144,7 +144,7 @@ function daysIntoYear(date){
 	return Math.floor((Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - Date.UTC(date.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000);
 }
 function transaction(arr, dates, setting, warning, c_record) {
-	var {transactionCode, CADFinancialInstitution, clientName,clientNumber}=setting;
+	var {transactionCode, clientName,clientNumber}=setting;
 	var total=0, ret='';
 	for (var i=0; i<(arr.length); i++) {
 		var {amount, accountNumber, customName, customNumber, mchName}=Object.assign({accountNumber:'', customName:'', customNumber:''}, arr[i]);
@@ -162,9 +162,9 @@ function transaction(arr, dates, setting, warning, c_record) {
 		if (!accountNumber) {
 			accountName='';
 			warning.push(`C${c_record+1}/${i+1} ${mchName} accountNumber为空`);
-		} else if (accountNumber.length>12) {
-			accountNumber=accountNumber.substring(0, 12);
-			warning.push(`C${c_record+1}/${i+1} ${mchName} accountNumber超过12byts`)
+		} else if (accountNumber.length>20) {
+			accountNumber=accountNumber.substring(0, 20);
+			warning.push(`C${c_record+1}/${i+1} ${mchName} accountNumber超过20byts`)
 		}
 		if (!customNumber) {
 			customNumber='XXXXXXXXXX';
@@ -175,7 +175,7 @@ function transaction(arr, dates, setting, warning, c_record) {
 		}
 		// var money=Math.floor(Math.random()*100000), accountNumber=randstring(12), customName=randstring(5), customNumber=randstring(19);
 		total+=amount;
-		var trans=`${transactionCode}${amount.pad(10)}${dates}${CADFinancialInstitution}${accountNumber.padEnd(12, ' ')}${''.padEnd(25, '0')}${clientName.padEnd(15, ' ')}${customName.padEnd(30, ' ')}${clientName.padEnd(30, ' ')}${clientNumber}${customNumber.padEnd(19, ' ')}${''.padEnd(9, '0')}${''.padEnd(12, ' ')}${'settlement'.padEnd(15, ' ')}${''.padEnd(35, ' ')}`;
+		var trans=`${transactionCode}${amount.pad(10)}${dates}0${accountNumber.padEnd(20, ' ')}${''.padEnd(25, '0')}${clientName.padEnd(15, ' ')}${customName.padEnd(30, ' ')}${clientName.padEnd(30, ' ')}${clientNumber}${customNumber.padEnd(19, ' ')}${''.padEnd(9, '0')}${''.padEnd(12, ' ')}${'settlement'.padEnd(15, ' ')}${''.padEnd(35, ' ')}`;
 		ret+=trans;
 	}
 	return {str:ret.padEnd(1464-24, ' '), total:total};
