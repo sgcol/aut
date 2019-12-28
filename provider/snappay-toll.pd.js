@@ -579,7 +579,10 @@ function init(err, db) {
 			if (currency!='CAD') return null;
 			return {_id:'testAccount', merchant_no:'901800000116', app_id:'9f00cd9a873c511e', key:'7e2083699dd510575faa1c72f9e35d43', supportedCurrency:'CAD'}
 		}
-		var [acc]= await db.snappay_toll_accounts.find({disable:{$ne:true}, supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
+		if (merchantData.debugMode) {
+			var [acc]= await db.snappay_toll_accounts.find({name:'测试', supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
+		}
+		else var [acc]= await db.snappay_toll_accounts.find({disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
 		return acc;
 	}
 	forwardOrder=async function(params, callback) {
