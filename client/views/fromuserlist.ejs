@@ -150,6 +150,12 @@ function forceconfirm(orderid) {
     refreshOrderList()
   });
 }
+function refund(orderid) {
+  accIntf('/forecore/admin/refund', {orderid:orderid}, (err)=>{
+    if (err) return showerr(err);
+    refreshOrderList();
+  })
+}
 function sendNotify(orderid) {
   accIntf('/admin/notifyMerchant', {orderid:orderid}, (err)=>{
     if (err) return showerr(err);
@@ -167,7 +173,12 @@ function showProviderOrderId(v, record) {
 }
 function showOp(v, o) {
   var ret=`<button class="btn btn-outline-primary btn-icon-sm tooltipfy" title="重发通知" onclick="javascript:sendNotify('${o._id}')"><i class="mdi mdi-replay"></i></button>`;
-  if (me.acl=='admin'||me.acl=='manager') ret+=`<button style="margin-left:5px" class="btn btn-outline-danger btn-icon-sm tooltipfy" title="强制结单" onclick="javascript:forceconfirm('${o._id}')"><i class="mdi mdi-archive"></i></button>`;
+  <% if (acl=='admin' || acl=='manager') { %>
+    <% if (forecoreOnly) { %>
+      ret+=`<button style="margin-left:5px" class="btn btn-outline-warning btn-icon-sm tooltipfy" title="退单" onclick="javascript:refund('${o._id}')"><i class="mdi mdi-send"></i></button>`
+    <% } %>
+    ret+=`<button style="margin-left:5px" class="btn btn-outline-danger btn-icon-sm tooltipfy" title="强制结单" onclick="javascript:forceconfirm('${o._id}')"><i class="mdi mdi-archive"></i></button>`;
+  <% } %>
   return ret;
 }
 window.initpage=()=>{

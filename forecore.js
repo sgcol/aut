@@ -15,6 +15,8 @@ const router=require('express').Router()
 
 const allPayType=['ALIPAYH5', 'WECHATPAYH5', 'UNIONPAYH5', 'ALIPAYAPP', 'WECHATPAYAPP', 'ALIPAYMINI', 'WECHATPAYMINI', 'ALIPAYPC', 'WECHATPAYPC', 'UNIONPAYPC'];
 
+const {verifyAuth, verifyManager}=require('./auth.js');
+
 exports.router=router;
 
 function err_h(err, req, res, next) {
@@ -117,6 +119,26 @@ function start(err, db) {
 			var result=await pvd.refund(order, money);
 			await db.bills.updateOne({_id:order._id}, {$set:{status:'refund'}}, {w:1});
 			callback(null, result);
+		} catch(e) {callback(e)}
+	}));
+	router.all('/admin/refund', verifyAuth, verifyManager, httpf({orderid:'string', callback:true}, async function(orderid, callback) {
+		try {
+			var order=await db.bills.findOne({_id:ObjectId(orderid)});
+			if (!order) return callback('无此订单');
+			if (order.status=='refund') return callback('已经退单');
+			var pvd=getProvider(order.provider);
+			if (!pvd) return callback('订单尚未支付');
+			if (!pvd.refund) return callback('提供方不支持退单')
+			var result=await pvd.refund(order, order.paidmoney);
+			await db.bills.updateOne({_id:order._id}, {$set:{status:'refund'}}, {w:1});
+			callback(null, result);
+		} catch(e) {callback(e)}
+	}));
+	router.all('/admin/invalidOrder', verifyAuth, verifyManager, httpf({orderid:'string', callback:true}, async function(orderid, callback) {
+		try {
+			var {order}=await db.bills.findOneAndUpdate({_id:ObjectId(orderid)}, {status:'作废'});
+			if (!order) return callback('无此订单');
+			callback(null);
 		} catch(e) {callback(e)}
 	}));
 }
