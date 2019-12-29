@@ -125,11 +125,12 @@ function start(err, db) {
 		try {
 			var order=await db.bills.findOne({_id:ObjectId(orderid)});
 			if (!order) return callback('无此订单');
+			dedecimal(order);
 			if (order.status=='refund') return callback('已经退单');
 			var pvd=getProvider(order.provider);
 			if (!pvd) return callback('订单尚未支付');
 			if (!pvd.refund) return callback('提供方不支持退单')
-			var result=await pvd.refund(order, dedecimal(order.paidmoney));
+			var result=await pvd.refund(order, order.paidmoney);
 			await db.bills.updateOne({_id:order._id}, {$set:{status:'refund'}}, {w:1});
 			callback(null, result);
 		} catch(e) {callback(e)}
