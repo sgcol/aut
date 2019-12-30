@@ -155,9 +155,9 @@ function transaction(arr, dates, setting, warning, c_record) {
 		if (!customName) {
 			customName='';
 			warning.push(`C${c_record+1}/${i+1} customName`);
-		} else if (customName.length>15) {
-			customName=customName.substring(0, 15);
-			warning.push(`${customName} 超过15Bytes，截短`);
+		} else if (customName.length>30) {
+			customName=customName.substring(0, 30);
+			warning.push(`${customName} 超过30Bytes，截短`);
 		}
 		if (!accountNumber) {
 			accountName='';
