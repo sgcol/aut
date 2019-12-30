@@ -486,6 +486,7 @@ function init(err, db) {
 				,mchId:'$_id.mchId'
 				,currency:'$_id.currency'
 			}},
+			{$sort:{dot:-1}},
 			{$project:{
 				doc:{
 					dot:'$dot',
