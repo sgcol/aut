@@ -177,7 +177,9 @@ function showOp(v, o) {
     <% if (forecoreOnly) { %>
       ret+=`<button style="margin-left:5px" class="btn btn-outline-warning btn-icon-sm tooltipfy" title="退单" onclick="javascript:refund('${o._id}')"><i class="mdi mdi-send"></i></button>`
     <% } %>
+    <% if (acl=='admin') { %>
     ret+=`<button style="margin-left:5px" class="btn btn-outline-danger btn-icon-sm tooltipfy" title="强制结单" onclick="javascript:forceconfirm('${o._id}')"><i class="mdi mdi-archive"></i></button>`;
+    <% } %>
   <% } %>
   return ret;
 }

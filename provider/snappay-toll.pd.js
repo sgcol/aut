@@ -332,7 +332,7 @@ function init(err, db) {
 			var upd=Object.assign(this.req.query, this.req.body);
 			upd.from=upd.to=upd.testMode=undefined;
 			var warning=[];
-			if (from>setting.lastExportTime) return callback('输出起点大于上次终点，这可能丢失订单，请关闭当前界面重新输出');
+			if (from>setting.lastExportTime) warning.push(`输出起点大于上次终点，这可能丢失订单，建议设置起点为${localtimestring(setting.lastExportTime)}`);
 			if (from<setting.lastExportTime) warning.push(`输出起点小于上次终点，可能导致数据重复，建议设置起点为${localtimestring(setting.lastExportTime)}`);
 			if (!testMode) {
 				upd.lastExportTime=new Date(Math.floor(to.getTime()/(3600*1000))*3600*1000);
