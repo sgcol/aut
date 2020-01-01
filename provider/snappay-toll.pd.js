@@ -332,6 +332,7 @@ function init(err, db) {
 			var upd=Object.assign(this.req.query, this.req.body);
 			upd.from=upd.to=upd.testMode=undefined;
 			var warning=[];
+			if (from>new Date('2020-1-1')) return callback('请使用大系统结算，这里的结算文件不得使用(数据重复)');
 			if (from>setting.lastExportTime) warning.push(`输出起点大于上次终点，这可能丢失订单，建议设置起点为${localtimestring(setting.lastExportTime)}`);
 			if (from<setting.lastExportTime) warning.push(`输出起点小于上次终点，可能导致数据重复，建议设置起点为${localtimestring(setting.lastExportTime)}`);
 			if (!testMode) {
@@ -583,7 +584,13 @@ function init(err, db) {
 		if (merchantData.debugMode) {
 			var [acc]= await db.snappay_toll_accounts.find({name:'测试', supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
 		}
-		else var [acc]= await db.snappay_toll_accounts.find({disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
+		else {
+			var cond={disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}
+			if (merchantData._id=='maimai') {
+				cond.merchant_no={$in:['901951498144', '901951498835', '901951499128', '901951499202', '901951499532']};
+			}
+			var [acc]= await db.snappay_toll_accounts.find(cond).sort({daily:1}).limit(1).toArray();
+		}
 		return acc;
 	}
 	forwardOrder=async function(params, callback) {

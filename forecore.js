@@ -50,6 +50,7 @@ function start(err, db) {
 		if (basepath.slice(-1)!='/') basepath=basepath+'/';
 
 		params._host=basepath;
+		params._req=req;
 		// if (provider.checkParams) {
 		// 	var paramsErr=provider.checkParams(params);
 		// 	if (paramsErr) return callback(paramsErr);

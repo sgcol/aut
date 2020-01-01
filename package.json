@@ -55,6 +55,7 @@
     "phonegap": "^8.2.2",
     "qr-scanner": "^1.1.1",
     "quagga": "^0.12.1",
+    "tenpay": "^2.1.18",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.3"
   },
