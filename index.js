@@ -177,8 +177,6 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 
 	var db=dbp[0];
 
-	app.use('/forecore', require('./forecore.js').router);
-	
 	var getProviders = require('./providerManager.js').getProvider;
 	if (argv.debugout) {
 		app.use(function (req, res, next) {
@@ -186,6 +184,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			next();
 		});
 	}
+	app.use('/forecore', require('./forecore.js').router);
 	app.param('provider', function (req, res, next, external_provider) {
 		req.provider = external_provider;
 		next();
