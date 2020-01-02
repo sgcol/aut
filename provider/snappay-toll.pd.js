@@ -18,6 +18,8 @@ const url = require('url')
 , JSZip =require('jszip')
 , stringify=require('csv-stringify/lib/sync')
 , multer=require('multer')
+, argv=require('yargs').argv
+, debugout =require('debugout')(argv.debugout)
 
 
 const _noop=function() {};
@@ -122,6 +124,7 @@ exports.exchangeRate=async function(currency, payment, callback) {
 		payment_method:supportedType[payment].type,
 	};
 	var [,ret]=await request_post({uri:request_url, json:makeSign(data, testAccount)});
+	debugout(ret);
 	if (ret.code!='0') return callback(ret.msg);
 	return callback(null, ret.data[0]);
 }
