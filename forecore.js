@@ -40,6 +40,8 @@ function start(err, db) {
 		// var params=Object.assign(this.req.query, this.req.body);
 		// if (merSign(user, params).sign!=sign) return callback('sign error, use sign-verify-url to find what is wrong');
 
+		if (money==0) return callback('金额异常，能不为0');
+		
 		var params =this.req.params;
 		
 		var merchant =this.req.merchant;
@@ -101,7 +103,7 @@ function start(err, db) {
 			if (pvd.queryOrder) {
 				try {
 					var data=await pvd.queryOrder(order);
-					order.received=data.paidmoney;
+					order.received=data && data.paidmoney;
 				} catch(e) {
 					order.err=e;
 				}
