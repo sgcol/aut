@@ -94,11 +94,22 @@ function start(err, db) {
 	router.all('/queryOrder', verifyMchSign, err_h, httpf({outOrderId:'string', partnerId:'string', callback:true},
 	async function(outOrderId, partnerId, callback) {
 		try {
-			var order = await db.bills.findOne({merchantOrderId:outOrderId}, {projection:{share:0, provider:0, snappay_account:0, snappay_data:0}});
+			var order = await db.bills.findOne({merchantOrderId:outOrderId}, {projection:{share:0}});
 			if (!order) return callback('无此订单');
 			if (order.merchantid!=partnerId) return callback('该订单不属于指定的partner');
+			var pvd=getProvider(order.provider);
+			if (pvd.queryOrder) {
+				try {
+					var data=await pvd.queryOrder(order);
+					order.received=data.paidmoney;
+				} catch(e) {
+					order.err=e;
+				}
+			} else order.received=order.paidmoney;
+			order.provider=undefined;
+			order.snappay_account=undefined;
+			order.snappay_data=undefined;
 			order.outOrderId=order.merchantOrderId
-			order.received=order.paidmoney;
 			order.paidmoney=undefined;
 			callback(null, dedecimal(order));
 		}catch(e) {callback(e)}

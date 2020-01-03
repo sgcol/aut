@@ -128,6 +128,17 @@ exports.exchangeRate=async function(currency, payment, callback) {
 	if (ret.code!='0') return callback(ret.msg);
 	return callback(null, ret.data[0]);
 }
+
+var querOrder=async function(order, callback) {
+	callback=callback||((err, r)=>{
+		if (err) throw err;
+		else return r
+	});
+	callback('启动中');
+}
+exports.queryOrder=async function(order, callback) {
+	queryOrder.apply(null, arguments);
+}
 //'merchant_no', 'app_id', 'key', 'supportedCurrency'
 
 const _auth=require('../auth.js'), aclgt=_auth.aclgt, verifyManager=_auth.verifyManager, verifyAdmin=_auth.verifyAdmin, getAuth=_auth.getAuth, verifyAuth=_auth.verifyAuth;
@@ -641,7 +652,27 @@ function init(err, db) {
 		if (warnings.length) ret.warnings=warnings;
 		callback(null, ret);
 	}
-	
+	queryOrder =async function(order, callback) {
+		callback=callback||((err, r)=>{
+			if (err) throw err;
+			else return r
+		});
+		if (!order.snappay_account) return callback('订单尚未确认');
+		var data={
+			method:'pay.orderquery'
+			, merchant_no : order.snappay_account.merchant_no
+			, out_order_no: order._id.toHexString()
+		}
+		var [,ret]=await request_post({uri:request_url, json:makeSign(data, order.snappay_account)});
+		if (ret.code!='0') return callback(ret.msg);
+		var _d=ret.data[0];
+		if (_d.trans_status=='SUCCESS' && !order.used) {
+			// 补单
+			makeItDone(order._id.toHexString(), _d);
+		}
+		_d.pasimoney=_d.customer_paid_amount;
+		callback(null, _d);
+	}
 	var today=new Date();
 	setInterval(()=>{
 		var now=new Date();
