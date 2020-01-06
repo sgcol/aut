@@ -3,6 +3,9 @@ const getDB=require('./db.js'), pify=require('pify'), getMerchant=require('./mer
     , sortObj=require('sort-object'), qs=require('querystring').stringify, url=require('url'), sysnotifier=require('./sysnotifier.js')
     , md5=require('md5'), sysevents=require('./sysevents.js');
 
+const argv=require('yargs').argv
+    , debugout=require('debugout')(argv.debugout);
+
 const decimalfy=require('./etc').decimalfy, dedecimal=require('./etc').dedecimal
 const onlineUsers=require('./auth.js').onlineUsers
 function getUser(id, cb) {
@@ -220,13 +223,15 @@ function notifyMerchant(orderdata) {
         function notify(mer, cb) {
             try {
                 var custom_params=url.parse(orderdata.cb_url, true).query;
-                request.post({uri:orderdata.cb_url, form:merSign(mer, Object.assign(custom_params, dedecimal(
+                var params=merSign(mer, Object.assign(custom_params, dedecimal(
                     {outOrderId:orderdata.merchantOrderId
                     , money:orderdata.paidmoney
                     , currency:orderdata.currency
                     , orderId:orderdata._id.toHexString()
                     , providerOrderId:orderdata.providerOrderId
-                })))}, cb);
+                })))
+                debugout('notifyMerchant', params);
+                request.post({uri:orderdata.cb_url, form:params}, cb);
             } catch(e) {
                 console.error(e);
                 cb(e);

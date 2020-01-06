@@ -1,0 +1,9 @@
+<script>
+    const wechatObj = new window.WechatJSSDK(<%= config %>);
+    wechatObj.initialize().then(()=>{
+        wechatObj.pay();
+    }).catch((e)=>{
+        console.log(e);
+        alert(e);
+    })
+</script>
