@@ -725,6 +725,7 @@ function init(err, db) {
 				openid:openid
 			});
 			debugout('preorder', ret);
+			ret=ret.responseData;
 			if (ret.return_code!='SUCCESS') throw ret.return_msg;
 			if (ret.result_code!='SUCCESS') throw ret.err_code_des;
 			updateOrder(params.state, {status:'进入收银台', lasttime:new Date(), wechat_unifiedorder:ret});
