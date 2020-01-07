@@ -730,6 +730,7 @@ function init(err, db) {
 			updateOrder(params.state, {status:'进入收银台', lasttime:new Date(), wechat_unifiedorder:ret});
 			// get signature
 			var conf=await wx.payment.generateChooseWXPayInfo(ret.prepay_id);
+			debugout('wx payment conf', conf);
 			res.render('cashcounter', {config:conf});
 		}catch(e) {
 			debugout(e);
