@@ -700,7 +700,9 @@ function init(err, db) {
 		if (req.headers['user-agent'].indexOf('MicroMessenger')<0) return res.render('error', {err:'请使用微信打开此页面'});
 		var params=Object.assign(req.query, req.body);
 		if (!params.id) return res.render('error', {err:'请从正确的位置进入本页面'});
-		res.render('wxentri', {go:wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, 'pvd/wechatforsnap/wechat/cc'), 'snsapi_base', params.id)});
+		var jumpto=wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, 'pvd/wechatforsnap/wechat/cc'), 'snsapi_base', params.id);
+		debugout(jumpto)
+		res.render('wxentri', {go:jumpto});
 	});
 	router.all('/wechat/cc', async (req, res)=>{
 		try {
