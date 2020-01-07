@@ -689,8 +689,10 @@ function init(err, db) {
 		if (!account) return callback('没有可用的收款账户');
 		// build a wechat h5 page
 		await updateOrder(params.orderId, {status:'创建H5', snappay_account:account, lasttime:new Date()});
+		var jumpto=wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, 'pvd/wechatforsnap/wechat/cc'), 'snsapi_base', params.orderId);
+		debugout(jumpto)
 		return callback(null, {
-			url:argv.wxhost?url.resolve(argv.wxhost, 'pvd/wechatforsnap/wechat/entri?id='+params.orderId):url.resolve(params._host, 'wechat/entri?id='+params.orderId)
+			url:jumpto
 			, pay_type:params.type
 		});
 	}
@@ -726,7 +728,10 @@ function init(err, db) {
 			updateOrder(params.state, {status:'进入收银台', lasttime:new Date(), wechat_unifiedorder:ret});
 			// get signature
 			res.render('cashcount', {config:getParams(ret.prepay_id)});
-		}catch(e) {return res.render('error', {err:e})}
+		}catch(e) {
+			debugout(e);
+			return res.render('error', {err:e})
+		}
 	})
 	queryOrder=async (order, callback)=>{
 		callback=callback||((err, r)=>{
