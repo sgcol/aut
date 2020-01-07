@@ -1,0 +1,13 @@
+{
+  "wechatConfig": {
+    "appId": "wxec73fe538fbc098e",
+    "wechatRedirectUrl": "http://undefined/wechat/oauth-callback"
+  },
+  "globalToken": {
+    "count": 0
+  },
+  "urls": {},
+  "oauth": {},
+  "card": {},
+  "mp": {}
+}
