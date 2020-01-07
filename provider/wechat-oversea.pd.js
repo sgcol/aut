@@ -18,12 +18,12 @@ const url = require('url')
 , JSZip =require('jszip')
 , stringify=require('csv-stringify/lib/sync')
 , multer=require('multer')
-, tenpay = require('tenpay')
 , ip6addr=require('ip6addr')
 , argv=require('yargs')
 	.describe('wxhost', 'a base url used to access wechat func')
 	.argv
 , { Wechat, Payment } = require('wechat-jssdk')
+, debugout =require('debugout')(argv.debugout)
 
 
 const _noop=function() {};
@@ -40,7 +40,7 @@ const config = {
 	payment: true, //enable payment support
 	merchantId: '1497853112', //
 	paymentKey: '748ab991ec1ca243670f811bb86e2eee', //API key to gen payment sign
-	// paymentCertificatePfx: fs.readFileSync(path.join(process.cwd(), 'cert/apiclient_cert.p12')),
+	paymentCertificatePfx: 'unknown',
 	//default payment notify url
 	paymentNotifyUrl: `http://${argv.wehost}/api/wechat/payment/`,
 };
@@ -689,14 +689,15 @@ function init(err, db) {
 		if (!account) return callback('没有可用的收款账户');
 		// build a wechat h5 page
 		await updateOrder(params.orderId, {status:'创建H5', snappay_account:account, lasttime:new Date()});
-		return {
+		return callback(null, {
 			url:argv.wxhost?url.resolve(argv.wxhost, 'pvd/wechatforsnap/wechat/entri?id='+params.orderId):url.resolve(params._host, 'wechat/entri?id='+params.orderId)
 			, pay_type:params.type
-		}
+		});
 	}
 	router.all('/wechat/entri', (req, res)=>{
 		// check the browser is wechat
-		if (req.agent.indexOf('wechat')<0) return res.render('error', {err:'请使用微信打开此页面'});
+		//debugout(req);
+		if (req.headers['user-agent'].indexOf('MicroMessenger')<0) return res.render('error', {err:'请使用微信打开此页面'});
 		var params=Object.assign(req.query, req.body);
 		if (!params.id) return res.render('error', {err:'请从正确的位置进入本页面'});
 		res.render('wxentri', {go:wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, 'pvd/wechatforsnap/wechat/cc'), 'snsapi_base', params.id)});
