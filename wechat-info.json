@@ -1,7 +1,8 @@
 {
   "wechatConfig": {
     "appId": "wxec73fe538fbc098e",
-    "wechatRedirectUrl": "http://undefined/wechat/oauth-callback"
+    "wechatRedirectUrl": "http://undefined/wechat/oauth-callback",
+    "store": "FileStore_/projects/snappay/wechat-info.json"
   },
   "globalToken": {
     "count": 0
