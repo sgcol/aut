@@ -711,6 +711,7 @@ function init(err, db) {
 			var params=Object.assign(req.query, req.body);
 			if (!params.code) throw '请勿自行访问本页面';
 			var {openid}=await wx.oauth.getUserBaseInfo(params.code);
+			debugout('got openid', openid);
 			// preorder
 			var order=await db.bills.findOne({_id:ObjectID(params.state)});
 			var ret =await wx.payment.unifiedOrder({
@@ -723,10 +724,12 @@ function init(err, db) {
 				total_fee : Math.floor(order.money*100),
 				openid:openid
 			});
+			debugout('preorder', ret);
 			if (ret.return_code!='SUCCESS') throw ret.return_msg;
 			if (ret.result_code!='SUCCESS') throw ret.err_code_des;
 			updateOrder(params.state, {status:'进入收银台', lasttime:new Date(), wechat_unifiedorder:ret});
 			// get signature
+			
 			res.render('cashcount', {config:getParams(ret.prepay_id)});
 		}catch(e) {
 			debugout(e);
