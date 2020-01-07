@@ -689,10 +689,12 @@ function init(err, db) {
 		if (!account) return callback('没有可用的收款账户');
 		// build a wechat h5 page
 		await updateOrder(params.orderId, {status:'创建H5', snappay_account:account, lasttime:new Date()});
-		return callback(null, {
-			url:argv.wxhost?url.resolve(argv.wxhost, 'pvd/wechatforsnap/wechat/entri?id='+params.orderId):url.resolve(params._host, 'wechat/entri?id='+params.orderId)
-			, pay_type:params.type
-		});
+		var ret= {
+                        url:argv.wxhost?url.resolve(argv.wxhost, 'pvd/wechatforsnap/wechat/entri?id='+params.orderId):url.resolve(params._host, 'wechat/entri?id='+params.orderId)
+                        , pay_type:params.type
+                };
+		debugout('wxpage', ret);
+		return callback(null, ret);
 	}
 	router.all('/wechat/entri', (req, res)=>{
 		// check the browser is wechat
