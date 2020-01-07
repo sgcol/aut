@@ -729,8 +729,8 @@ function init(err, db) {
 			if (ret.result_code!='SUCCESS') throw ret.err_code_des;
 			updateOrder(params.state, {status:'进入收银台', lasttime:new Date(), wechat_unifiedorder:ret});
 			// get signature
-			
-			res.render('cashcount', {config:getParams(ret.prepay_id)});
+			var conf=await wx.payment.generateChooseWXPayInfo(ret.prepay_id);
+			res.render('cashcounter', {config:conf});
 		}catch(e) {
 			debugout(e);
 			return res.render('error', {err:e})
