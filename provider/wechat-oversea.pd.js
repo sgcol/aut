@@ -730,7 +730,7 @@ function init(err, db) {
 			res.render('cashcounter', ccdata);
 		}catch(e) {
 			debugout(e);
-			return res.render('error', {err:JSON.stringify(e)})
+			return res.render('error', {err:e.errmsg||JSON.stringify(e)})
 		}
 	})
 	queryOrder=async (order, callback)=>{
