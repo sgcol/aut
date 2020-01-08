@@ -603,6 +603,9 @@ function init(err, db) {
 			if (merchantData._id=='maimai') {
 				cond.merchant_no={$in:['901951498144', '901951498835', '901951499128', '901951499202', '901951499532']};
 			}
+			if (merchantData._id=='zjfan') {
+				cond.merchant_no={$in:['901951481062', '901951481125', '901951481485']};
+			}
 			var [acc]= await db.snappay_toll_accounts.find(cond).sort({used:1}).limit(1).toArray();
 		}
 		return acc;
