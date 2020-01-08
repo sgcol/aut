@@ -720,6 +720,7 @@ function init(err, db) {
 			if (ret.result_code!='SUCCESS') throw ret.err_code_des;
 			updateOrder(params.state, {status:'进入收银台', lasttime:new Date(), wechat_unifiedorder:ret});
 			// get signature
+			debugout(req.protocol+';//'+req.headers.host+req.url);
 			var [init_config, payData]=await Promise.all([
 				wx.jssdk.getSignature(req.protocol+';//'+req.headers.host+req.url),
 				wx.payment.generateChooseWXPayInfo(ret.prepay_id)
@@ -729,7 +730,7 @@ function init(err, db) {
 			res.render('cashcounter', ccdata);
 		}catch(e) {
 			debugout(e);
-			return res.render('error', {err:e})
+			return res.render('error', {err:JSON.stringify(e)})
 		}
 	})
 	queryOrder=async (order, callback)=>{
