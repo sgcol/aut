@@ -24,6 +24,7 @@ const url = require('url')
 	.argv
 , { Wechat, Payment } = require('wechat-jssdk')
 , debugout =require('debugout')(argv.debugout)
+, bodyParser =require('body-parser')
 
 
 const _noop=function() {};
@@ -32,7 +33,7 @@ const supportedType={'WECHATPAYH5':{type:'WECHATPAY', method:'pay.h5pay'}, 'ALIP
 
 const config = {
 	//set your oauth redirect url, defaults to localhost
-	"wechatRedirectUrl": `http://${argv.wehost}/wechat/oauth-callback`,
+	"wechatRedirectUrl": `http://${argv.wxhost}/wechat/oauth-callback`,
 	//"wechatToken": "wechat_token", //not necessary required
 	"appId": "wxec73fe538fbc098e",
 	"appSecret": "748ab991ec1ca243670f811bb86e2eee",
@@ -561,38 +562,37 @@ function init(err, db) {
 	} catch(e) {callback(e)}
 	}))
 	router.all('/return', (req, res)=>{
-		var orderid=req.query.out_trade_no;
-		(function tryUseMerchantReturnUrl(cb) {
-			if (!orderid) return cb('orderid not defined');
-			getOrderDetail(orderid, (err, merchantid, money, mer_userid, cb_url, return_url)=>{
-				if (err) return cb(err);
-				if (!return_url) return cb('use default page');
-				res.redirect(return_url);
-				cb();
-			})	
-		})(function ifFailed(err) {
-			if (!err) return;
-			//show default page
-			res.send('充值完成');
-		})
+		res.send('充值完成');
 	})
-	router.all('/done', async function(req, res) {
+	router.all('/done', bodyParser.text(), async function(req, res) {
 		try {
-			var r=req.body, sign=r.sign, orderId=r.out_order_no;
-			var orderdata=await db.bills.findOne({_id:ObjectID(orderId)});
-			if (makeSign(r, orderdata.snappay_account).sign!=sign) return res.send({err:'sign error'});
-			// if (r.code!='0') return res.send({err:r.msg});
-			makeItDone(r.out_order_no, r, (err)=>{
-				if (err) return res.send({err:err});
-				res.send({code:'0'});
-			});
-		}catch(e) {res.send({err:e})};
-	});
+			var data =await wx.payment.parseNotifyData(req.body);
+			const sign = data.sign;
+			if (!sign) {
+				var ret=await wx.payment.replyData(false);
+				return res.send(ret);
+			}
+			data.sign = undefined;
+			const genSignData = wx.payment.generateSignature(data, data.sign_type);
+			//case test, only case 6 will return sign
+			if (sign != genSignData.sign) {
+				var ret=await wx.payment.replyData(false);
+				return res.send(ret);
+			}
+			const tradeNo = data.out_trade_no;
+			//sign check and send back
+			await pify(makeItDone)(tradeNo, data);
+			var ret =wx.payment.replyData(true)
+			return res.send(ret);
+		} catch(e) {
+			res.send(await wx.payment.replyData(false));
+		}
+    })
 	function makeItDone(orderid, data, callback) {
 		callback=callback||function(){};
 		db.bills.findOne({_id:ObjectID(orderid)},function(err, orderData) {
 			if (err) callback('no such order');
-			var acc=orderData.snappay_account, net, succrate, total_amount=Number(data.trans_amount), fee;
+			var acc=orderData.snappay_account, net, succrate, total_amount=Number(data.total_fee), fee;
 			if (acc) {
 				if (!acc.log) acc.log={};
 				if (acc.log.success) acc.log.success++;
@@ -605,7 +605,7 @@ function init(err, db) {
 			db.users.updateOne({_id:orderData.userid}, {$inc:{succOrder:1, balance:data.transfer_amount}});
 			confirmOrder(orderid, total_amount, net, (err)=>{
 				if (!err) {
-					updateOrder(orderid, {snappay_result:data});
+					updateOrder(orderid, {wechat_result:data});
 					var upd={daily:net, total:net, 'gross.daily':total_amount, 'gross.total':total_amount}
 					db.snappay_toll_accounts.updateOne({_id:acc._id}, {
 						$set:{'log.success':acc.log.success, 'succrate':succrate},
@@ -696,16 +696,6 @@ function init(err, db) {
 			, pay_type:params.type
 		});
 	}
-	router.all('/wechat/entri', (req, res)=>{
-		// check the browser is wechat
-		//debugout(req);
-		if (req.headers['user-agent'].indexOf('MicroMessenger')<0) return res.render('error', {err:'请使用微信打开此页面'});
-		var params=Object.assign(req.query, req.body);
-		if (!params.id) return res.render('error', {err:'请从正确的位置进入本页面'});
-		var jumpto=wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, 'pvd/wechatforsnap/wechat/cc'), 'snsapi_base', params.id);
-		debugout(jumpto)
-		res.render('wxentri', {go:jumpto});
-	});
 	router.all('/wechat/cc', async (req, res)=>{
 		try {
 			var params=Object.assign(req.query, req.body);
@@ -731,8 +721,10 @@ function init(err, db) {
 			updateOrder(params.state, {status:'进入收银台', lasttime:new Date(), wechat_unifiedorder:ret});
 			// get signature
 			var conf=await wx.payment.generateChooseWXPayInfo(ret.prepay_id);
-			debugout('wx payment conf', conf);
-			res.render('cashcounter', {config:conf});
+			conf.appId=config.appId;
+			var ccdata={config:conf, return_url:order.return_url||url.resolve(argv.wxhost, 'pvd/wechatforsnap/return')}
+			debugout('pay params', ccdata)
+			res.render('cashcounter', ccdata);
 		}catch(e) {
 			debugout(e);
 			return res.render('error', {err:e})
