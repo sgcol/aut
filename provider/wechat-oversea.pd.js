@@ -720,9 +720,9 @@ function init(err, db) {
 			if (ret.result_code!='SUCCESS') throw ret.err_code_des;
 			updateOrder(params.state, {status:'进入收银台', lasttime:new Date(), wechat_unifiedorder:ret});
 			// get signature
-			debugout(req.protocol+';//'+req.headers.host+req.url);
+			debugout(req.protocol+'://'+req.headers.host+req.originalUrl);
 			var [init_config, payData]=await Promise.all([
-				wx.jssdk.getSignature(req.protocol+';//'+req.headers.host+req.url),
+				wx.jssdk.getSignature(req.protocol+'://'+req.headers.host+req.originalUrl),
 				wx.payment.generateChooseWXPayInfo(ret.prepay_id)
 			]);
 			var ccdata={init_config:init_config, payData:payData, return_url:order.return_url||url.resolve(argv.wxhost, 'pvd/wechatforsnap/return')}
