@@ -625,6 +625,7 @@ function init(err, db) {
 			payType=supportedType.WECHATPAYH5;
 			warnings.push(`type只能是${Object.keys(supportedType).join(' ')}，使用默认WECHATH5`);
 		}
+		updateOrder(params.orderId, {status:'待支付', providerOrderId:data.out_order_no, snappay_account:account, lasttime:new Date(), snappay_data:ret});
 		// if (supportedCurrency.indexOf(params.currency)<0) {
 		//     params.currency=supportedCurrency[0];
 		//     warnings.push(`currency只能是${supportedCurrency.join(' ')}，使用默认${supportedCurrency[0]}`);
@@ -644,7 +645,6 @@ function init(err, db) {
 		var ret=body;
 		if (ret.code!='0') return callback(ret.msg);
 		var data=ret.data[0];
-		updateOrder(params.orderId, {status:'待支付', providerOrderId:data.out_order_no, snappay_account:account, lasttime:new Date(), snappay_data:ret});
 		sysevents.emit('snappayOrderCreated', {snappay_account:account, orderId:params.orderId, money:params.money, merchant:params.merchant, mchUserId:params.userId});
 		// if (!account.used) account.used=1;
 		// else account.used++;
