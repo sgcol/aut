@@ -47,39 +47,39 @@ const config = {
 };
 const wx = new Wechat(config);
 
-Number.prototype.pad = function(size) {
-	var s = String(this);
-	while (s.length < (size || 2)) {s = "0" + s;}
-	return s;
-}
+// Number.prototype.pad = function(size) {
+// 	var s = String(this);
+// 	while (s.length < (size || 2)) {s = "0" + s;}
+// 	return s;
+// }
 
-function pad(n, size) {
-	const temp='00000000000000';
-	size=size||2;
-	return (temp+n).slice(-size);
-}
+// function pad(n, size) {
+// 	const temp='00000000000000';
+// 	size=size||2;
+// 	return (temp+n).slice(-size);
+// }
 
-const timestring =(t)=>{
-	return `${pad(t.getUTCFullYear(), 4)}-${pad(t.getUTCMonth()+1)}-${pad(t.getUTCDate())} ${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}:${pad(t.getUTCSeconds())}`;
-}
+// const timestring =(t)=>{
+// 	return `${pad(t.getUTCFullYear(), 4)}-${pad(t.getUTCMonth()+1)}-${pad(t.getUTCDate())} ${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}:${pad(t.getUTCSeconds())}`;
+// }
 
 const localtimestring =(t)=>{
 	return `${t.getFullYear().pad(4)}-${(t.getMonth()+1).pad()}-${t.getDate().pad()} ${t.getHours().pad()}:${t.getMinutes().pad()}`;
 }
 
-const makeSign=function(data, account, options) {
-	delete data.sign;
-	var message ='', o=Object.assign({app_id:account.app_id, version:'1.0', format:'JSON', sign_type:'MD5', charset:'UTF-8', timestamp:timestring(new Date())}, data);
-	Object.keys(o).sort().map((key)=>{
-		if (key=='sign') return;
-		if (key=='sign_type' && ((!options) || (!options.includeSignType))) return;
-		if (!o[key]) return;
-		message+=''+key+'='+o[key]+'&';
-	})
-	var encoded_sign=md5(message.substr(0, message.length-1)+account.key);
-	o['sign'] = encoded_sign.toLowerCase();
-	return o;
-}
+// const makeSign=function(data, account, options) {
+// 	delete data.sign;
+// 	var message ='', o=Object.assign({app_id:account.app_id, version:'1.0', format:'JSON', sign_type:'MD5', charset:'UTF-8', timestamp:timestring(new Date())}, data);
+// 	Object.keys(o).sort().map((key)=>{
+// 		if (key=='sign') return;
+// 		if (key=='sign_type' && ((!options) || (!options.includeSignType))) return;
+// 		if (!o[key]) return;
+// 		message+=''+key+'='+o[key]+'&';
+// 	})
+// 	var encoded_sign=md5(message.substr(0, message.length-1)+account.key);
+// 	o['sign'] = encoded_sign.toLowerCase();
+// 	return o;
+// }
 
 var order=function() {
 	var callback=arguments[arguments.length-1];
@@ -270,7 +270,7 @@ var snappayGlobalSetting, snappayFee;
 		if (err) return cb(err);
 		async.parallel([
 			function getSetting(cb) {
-				db.snappay_toll_settings.findOne({}, (err, r)=>{
+				db.snappay_base_settings.findOne({}, (err, r)=>{
 					cb(err, r||{});
 				})
 			}
@@ -297,7 +297,7 @@ function init(err, db) {
 		disable!=null && (upd.disable=disable);
 		var defaultValue={createTime:new Date()};
 		id=id?ObjectID(id):new ObjectID();
-		db.snappay_toll_accounts.updateOne({_id:id}, {$set:upd,$setOnInsert:defaultValue}, {upsert:true, w:1}, (err, r)=>{
+		db.snappay_base_accounts.updateOne({_id:id}, {$set:upd,$setOnInsert:defaultValue}, {upsert:true, w:1}, (err, r)=>{
 			if (err) return callback(err);
 			if (r.upsertedCount) {
 				sysevents.emit('newSnapPayTollAccount', upd);
@@ -308,7 +308,7 @@ function init(err, db) {
 	router.all('/listAccounts', verifyAuth, verifyManager, httpf({sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, 
 	async function(sort, order, offset, limit, callback) {
 	try {
-		var cur=db.snappay_toll_accounts.find({});
+		var cur=db.snappay_base_accounts.find({});
 		if (sort) {
 			var so={};
 			so[sort]=(order=='asc'?1:-1);
@@ -322,7 +322,7 @@ function init(err, db) {
 	} catch(e) {callback(e)}
 	}));
 	router.all('/removeAccount', httpf({_id:'string', callback:true}, function(id, callback) {
-		db.snappay_toll_accounts.deleteOne({_id:ObjectID(id)}, {w:1}, (err, r)=>{
+		db.snappay_base_accounts.deleteOne({_id:ObjectID(id)}, {w:1}, (err, r)=>{
 			if (err) return callback(err);
 			if (r.deletedCount<1) return callback('no such account');
 			callback();
@@ -352,7 +352,7 @@ function init(err, db) {
 			}
 			if (accounts.length) {
 				try {
-					var r=await db.snappay_toll_accounts.insertMany(accounts, {w:1,ignoreUndefined:true});
+					var r=await db.snappay_base_accounts.insertMany(accounts, {w:1,ignoreUndefined:true});
 					res.send({count:r.insertedCount});
 				} catch(e) {res.send({err:e})}
 			}else res.send({count:0});
@@ -371,7 +371,7 @@ function init(err, db) {
 	}
 	, async function(from, to, testMode, CADFinancialInstitution, RoyalBankProcessingCentre, clientName,clientNumber,transactionCode, callback) {
 		try {
-			var setting=await db.snappay_toll_settings.findOne({_id:'setting'});
+			var setting=await db.snappay_base_settings.findOne({_id:'setting'});
 			setting=setting||{};
 			var upd=Object.assign(this.req.query, this.req.body);
 			upd.from=upd.to=upd.testMode=undefined;
@@ -403,7 +403,7 @@ function init(err, db) {
 				]).toArray()
 			]);
 			if (rec.length==0) return callback('没有记录');
-			db.snappay_toll_settings.updateOne({_id:'setting'}, {$set:upd}, {upsert:true});
+			db.snappay_base_settings.updateOne({_id:'setting'}, {$set:upd}, {upsert:true});
 			dedecimal(rec);dedecimal(stat);
 			var mapper=new Map([
 				['Created Time', 'time']
@@ -486,11 +486,11 @@ function init(err, db) {
 		}catch(e) {callback(e)}
 	}))
 	router.all('/settings', verifyAuth, verifyManager, httpf({settings:'?object', callback:true}, function(settings, callback) {
-		if (!settings) return db.snappay_toll_settings.findOne({_id:'setting'}, (err, r)=>{
+		if (!settings) return db.snappay_base_settings.findOne({_id:'setting'}, (err, r)=>{
 			if (err) return callback(err);
 			callback(null, r||{});
 		});
-		db.snappay_toll_settings.updateOne({_id:'settings'}, {$set:settings}, {w:1, upsert:true}, (err, r)=>{
+		db.snappay_base_settings.updateOne({_id:'settings'}, {$set:settings}, {w:1, upsert:true}, (err, r)=>{
 			if (err) return callback(err);
 			Object.assign(snappayGlobalSetting, setting);
 			if (settings.fee) snappayFee=normalizeFee(settings.fee);
@@ -607,7 +607,7 @@ function init(err, db) {
 				if (!err) {
 					updateOrder(orderid, {wechat_result:data});
 					var upd={daily:net, total:net, 'gross.daily':total_amount, 'gross.total':total_amount}
-					db.snappay_toll_accounts.updateOne({_id:acc._id}, {
+					db.snappay_base_accounts.updateOne({_id:acc._id}, {
 						$set:{'log.success':acc.log.success, 'succrate':succrate},
 						$inc:decimalfy(upd)
 					});
@@ -624,9 +624,9 @@ function init(err, db) {
 			return {_id:'testAccount', mch_id:'224339062', supportedCurrency:'CAD'}
 		}
 		if (merchantData.debugMode) {
-			var [acc]= await db.snappay_toll_accounts.find({name:'测试', supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
+			var [acc]= await db.snappay_base_accounts.find({name:'测试', supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
 		}
-		else var [acc]= await db.snappay_toll_accounts.find({disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
+		else var [acc]= await db.snappay_base_accounts.find({disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
 		return acc;
 	}
 	function retreiveClientIp(req) {
@@ -666,7 +666,7 @@ function init(err, db) {
 		sysevents.emit('snappayOrderCreated', {snappay_account:account, orderId:params.orderId, money:params.money, merchant:params.merchant, mchUserId:params.userId});
 		// if (!account.used) account.used=1;
 		// else account.used++;
-		db.snappay_toll_accounts.updateOne({_id:account._id}, {$inc:{used:1}});
+		db.snappay_base_accounts.updateOne({_id:account._id}, {$inc:{used:1}});
 		db.users.updateOne({_id:params.merchant._id}, {$inc:{orderCount:1}});
 		var toPartner={
 			url:ret.mweb_url
@@ -748,10 +748,10 @@ function init(err, db) {
 		if (now.getDate()!=today.getDate()) {
 			today=now;
 			// log all [in] in the accounts
-			db.snappay_toll_accounts.find().toArray().then((r)=>{
+			db.snappay_base_accounts.find().toArray().then((r)=>{
 				var logs=r.map((ele)=>{return {net:ele.daily||0, gross:objPath.get(ele, ['gross', 'daily'])||0, t:today, accId:ele._id, accName:ele.name}});
-				db.snappay_toll_accounts.updateMany({}, {$set:{daily:0, 'gross.daily':0}});
-				db.snappay_toll_accounts.updateMany({daily:{$lt:500}}, {$set:{occupied:null}});
+				db.snappay_base_accounts.updateMany({}, {$set:{daily:0, 'gross.daily':0}});
+				db.snappay_base_accounts.updateMany({daily:{$lt:500}}, {$set:{occupied:null}});
 				db.snappay_logs.insertMany(logs);
 			}).catch((e)=>{
 				console.error(e);
