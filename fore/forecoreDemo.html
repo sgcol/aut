@@ -274,6 +274,12 @@
                       <input type="" class="form-control" id="money" placeholder="">
                     </div>
                     <div class="form-group">
+                      <label for="account">收款账号</label>
+                      <select class="form-control" id="account">
+                        <option selected>自动选择</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
                       <label for="currency">币种</label>
                       <select class="form-control" id="currency">
                         <option selected>CAD</option>
@@ -367,11 +373,22 @@ $(()=>{
     if (item) {
       $('#merchantid').val(item.merchantid);
       $('#key').val(item.key);
+      fillAccounts(item.name);
     } else {
       $('#merchantid').val('');
       $('#key').val('');
     }
   })
+  function fillAccounts(belongs) {
+    accIntf('pvd/snappay-toll/availbeAccounts', {belongs:belongs}, (err, r)=>{
+      if (err) return;
+      var accounts=$('#account');
+      accounts.empty().append('<option selected value="">自动选择</option');
+      r.rows.forEach((item)=>{
+        accounts.append(`<option value="${item._id}">${item.name}</option>`);
+      })
+    })
+  }
   accIntf('admin/listAccount', {identity:'merchant'}, (err, res)=>{
     if (err) return;
     data=res.rows;
@@ -385,6 +402,7 @@ $(()=>{
     })
     $('#merchantid').val(data[0].merchantid);
     $('#key').val(data[0].key);
+    fillAccounts(data[0].name);
   });
   $('form').submit((e)=>{
     e.preventDefault();
@@ -394,6 +412,7 @@ $(()=>{
     $('#qrcode').empty();
     var now=new Date();
     var params={
+        account:$('#account').val(),
         cb_url:location.origin+'/demo/result',
         currency:$('#currency option:selected').text(),
         money:Number($('#money').val()),

@@ -561,6 +561,11 @@ function init(err, db) {
 			});
 		}catch(e) {res.send({err:e})};
 	});
+	router.all('/availbeAccounts', verifyAuth, verifyManager, httpf({belongs:'string', callback:true}, async function(belongs, callback) {
+		try {
+			return callback(null, {rows:await db.snappay_toll_accounts.find({belongs:{$in:[null, belongs]}}).toArray()});
+		} catch(e) {return callback(e)}
+	}))
 	function makeItDone(orderid, data, callback) {
 		callback=callback||function(){};
 		db.bills.findOne({_id:ObjectID(orderid)},function(err, orderData) {
@@ -617,47 +622,53 @@ function init(err, db) {
 			params.providerSpec=undefined
 			params=Object.assign(spec, params);
 		}
-		var account =await bestAccount(params.money, params.merchant, params.userId, params.currency);
-		if (!account) return callback('没有可用的收款账户');
-		var warnings=[];
-		var payType=supportedType[params.type];
-		if (!payType) {
-			params.type='WECHATPAYH5';
-			payType=supportedType.WECHATPAYH5;
-			warnings.push(`type只能是${Object.keys(supportedType).join(' ')}，使用默认WECHATH5`);
-		}
-		// if (supportedCurrency.indexOf(params.currency)<0) {
-		//     params.currency=supportedCurrency[0];
-		//     warnings.push(`currency只能是${supportedCurrency.join(' ')}，使用默认${supportedCurrency[0]}`);
-		// }
-		var data = {
-			method:payType.method,
-			merchant_no:account.merchant_no,
-			payment_method:payType.type,
-			'out_order_no' : params.orderId,
-			trans_currency:params.currency,
-			trans_amount:params.money,
-			description:params.desc||'Goods',
-			'notify_url' : url.resolve(params._host, '../../pvd/snappay-toll/done'),
-			'return_url' : url.resolve(params._host, '../../pvd/snappay-toll/return'),
-		};            
-		var [, body] =await request_post({url:request_url, json:makeSign(data, account)});
-		var ret=body;
-		if (ret.code!='0') {
-			updateOrder(params.orderId, {status:'failed',  snappay_account:account, lasttime:new Date(), snappay_data:ret});
-			return callback(ret.msg);
-		}
-		var data=ret.data[0];
-		updateOrder(params.orderId, {status:'待支付', providerOrderId:data.out_order_no, snappay_account:account, lasttime:new Date(), snappay_data:ret});
-		sysevents.emit('snappayOrderCreated', {snappay_account:account, orderId:params.orderId, money:params.money, merchant:params.merchant, mchUserId:params.userId});
-		// if (!account.used) account.used=1;
-		// else account.used++;
-		db.snappay_toll_accounts.updateOne({_id:account._id}, {$inc:{used:1}});
-		db.users.updateOne({_id:params.merchant._id}, {$inc:{orderCount:1}});
-		var ret={url:data.h5pay_url};
-		ret.pay_type=params.type;
-		if (warnings.length) ret.warnings=warnings;
-		callback(null, ret);
+		var account;
+		try {
+			if (params.account) {
+				account =await db.snappay_toll_accounts.findOne({_id:ObjectID(params.account)});
+			}
+			if (!account) account =await bestAccount(params.money, params.merchant, params.userId, params.currency);
+			if (!account) return callback('没有可用的收款账户');
+			var warnings=[];
+			var payType=supportedType[params.type];
+			if (!payType) {
+				params.type='WECHATPAYH5';
+				payType=supportedType.WECHATPAYH5;
+				warnings.push(`type只能是${Object.keys(supportedType).join(' ')}，使用默认WECHATH5`);
+			}
+			// if (supportedCurrency.indexOf(params.currency)<0) {
+			//     params.currency=supportedCurrency[0];
+			//     warnings.push(`currency只能是${supportedCurrency.join(' ')}，使用默认${supportedCurrency[0]}`);
+			// }
+			var data = {
+				method:payType.method,
+				merchant_no:account.merchant_no,
+				payment_method:payType.type,
+				'out_order_no' : params.orderId,
+				trans_currency:params.currency,
+				trans_amount:params.money,
+				description:params.desc||'Goods',
+				'notify_url' : url.resolve(params._host, '../../pvd/snappay-toll/done'),
+				'return_url' : url.resolve(params._host, '../../pvd/snappay-toll/return'),
+			};            
+			var [, body] =await request_post({url:request_url, json:makeSign(data, account)});
+			var ret=body;
+			if (ret.code!='0') {
+				updateOrder(params.orderId, {status:'failed',  snappay_account:account, lasttime:new Date(), snappay_data:ret});
+				return callback(ret.msg);
+			}
+			var data=ret.data[0];
+			updateOrder(params.orderId, {status:'待支付', providerOrderId:data.out_order_no, snappay_account:account, lasttime:new Date(), snappay_data:ret});
+			sysevents.emit('snappayOrderCreated', {snappay_account:account, orderId:params.orderId, money:params.money, merchant:params.merchant, mchUserId:params.userId});
+			// if (!account.used) account.used=1;
+			// else account.used++;
+			db.snappay_toll_accounts.updateOne({_id:account._id}, {$inc:{used:1}});
+			db.users.updateOne({_id:params.merchant._id}, {$inc:{orderCount:1}});
+			var ret={url:data.h5pay_url};
+			ret.pay_type=params.type;
+			if (warnings.length) ret.warnings=warnings;
+			callback(null, ret);
+		}catch(e){return callback(e)}
 	}
 	queryOrder =async function(order, callback) {
 		callback=callback||((err, r)=>{
