@@ -1,9 +1,13 @@
+<script src="js/client.umd.js"></script>
 <script>
-    const wechatObj = new window.WechatJSSDK(<%= config %>);
-    wechatObj.initialize().then(()=>{
-        wechatObj.pay();
-    }).catch((e)=>{
-        console.log(e);
-        alert(e);
-    })
+(async function run() {
+    const wechatObj=new WechatJSSDK(<%= JSON.stringify(init_config) %>);
+    await wechatObj.initialize();
+    wechatObj.callWechatApi('chooseWXPay', Object.assign({
+        success: res => {
+          console.log(res);
+          location.href="<%= return_url%>";
+        }
+      }, <%= JSON.stringify(payData) %> ));
+})();
 </script>

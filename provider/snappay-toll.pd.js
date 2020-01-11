@@ -256,8 +256,8 @@ var snappayGlobalSetting, snappayFee;
 })(init);
 function init(err, db) {
 	if (err) return console.log('启动snappay-toll.pd失败', err);
-	router.all('/updateAccount', verifyAuth, verifyManager, httpf({_id:'?string', app_id:'?string', key:'?string', merchant_no:'?string', name:'?string', supportedCurrency:'?string', disable:'?boolean', callback:true}, 
-	function(id, app_id, key, merchant_no, name, supportedCurrency, disable, callback) {
+	router.all('/updateAccount', verifyAuth, verifyManager, httpf({_id:'?string', app_id:'?string', key:'?string', merchant_no:'?string', name:'?string', supportedCurrency:'?string', disable:'?boolean', belongs:'?string', callback:true}, 
+	function(id, app_id, key, merchant_no, name, supportedCurrency, disable, belongs, callback) {
 		var upd={}
 		app_id && (upd.app_id=app_id);
 		key &&(upd.key=key);
@@ -265,6 +265,7 @@ function init(err, db) {
 		name && (upd.name=name);
 		supportedCurrency &&(upd.supportedCurrency=supportedCurrency);
 		disable!=null && (upd.disable=disable);
+		belongs!=null && (upd.belongs=belongs);
 		var defaultValue={createTime:new Date()};
 		id=id?ObjectID(id):new ObjectID();
 		db.snappay_toll_accounts.updateOne({_id:id}, {$set:upd,$setOnInsert:defaultValue}, {upsert:true, w:1}, (err, r)=>{
@@ -599,13 +600,13 @@ function init(err, db) {
 			var [acc]= await db.snappay_toll_accounts.find({name:'测试', supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
 		}
 		else {
-			var cond={disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}
-			if (merchantData._id=='maimai') {
-				cond.merchant_no={$in:['901951498144', '901951498835', '901951499128', '901951499202', '901951499532']};
-			}
-			if (merchantData._id=='zjfan') {
-				cond.merchant_no={$in:['901951481062', '901951481125', '901951481485']};
-			}
+			var cond={disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency, belongs:merchantData.name}
+			// if (merchantData._id=='maimai') {
+			// 	cond.merchant_no={$in:['901951498144', '901951498835', '901951499128', '901951499202', '901951499532']};
+			// }
+			// if (merchantData._id=='zjfan') {
+			// 	cond.merchant_no={$in:['901951481062', '901951481125', '901951481485']};
+			// }
 			var [acc]= await db.snappay_toll_accounts.find(cond).sort({used:1}).limit(1).toArray();
 		}
 		return acc;
