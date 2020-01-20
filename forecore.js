@@ -11,6 +11,7 @@ const router=require('express').Router()
 , path =require('path')
 , decimalfy=require('./etc').decimalfy
 , dedecimal=require('./etc').dedecimal
+, objPath=require('object-path')
 , argv=require('yargs').argv
 
 const allPayType=['ALIPAYH5', 'WECHATPAYH5', 'UNIONPAYH5', 'ALIPAYAPP', 'WECHATPAYAPP', 'ALIPAYMINI', 'WECHATPAYMINI', 'ALIPAYPC', 'WECHATPAYPC', 'UNIONPAYPC'];
@@ -41,7 +42,7 @@ function start(err, db) {
 		// if (merSign(user, params).sign!=sign) return callback('sign error, use sign-verify-url to find what is wrong');
 
 		if (money==0) return callback('金额异常，能不为0');
-		
+
 		var params =this.req.params;
 		
 		var merchant =this.req.merchant;
@@ -72,9 +73,12 @@ function start(err, db) {
 					, merchantid:merchant.merchantid
 					, merchantName:merchant.name
 					, mer_userid:mchuserid
-					, provider:provider.internal_name||provider.name
+					, provider:provider.name||provider.internal_name
 					, providerOrderId:''
 					, share:merchant.share
+					, sp_fee:merchant.sp_fee
+					, ap_fee:merchant.ap_fee
+					, pc_fee:merchant.pc_fee
 					, money:money
 					, paidmoney:-1
 					, currency: currency
@@ -96,7 +100,7 @@ function start(err, db) {
 	router.all('/queryOrder', verifyMchSign, err_h, httpf({outOrderId:'string', partnerId:'string', callback:true},
 	async function(outOrderId, partnerId, callback) {
 		try {
-			var order = await db.bills.findOne({merchantOrderId:outOrderId}, {projection:{share:0}});
+			var order = await db.bills.findOne({merchantOrderId:outOrderId}, {projection:{share:0},readPreference:'secondaryPreferred'});
 			if (!order) return callback('无此订单');
 			if (order.merchantid!=partnerId) return callback('该订单不属于指定的partner');
 			var pvd=getProvider(order.provider);
@@ -113,6 +117,8 @@ function start(err, db) {
 			order.snappay_data=undefined;
 			order.outOrderId=order.merchantOrderId
 			order.paidmoney=undefined;
+			order.settleDate=order.checkout;
+			order.checkout=undefined;
 			callback(null, dedecimal(order));
 		}catch(e) {callback(e)}
 	}))
@@ -135,12 +141,72 @@ function start(err, db) {
 			callback(null, result);
 		} catch(e) {callback(e)}
 	}));
-	router.all('/admin/refund', verifyAuth, verifyManager, httpf({orderid:'string', callback:true}, async function(orderid, callback) {
+	router.all('/settlements', verifyAuth, httpf({from:'?date', to:'?date', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, 
+	async function(from, to, sort, order, offset, limit, callback) {
+		var cond={};
+		if (this.req.auth.acl=='mrechant') cond.mchId=this.req.auth._id;
+		if (from) cond.time={$gte:from};
+		if (to) objPath.set(cond, 'time.$lte', to);
+		var cur=db.settlements.find(cond, {readPreference:'secondaryPreferred'});
+		if (sort) {
+			var so={};
+			so[sort]=(order=='asc'?1:-1);
+			cur=cur.sort(so);
+		}
+		if (offset) cur=cur.skip(offset);
+		if (limit) cur=cur.limit(limit);
+
+		var [c, rows]=await Promise.all([cur.count(), cur.toArray()]);
+		return callback(null, {total:c, rows:rows});
+	}))
+	router.all('/settleOrders', verifyMchSign, err_h, httpf({partnerId:'string', from:'date', to:'date', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, async function(partnerId, from, to, sort, order, offset, limit, callback) {
 		try {
-			var order=await db.bills.findOne({_id:ObjectId(orderid)});
+			var cond={mchId:partnerId};
+			if (from) cond.time={$gte:from};
+			if (to) objPath.set(cond, 'time.$lte', to);
+			var cur=db.settlements.find(cond, {projection:{amount:1, currency:1, checkout:1, mchId:1, mchName:1}, readPreference:'secondaryPreferred'});
+			if (sort) {
+				var so={};
+				so[sort]=(order=='asc'?1:-1);
+				cur=cur.sort(so);
+			}
+			if (offset) cur=cur.skip(offset);
+			if (limit) cur=cur.limit(limit);
+			var [c, rows]=await Promise.all([cur.count(), cur.toArray()]);
+			var dbBills=db.db.collection('bills', {readPreference:'secondaryPreferred', readConcern:{level:'majority'}});
+			var actions=rows.map((item)=>{
+				return new Promise((resolve, reject)=>{
+					dbBills.find({checkout:item.time, userid:partnerId}, {projection:{_id:1}})
+					.toArray()
+					.then((ids)=>{
+						item.relative=ids.map(obj=>obj._id);
+						resolve();
+					})
+					.catch((e)=>{
+						reject(e);
+					});
+				})
+			});
+			await Promise.all(actions);
+			return callback(null, {total:c, rows:rows});		
+		} catch(e) {
+			callback(e);
+		}
+	}));
+	router.all('/downloadBills', verifyMchSign, err_h, httpf({from:'?date', to:'?date', no_return:true}, function(from, to) {
+
+	}));
+	router.all('/admin/refund', verifyAuth, httpf({orderid:'string', callback:true}, async function(orderid, callback) {
+		try {
+			var cond={_id:ObjectId(orderid)};
+			if (this.req.auth.acl!='admin' && this.req.auth.acl!='mamager') {
+				cond.userid=this.req.auth._id;
+			}
+			var order=await db.bills.findOne(cond);
 			if (!order) return callback('无此订单');
-			dedecimal(order);
 			if (order.status=='refund') return callback('已经退单');
+			if (!order.used && ['进入收银台'].indexOf(order.status)<0) return callback('订单尚未提交');
+			dedecimal(order);
 			var pvd=getProvider(order.provider);
 			if (!pvd) return callback('订单尚未支付');
 			if (!pvd.refund) return callback('提供方不支持退单')

@@ -55,6 +55,8 @@
               <input type="text" class="form-control" id="key" placeholder="key">
               <label for="supportedCurrency">supportedCurrency</label>
               <input type="text" class="form-control" id="supportedCurrency" placeholder="CAD">
+              <label for="belongs">归属</label>
+              <input type="text" class="form-control" id="belongs" placeholder="合作商显示名">
             </div>
             <div class="form-group">
               <div class="form-check form-check">
@@ -259,8 +261,8 @@
       </a>
       <div class="collapse" id="ui-snappay">
         <ul class="nav flex-column sub-menu">
-          <li class="nav-item"> <a class="nav-link" href="statementOfSnappay-toll.html">SnapPay</a></li>
-          <li class="nav-item"> <a class="nav-link" href="accountsOfSnappay-toll.html">SnapPay商户管理</a></li>
+          <li class="nav-item"> <a class="nav-link" href="statementOfSnappay-base.html">SnapPay</a></li>
+          <li class="nav-item"> <a class="nav-link" href="accountsOfSnappay-base.html">SnapPay商户管理</a></li>
         </ul>
       </div>
     </li> 
@@ -304,8 +306,19 @@
                     <div class="card-body">
                       <h4 class="card-title">商户</h4>
                       <div class="buttons-toolbar">
-                        <button class="btn btn-sm btn-secondary" onclick="javascript:$('#editSnapPayAccount').modal()"><i class="mdi mdi-account-plus"></i></button>
-                        <button class="btn btn-sm btn-secondary" onclick="javascript:$('#addMultiSnapPayAccounts').modal()"><i class="mdi mdi mdi-account-multiple-plus"></i></button>
+                        <form class="form-inline" id="params">
+                          <button class="btn btn-sm btn-secondary mr-2" onclick="javascript:$('#editSnapPayAccount').modal()"><i class="mdi mdi-account-plus"></i></button>
+                          <button class="btn btn-sm btn-secondary mr-2" onclick="javascript:$('#addMultiSnapPayAccounts').modal()"><i class="mdi mdi mdi-account-multiple-plus"></i></button>
+                          <div class="input-group input-group-sm">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-account-box"></i></span>
+                            </div>
+                            <input type="text" class="form-control mr-sm-2" placeholder="商户" name="name">
+                          </div>
+                          <div class="form-group">
+                            <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:getlist();"><i class="mdi mdi-magnify"></i></a>
+                          </div>
+                        </form>     
                       </div>
                       <div class="table-responsive">
                       <table class="table table-hover" id="accounts"
@@ -319,7 +332,8 @@
                         data-buttons-class=" btn-sm btn-secondary"
                         data-url="pvd/snappay-toll/listAccounts"
                         data-toolbar=".buttons-toolbar"
-                        data-response-handler="formatRes">
+                        data-response-handler="formatRes"
+                        data-row-style="handleDisable">
                         <thead>
                             <th data-field="name" data-sortable="true">
                               name
@@ -466,7 +480,17 @@
   });
 
   function getlist() {
-    $('#accounts').bootstrapTable('refresh');
+    var allclear=true, querys={};
+    $('#params input').each(function(idx, ele) {
+      var je=$(ele), jv=je.val();
+      if (ele.name=='dates') {
+        var drp=$('input[name="dates"]').data('daterangepicker');
+        querys.from=drp.startDate._d;
+        querys.to=drp.endDate._d;
+      }
+      else querys[ele.name]=jv.trim();
+    });
+    $('#accounts').bootstrapTable('refresh', {query:querys});
   }
   function showop(value, record, rowIndex) {
     return `<button type="button" style="display:inline" class="btn btn-icon-sm btn-outline-primary" data-toggle="modal" data-target="#editSnapPayAccount" data-id="${rowIndex}"><i class="mdi mdi-key-change"></i></button>
@@ -505,6 +529,10 @@
           if (err) return alert(err);
           getlist();
       });
+  }
+  function handleDisable(row, idx) {
+    if (row.disable) return {css:{color:'grey', 'text-decoration':'line-through'}}
+    return {};
   }
 </script>
 </html>

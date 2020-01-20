@@ -206,8 +206,8 @@
       </a>
       <div class="collapse" id="ui-snappay">
         <ul class="nav flex-column sub-menu">
-          <li class="nav-item"> <a class="nav-link" href="statementOfSnappay-toll.html">SnapPay</a></li>
-          <li class="nav-item"> <a class="nav-link" href="accountsOfSnappay-toll.html">SnapPay商户管理</a></li>
+          <li class="nav-item"> <a class="nav-link" href="statementOfSnappay-base.html">SnapPay</a></li>
+          <li class="nav-item"> <a class="nav-link" href="accountsOfSnappay-base.html">SnapPay商户管理</a></li>
         </ul>
       </div>
     </li> 
@@ -272,6 +272,12 @@
                     <div class="form-group">
                       <label for="money">充值钱数</label>
                       <input type="" class="form-control" id="money" placeholder="">
+                    </div>
+                    <div class="form-group">
+                      <label for="account">收款账号</label>
+                      <select class="form-control" id="account">
+                        <option selected>自动选择</option>
+                      </select>
                     </div>
                     <div class="form-group">
                       <label for="currency">币种</label>
@@ -367,11 +373,22 @@ $(()=>{
     if (item) {
       $('#merchantid').val(item.merchantid);
       $('#key').val(item.key);
+      fillAccounts(item.name);
     } else {
       $('#merchantid').val('');
       $('#key').val('');
     }
   })
+  function fillAccounts(belongs) {
+    accIntf('pvd/snappay-toll/availbeAccounts', {belongs:belongs}, (err, r)=>{
+      if (err) return;
+      var accounts=$('#account');
+      accounts.empty().append('<option selected value="">自动选择</option');
+      r.rows.forEach((item)=>{
+        accounts.append(`<option value="${item._id}">${item.name+(item.disable?'(disable)':'')}</option>`);
+      })
+    })
+  }
   accIntf('admin/listAccount', {identity:'merchant'}, (err, res)=>{
     if (err) return;
     data=res.rows;
@@ -385,6 +402,7 @@ $(()=>{
     })
     $('#merchantid').val(data[0].merchantid);
     $('#key').val(data[0].key);
+    fillAccounts(data[0].name);
   });
   $('form').submit((e)=>{
     e.preventDefault();
@@ -394,6 +412,7 @@ $(()=>{
     $('#qrcode').empty();
     var now=new Date();
     var params={
+        account:$('#account').val(),
         cb_url:location.origin+'/demo/result',
         currency:$('#currency option:selected').text(),
         money:Number($('#money').val()),

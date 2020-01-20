@@ -275,10 +275,12 @@ function init(err, db) {
 			callback();
 		});
 	}))
-	router.all('/listAccounts', verifyAuth, verifyManager, httpf({sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, 
-	async function(sort, order, offset, limit, callback) {
+	router.all('/listAccounts', verifyAuth, verifyManager, httpf({name:'?string', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, 
+	async function(name, sort, order, offset, limit, callback) {
 	try {
-		var cur=db.snappay_toll_accounts.find({});
+		var cond={};
+		if (name) cond.name={'$regex':name};
+		var cur=db.snappay_toll_accounts.find(cond);
 		if (sort) {
 			var so={};
 			so[sort]=(order=='asc'?1:-1);
@@ -603,7 +605,7 @@ function init(err, db) {
 			if (merchantData._id=='maimai') {
 				cond.merchant_no={$in:['901951498144', '901951498835', '901951499128', '901951499202', '901951499532']};
 			}
-			var [acc]= await db.snappay_toll_accounts.find(cond).sort({daily:1}).limit(1).toArray();
+			var [acc]= await db.snappay_toll_accounts.find(cond).sort({used:1}).limit(1).toArray();
 		}
 		return acc;
 	}
@@ -626,6 +628,7 @@ function init(err, db) {
 		//     params.currency=supportedCurrency[0];
 		//     warnings.push(`currency只能是${supportedCurrency.join(' ')}，使用默认${supportedCurrency[0]}`);
 		// }
+		updateOrder(params.orderId, {status:'待支付', providerOrderId:data.out_order_no, snappay_account:account, lasttime:new Date(), snappay_data:ret});
 		var data = {
 			method:payType.method,
 			merchant_no:account.merchant_no,
@@ -641,7 +644,6 @@ function init(err, db) {
 		var ret=body;
 		if (ret.code!='0') return callback(ret.msg);
 		var data=ret.data[0];
-		updateOrder(params.orderId, {status:'待支付', providerOrderId:data.out_order_no, snappay_account:account, lasttime:new Date(), snappay_data:ret});
 		sysevents.emit('snappayOrderCreated', {snappay_account:account, orderId:params.orderId, money:params.money, merchant:params.merchant, mchUserId:params.userId});
 		// if (!account.used) account.used=1;
 		// else account.used++;

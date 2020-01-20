@@ -10,7 +10,7 @@ var q=async.queue(function (extern_callback, queue_callback) {
   (function(cb) {
     if (__stored_db) return cb(null, __stored_db, easym);
     else new easym.DbProvider().init(argv.mongo, {exists:[
-        {bills:{index:['status', 'time', 'type', 
+        {bills:{index:['status', 'time', 'type', 'checkout',
           {userid:1, used:1, time:-1, lasttime:-1, paidmoney:1, money:1},
           {time:1, provider:1, used:1, status:1}
         ]}},
@@ -32,7 +32,10 @@ var q=async.queue(function (extern_callback, queue_callback) {
         'snappay_orders',
         {'snappay_toll_accounts':{index:['disable', {key:{merchant_no:1}, name:'uni_merchant_no', unique:true}]}},
         'snappay_toll_settings',
+        {'snappay_base_accounts':{index:['disable', {key:{merchant_no:1}, name:'uni_merchant_no', unique:true}]}},
+        'snappay_base_settings',
         {'withdrawals':{index:['userid', 'done', {_t:-1, userid:1, money:1, name:-1}, 'money', 'name']}},
+        {'settlements':{index:['time', 'mchId']}},
         {notify:{capped:true, size:100*1024, max:1000000, index:'read'}},
         ]}, 
         function(err, db) {

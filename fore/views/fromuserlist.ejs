@@ -9,8 +9,10 @@
 <link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
 <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
 <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
-<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.css" rel="stylesheet">
 <link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
 <!-- endinject -->
 <!-- inject:css -->
 <link rel="stylesheet" href="css/style.css">
@@ -54,6 +56,23 @@
                   <div class="card-body">
                     <h4 class="card-title">充值订单</h4>
                     <div class="buttons-toolbar">
+                      <form class="form-inline" id="params">
+                        <div class="input-group input-group-sm">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-account-box"></i></span>
+                          </div>
+                          <input type="text" class="form-control mr-sm-2" placeholder="商户订单号" name="outOrderId">
+                        </div>
+                        <div class="input-group input-group-sm">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-calendar-today"></i></span>
+                          </div>
+                          <input type="text" class="form-control mr-sm-2" name="dates" placeholder="时间">
+                        </div> 
+                        <div class="form-group">
+                          <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:refreshOrderList();"><i class="mdi mdi-magnify"></i></a>
+                        </div>
+                      </form> 
                     </div>
                     <div class="table-responsive">
                       <table id="orderlist"
@@ -70,7 +89,12 @@
                         data-url="admin/listOrders"
                         data-toolbar=".buttons-toolbar"
                         data-sort-order="desc"
-                        data-sort-name="time">
+                        data-sort-name="time"
+                        <% if (acl=='admin'||acl=='manager') { %> 
+                        data-detail-view="true"
+                        data-detail-formatter="showDetail"
+                        <% } %>
+                        >
                          <thead>
                            <tr>
                              <th data-field="mername">
@@ -84,6 +108,9 @@
                              </th>
                              <th data-field="providerOrderId">
                                提供商单号
+                             </th>
+                             <th data-field='type'>
+                               类型
                              </th>
                              <th data-field="money">
                                金额
@@ -133,7 +160,9 @@
   <!-- endinject -->
   <!-- Custom js for this page-->
   <script src="js/base.js"></script>
-  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
   <!-- End custom js for this page-->
 </body>
 <script>
@@ -144,12 +173,15 @@ function statusHtmlfy(s) {
   if (s.indexOf('failed')>=0 ||s.indexOf('失败')>=0) return `<label class="badge badge-gradient-danger">${s}</label>`
   return `<label class="badge badge-gradient-warning">${s}</label>`
 }
+<% if (acl=='admin') {%>
 function forceconfirm(orderid) {
   accIntf('/admin/confirmOrder', {orderid:orderid}, (err)=>{
     if (err) return showerr(err);
     refreshOrderList()
   });
 }
+<% } %>
+
 function refund(orderid) {
   accIntf('/forecore/admin/refund', {orderid:orderid}, (err)=>{
     if (err) return showerr(err);
@@ -163,7 +195,19 @@ function sendNotify(orderid) {
   });
 }
 function refreshOrderList() {
-  $('#orderlist').bootstrapTable('refresh');
+  var allclear=true, querys={};
+  $('#params input').each(function(idx, ele) {
+    var je=$(ele), jv=je.val();
+    if (ele.name=='dates') {
+      if ($('input[name="dates"]').val()) {
+        var drp=$('input[name="dates"]').data('daterangepicker');
+        querys.from=drp.startDate._d;
+        querys.to=drp.endDate._d;
+      }
+    }
+    else querys[ele.name]=jv.trim();
+  });
+  if (allclear) $('#orderlist').bootstrapTable('refresh', {query:querys});
 }
 function showProvider(v) {
   return v||'unknown';
@@ -172,19 +216,57 @@ function showProviderOrderId(v, record) {
   return v||record.merchantOrderId;
 }
 function showOp(v, o) {
-  var ret=`<button class="btn btn-outline-primary btn-icon-sm tooltipfy" title="重发通知" onclick="javascript:sendNotify('${o._id}')"><i class="mdi mdi-replay"></i></button>`;
-  <% if (acl=='admin' || acl=='manager') { %>
-    <% if (forecoreOnly) { %>
-      ret+=`<button style="margin-left:5px" class="btn btn-outline-warning btn-icon-sm tooltipfy" title="退单" onclick="javascript:refund('${o._id}')"><i class="mdi mdi-send"></i></button>`
-    <% } %>
-    <% if (acl=='admin') { %>
-    ret+=`<button style="margin-left:5px" class="btn btn-outline-danger btn-icon-sm tooltipfy" title="强制结单" onclick="javascript:forceconfirm('${o._id}')"><i class="mdi mdi-archive"></i></button>`;
-    <% } %>
+  var ret=`<form class="form-inline"><button class="btn btn-outline-primary btn-icon-sm tooltipfy mr-sm-2" title="重发通知" onclick="javascript:sendNotify('${o._id}')"><i class="mdi mdi-replay"></i></button>`;
+  <% if (forecoreOnly) { %>
+      ret+=`<button class="btn btn-outline-warning btn-icon-sm tooltipfy mr-sm-2" title="退单" onclick="javascript:refund('${o._id}')"><i class="mdi mdi-send"></i></button>`
   <% } %>
+  <% if (acl=='admin') { %>
+    ret+=`<button class="btn btn-outline-danger btn-icon-sm tooltipfy mr-sm-2" title="强制结单" onclick="javascript:forceconfirm('${o._id}')"><i class="mdi mdi-archive"></i></button>`;
+  <% } %>
+    ret+='</form>'
   return ret;
 }
+function getProp(o, path) {
+  if (typeof path=='string') {
+    path=path.split('.');
+  }
+  var out=o;
+  for (var i=0; i<path.length; i++) {
+    var p=path[i];
+    if (out[p]) out=out[p];
+    else return null; 
+  }
+  return out;
+}
+<% if (acl=='admin'||acl=='manager') { %>
+function showDetail(index, row) {
+  var data=$('#orderlist').bootstrapTable('getData');
+  data=data[index];
+  if (!data.snappay_account) return '<p>--</p>'
+  var ret=`<p>snappay_account:${getProp(data, 'snappay_account.name')} ${getProp(data, 'snappay_account.supportedCurrency')} ${Math.floor(getProp(data, 'snappay_account.succrate')*100)}% ${getProp(data, 'snappay_account.total')}</p>
+  <p>partner return ${JSON.stringify(data.merchant_return)}</p>
+  `
+  return ret;
+}
+<% } %>
+
 window.initpage=()=>{
   $('#orderlist').bootstrapTable();
+  $('input[name="dates"]').daterangepicker(
+  {
+      autoUpdateInput: false,
+      locale: {
+          cancelLabel: 'Clear'
+      }
+  });
+  $('input[name="dates"]').on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+  });
+
+  $('input[name="dates"]').on('cancel.daterangepicker', function(ev, picker) {
+      $(this).val('');
+  });
+
 };
   
 </script>

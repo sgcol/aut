@@ -12,22 +12,15 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
 <link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
 <link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
 <!-- endinject -->
 <!-- inject:css -->
 <link rel="stylesheet" href="css/style.css">
 <!-- endinject -->
 <link rel="shortcut icon" href="images/favicon.png" />
-<style>
-  .wrong {
-    border-bottom-color: red;
-  }
-</style>
 </head>
 <body>
-  <!-- dialog  -->
-    
+  <!-- dialogs  -->
   <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
     <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
@@ -156,66 +149,31 @@
     </li>
     
     <li class="nav-item">
-      <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-        <span class="menu-title">账号</span>
-        <i class="menu-arrow"></i>
-        <i class="mdi mdi-contacts menu-icon"></i>
+      <a class="nav-link" href="extrainfo.html">
+        <span class="menu-title">联系人</span>
+        <i class="mdi mdi-contact-mail menu-icon"></i>
       </a>
-      <div class="collapse" id="ui-basic">
-        <ul class="nav flex-column sub-menu">
-          <li class="nav-item"> <a class="nav-link" href="admin.html">管理员账号</a></li>
-          <li class="nav-item"> <a class="nav-link" href="merchant.html">合作商户</a></li>
-          
-        </ul>
-      </div>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" data-toggle="collapse" href="#ui-details" aria-expanded="false" aria-controls="ui-details">
-        <span class="menu-title">明细</span>
-        <i class="menu-arrow"></i>
-        <i class="mdi mdi-chart-bar menu-icon"></i>
-      </a>
-      <div class="collapse" id="ui-details">
-        <ul class="nav flex-column sub-menu">
-          <li class="nav-item"> <a class="nav-link" href="fromuserlist.ae">充值订单</a></li>
-          
-        </ul>
-      </div>
-    </li>
-    <!-- <li class="nav-item">
-      <a class="nav-link" href="checkBalance.html">
-        <span class="menu-title">对账</span>
-        <i class="mdi mdi-format-list-bulleted menu-icon"></i>
-      </a>
-    </li> -->
     
     <li class="nav-item">
-      <a class="nav-link" data-toggle="collapse" href="#ui-snappay" aria-expanded="false" aria-controls="ui-details">
-        <span class="menu-title">四方平台</span>
-        <i class="menu-arrow"></i>
-        <i class="fab fa-alipay menu-icon"></i>
+      <a class="nav-link" href="fromuserlist.ae">
+        <span class="menu-title">充值详单</span>
+        <i class="mdi mdi-human-greeting menu-icon"></i>
       </a>
-      <div class="collapse" id="ui-snappay">
-        <ul class="nav flex-column sub-menu">
-          <li class="nav-item"> <a class="nav-link" href="statementOfSnappay-base.html">SnapPay</a></li>
-          <li class="nav-item"> <a class="nav-link" href="accountsOfSnappay-base.html">SnapPay商户管理</a></li>
-        </ul>
-      </div>
     </li> 
-    <!-- <li class="nav-item">
-      <a class="nav-link" href="forecore.html">
-        <span class="menu-title">四方平台</span>
-        <i class="mdi mdi-book-open-variant menu-icon"></i>
+    <li class="nav-item">
+      <a class="nav-link" href="settlements.html">
+        <span class="menu-title">结算清单</span>
+        <i class="mdi mdi-human-greeting menu-icon"></i>
       </a>
-    </li>   -->
+    </li> 
     
     <li class="nav-item">
-      <a class="nav-link" href="forecoreDemo.html">
-        <span class="menu-title">支付演示</span>
-        <i class="mdi mdi-book-open-variant menu-icon"></i>
+      <a class="nav-link" href="changepassword.html">
+        <span class="menu-title">修改密码</span>
+        <i class="mdi mdi-alert-octagon menu-icon"></i>
       </a>
-    </li>  
-    
+    </li>
   </ul>
 </nav>
 
@@ -224,70 +182,72 @@
         <div class="content-wrapper">
           <div class="page-header">
             <h3 class="page-title">
-              流水
+              <span class="page-title-icon bg-gradient-primary text-white mr-2">
+                <i class="fab fa-alipay"></i>
+              </span>
+              结算
             </h3>
             <nav aria-label="breadcrumb">
               <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">支付宝</a></li>
-                <li class="breadcrumb-item active" aria-current="page">流水</li>
+                <li class="breadcrumb-item active" aria-current="page">结算</li>
               </ol>
             </nav>
           </div>
           <div class="row">
-            <div class="col-12 grid-margin">
-              <div class="card">
-                <div class="card-body">
-                  <div class="buttons-toolbar">
-                    <form class="form-inline" id="params">
-                      <div class="input-group input-group-sm">
-                        <div class="input-group-prepend">
-                          <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-account-box"></i></span>
-                        </div>
-                        <input type="text" class="form-control mr-sm-2" placeholder="支付宝账号" name="account">
+              <div class="col-lg-12 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="buttons-toolbar">
+                        <form class="form-inline" id="params">
+                          <div class="input-group input-group-sm">
+                          </div>
+                          <div class="form-group">
+                            <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:getlist();"><i class="mdi mdi-magnify"></i></a>
+                          </div>
+                        </form>     
                       </div>
-                      <div class="input-group input-group-sm">
-                        <div class="input-group-prepend">
-                          <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-calendar-today"></i></span>
-                        </div>
-                        <input type="text" class="form-control mr-sm-2" name="dates" placeholder="时间">
-                      </div> 
-                      <div class="form-group">
-                        <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:querydata();"><i class="mdi mdi-magnify"></i></a>
-                      </div>
-                    </form>
-                  </div>
-                  <div class="table-responsive">
-                    <table id="detail"
-                     class="table table-hover"
-                     data-classes="table-no-bordered table-hover"
-                     data-toggle="table"
-                     data-show-refresh="true"
-                     data-show-columns="true"
-                     data-show-pagination-switch="true"
-                     data-pagination="true" 
-                     data-page-size="30" 
-                     data-page-list="[10, 25, 50, 100, ALL]" 
-                     data-side-pagination="server" 
-                     data-url="pvd/alipay/statements"
-                     data-buttons-class=" btn-sm btn-secondary"
-                     data-toolbar=".buttons-toolbar"
-                     data-show-footer="true"
-                     data-response-handler="handleData"
-                     data-sort-name="time"
-                     data-sort-order="desc">
-                      <thead>
-                        <th data-field="_id" data-footer-formatter="showTotalText" data-sortable="true">订单号</th>
-                        <th data-field="alipay_account.name" data-visible="false" data-sortable="true">账号</th>
-                        <th data-field="paidmoney" data-footer-formatter="showTotalMoney" data-sortable="true">毛收入</th>
-                        <th data-field="net" data-footer-formatter="showTotalNet" data-sortable="true">净收入</th>
-                        <th data-field="time" data-sort-order="desc" data-formatter="timestring"  data-sortable="true">时间</th>
-                      </thead>
-                      <tbody></tbody>
-                    </table>
+                      <div class="table-responsive">
+                      <table class="table table-hover" id="list"
+                        data-classes="table-no-bordered table-hover"
+                        data-toggle="table"
+                        data-side-pagination="server"
+                        data-pagination="true"
+                        data-show-refresh="true"
+                        data-show-columns="true"
+                        data-show-pagination-switch="true"
+                        data-buttons-class=" btn-sm btn-secondary"
+                        data-url="forecore/settlementOrders"
+                        data-toolbar=".buttons-toolbar"
+                        data-response-handler="formatRes"
+                       >
+                        <thead>
+                            <th data-field="checkout" data-formatter="timestring" data-sortable="true">
+                              结算时间
+                            </th>
+                            <th data-field="mchName" data-visible="true">
+                              合作商
+                            </th>  
+                            <th data-field="amount" data-sortable="true" data-visible="true">
+                              金额
+                            </th>
+                            <th data-field="currency" data-sortable="true">
+                              currency
+                            </th>    
+                            <th data-field="relative" data-sortable="false" data-formatter="showDownloadBtn">
+                              详单
+                            </th>
+                        </thead>
+                        <tbody id="list">
+                        </tbody>
+                      </table>
+                    </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
+          </div>
+          <div class="row">
+          </div>
+          <div class="row">
           </div>
         <!-- content-wrapper ends -->
         <!-- partial:partials/_footer.html -->
@@ -317,75 +277,28 @@
   <!-- endinject -->
   <!-- Custom js for this page-->
   <script src="js/base.js"></script>
-  <!-- End custom js for this page-->
+  <script src="js/ejs.js"></script>
+  <script src="js/admin.js"></script>
   <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
   <!-- End custom js for this page-->
 </body>
 <script>
-  var data;
-  function handleData(res) {
-    data=res;
-    return res;
-  }
-  // function requestData(params) {
-  //   if (!params.data.account) return alert('必须指定支付宝账号才能查询');
-  //   accIntf('pvd/alipay/statements', params.data, (err, r)=>{
-  //     params.success(r);
-  //   });
-  // }
-  function showTotalText() {
-    return "Total";
-  }
-  function showTotalMoney() {
-    return data?data.totalmoney:undefined;
-  }
-  function showTotalNet() {
-    return data?data.totalnet:undefined;
-  }
-  var urlparam=new URL(location.href).searchParams;
-  $(()=>{
-    $('input[name="account"]').val(urlparam.get('account'));
-    var p_start=urlparam.get('start'), p_end=urlparam.get('end');
-    var start, end;
-    if (p_start) {  
-      start=new Date(p_start);
-      if (start=='Invalid Date') start=undefined;
-    }
-    if (p_end) {
-      end=new Date(p_end);
-      if (end=='Invalid Date') end=undefined;
-    }
-    $('input[name="dates"]').daterangepicker({startDate:start, endDate:end});
-  });
-  function querydata() {
+  function getlist() {
     var allclear=true, querys={};
     $('#params input').each(function(idx, ele) {
       var je=$(ele), jv=je.val();
-      if (jv=='') {
-        if (ele.name!='account') return true;
-        jv=urlparam.get('account');
-        if (!jv) {
-          alert('必须指定支付宝账号才能查询');
-          allclear=false;
-          return false;
-        }
-      }
       if (ele.name=='dates') {
         var drp=$('input[name="dates"]').data('daterangepicker');
-        querys.startTime=drp.startDate._d;
-        querys.endTime=drp.endDate._d;
+        querys.from=drp.startDate._d;
+        querys.to=drp.endDate._d;
       }
       else querys[ele.name]=jv.trim();
     });
-    if (allclear) $('#detail').bootstrapTable('refresh', {query:querys});
+    $('#list').bootstrapTable('refresh', {query:querys});
   }
-  function remove(appId) {
-      accIntf('/pvd/alipay/removeAccount', {appId:appId}, err=>{
-          if (err) return alert(err);
-          getlist();
-      });
+  function showop(value, record, rowIndex) {
+    return `<button type="button" style="display:inline" class="btn btn-icon-sm btn-outline-primary" data-toggle="modal" data-target="#editSnapPayAccount" data-id="${rowIndex}"><i class="mdi mdi-key-change"></i></button>
+          `
   }
 </script>
 </html>

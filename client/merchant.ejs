@@ -55,8 +55,14 @@
             </div>
             <div class="form-group">
               <div class="input-group">
+                <!-- <div class="input-group-prepend"><span for="sp_fee" class="input-group-text bg-gradient-info text-white">Snappay手续费</span></div>
+                <input type="text" class="form-control" id="sp_fee" placeholder="1.2%">
+                <div class="input-group-prepend"><span for="ap_fee" class="input-group-text bg-gradient-info text-white">APay手续费</span></div>
+                <input type="text" class="form-control" id="ap_fee" placeholder="0.6%">
+                <div class="input-group-prepend"><span for="pc_fee" class="input-group-text bg-gradient-info text-white">垫付手续费</span></div>
+                <input type="text" class="form-control" id="pc_fee" placeholder="1.5%"> -->
                 <div class="input-group-prepend"><span for="fee" class="input-group-text bg-gradient-info text-white">手续费</span></div>
-                <input type="text" class="form-control" id="fee" placeholder="1.5%">
+                <input type="text" class="form-control" id="fee">
               </div>
               <br>
               <div class="input-group">
@@ -288,7 +294,9 @@
         $('#providers_snappay-toll_accountNumber').mask('000-00000-000000000000', {placeholder:'bnk-trans-account'});
         $('#providers_snappay-toll_timezone').mask('s09:99', {placeholder:'[+/-]hh:mm', translation:{s:{pattern:/[\+\-]/}}});
       })
-      $('#fee').attr("placeholder", ''+((1-merchant.share)*100).toFixed(2)+'%');
+      // $('#fee').attr("placeholder", ''+((1-merchant.share)*100).toFixed(2)+'%');
+      $('#fee').mask('0.09% 0.09% 0.09%', {placeholder:'snappay apay 垫付'});
+      $('#fee').val(`${merchant.sp_fee*100}% ${merchant.ap_fee*100}% ${merchant.pc_fee*100}%`);
       $('#parent').attr('placeholder', merchant.parent);
       $('#valid').attr('placeholder', formattime(merchant.validfrom||'1971 1-1 0:00 GMT+0800')+'-'+formattime(merchant.validend||'1971-1-2 00:00 GMT+0800', true));
       $('#limitation').attr('placeholder', merchant.limitation);
@@ -300,9 +308,12 @@
         if (jv=='') return;
         if (je.is(':radio')) return;
         if (id=='fee') {
-          var s=jv.trim(), v=parseFloat(s);
-          if (isNaN(v)) return;
-          params.share=Number((1-(v/100)).toFixed(5));
+          var s=jv.trim(), fees=s.split(' ');
+          if (fees.length<3) return alert('手续费要填写3个');
+          params.sp_fee=parseFloat(fees[0])/100;
+          params.ap_fee=parseFloat(fees[1])/100;
+          params.pc_fee=parseFloat(fees[2])/100;
+          params.share=Number((1-(params.sp_fee+params.ap_fee)).toFixed(5));
         } else if (je.attr('for')=='provider') {
           params[id+'.disabled']=!ele.checked;
         } else if (id=='valid') {

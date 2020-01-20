@@ -318,7 +318,7 @@
                         data-show-columns="true"
                         data-show-pagination-switch="true"
                         data-buttons-class=" btn-sm btn-secondary"
-                        data-url="pvd/snappay-toll/statement"
+                        data-url="pvd/snappay_base/statement"
                         data-query-params="queryParams"
                         data-toolbar=".buttons-toolbar"
                         data-response-handler="formatRes"
@@ -412,7 +412,7 @@
       else if (jv) querys[ele.id]=jv;
     })
 
-    accIntf('pvd/snappay-toll/BTF', querys, (err, r)=>{
+    accIntf('pvd/snappay_base/BTF', querys, (err, r)=>{
       btn.text(btnOrgText);
       if (err) {
         return alert(err);
@@ -436,9 +436,9 @@
     return s.substring(0, len);
   }
   $('#exportBTFDlg').on('shown.bs.modal', function (e) {
-    accIntf('pvd/snappay-toll/settings', (err, r)=>{
+    accIntf('pvd/snappay_base/settings', (err, r)=>{
       if (err) r={};
-      var newest=new Date(Math.floor(Date.now()/(3600*1000))*(3600*1000));
+      var newest=new Date();
       var from=r.lastExportTime?new Date(r.lastExportTime):undefined;
       $('#dates').daterangepicker({
         startDate:from
@@ -460,7 +460,7 @@
       var je=$(ele), jv=je.val().trim();
       if (jv) querys[ele.id]=jv;
     })
-    accIntf('/pvd/snappay-toll/settings', querys, (err)=>{
+    accIntf('/pvd/snappay_base/settings', querys, (err)=>{
       if (err) return alert(err);
       alert('设置已更新');
     })
