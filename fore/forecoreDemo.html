@@ -385,7 +385,7 @@ $(()=>{
       var accounts=$('#account');
       accounts.empty().append('<option selected value="">自动选择</option');
       r.rows.forEach((item)=>{
-        accounts.append(`<option value="${item._id}">${item.name}</option>`);
+        accounts.append(`<option value="${item._id}">${item.name+(item.disable?'(disable)':'')}</option>`);
       })
     })
   }

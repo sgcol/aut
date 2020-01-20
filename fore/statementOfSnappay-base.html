@@ -9,9 +9,10 @@
 <link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
 <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
 <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
-<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.15.5/dist/extensions/group-by-v2/bootstrap-table-group-by.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.css" rel="stylesheet">
 <link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
 <!-- endinject -->
 <!-- inject:css -->
@@ -22,49 +23,64 @@
   .wrong {
     border-bottom-color: red;
   }
-  #upload-photo {
-      opacity: 0;
-      position: absolute;
-      z-index: -1;
-  }
 </style>
 </head>
 <body>
   <!-- dialogs  -->
-  <!-- edit&add snappay account  -->
-  <div class="modal fade" id="editSnapPayAccount" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="editSnapPayAccount" aria-hidden="true">
+  <!-- export bank transfer files  -->
+  <div class="modal fade" id="exportBTFDlg" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="exportBTFDlg" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
         <div class="modal-header">
-          <h5 class="card-title" id="exampleModalLabel">设置</h5>
+          <h5 class="card-title">导出</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label for="end">时间段</label>
+            <input type="text" class="form-control" id="dates" placeholder="时间">
+          </div>
+          <div class="form-group">
+            <p class="card-description">
+              使用以下参数
+            </p>
+            <label for="clientNumber">Client Number</label>
+            <input type="text" class="form-control" id="clientNumber" placeholder="4806920000">
+            <label for="clientName">Client Name</label>
+            <input type="text" class="form-control" id="clientName" placeholder="SnapPay Inc.">
+            <label for="RoyalBankProcessingCentre">Royal Bank Processing Centre</label>
+            <input type="text" class="form-control" id="RoyalBankProcessingCentre" placeholder="00320">
+            <label for="transactionCode">transaction Code</label>
+            <input type="text" class="form-control" id="transactionCode" placeholder="729">
+          </div>
+          <div class="form-group">
+            <button type="button" id="createExportFiles" class="btn btn-gradient-primary mr-2" onclick="exportBTF()">Export</button>
+            <button type="button" id="createTestFiles" class="btn btn-gradient-success" data-dismiss="modal" onclick="exportBTF(true)">Test</button>   
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- edit alipay general settings  -->
+  <div class="modal fade" id="editSnappaySettings" tabindex="-1" role="dialog" data-backdrop="static"  aria-labelledby="editSnappaySettings" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
+        <div class="modal-header">
+          <h5 class="card-title">SnapPay通用设置</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <form>
-          <!--merchant_no:'901800000116', app_id:'9f00cd9a873c511e', key:'7e2083699dd510575faa1c72f9e35d43', supportedCurrency:'CAD'-->
           <div class="card-body">
             <div class="form-group">
-              <label for="name">name</label>
-              <input type="text" class="form-control" id="name" placeholder="name">
-              <label for="app_id">app_id</label>
-              <input type="text" class="form-control" id="app_id" placeholder="app_id">
-              <label for="merchant_no">merchant_no</label>
-              <input type="text" class="form-control" id="merchant_no" placeholder="merchant_no">
-              <label for="key">key</label>
-              <input type="text" class="form-control" id="key" placeholder="key">
-              <label for="supportedCurrency">supportedCurrency</label>
-              <input type="text" class="form-control" id="supportedCurrency" placeholder="CAD">
-              <label for="belongs">归属</label>
-              <input type="text" class="form-control" id="belongs" placeholder="合作商显示名">
-            </div>
+              <label for="fee">费率</label>
+              <input type="text" class="form-control" id="fee" placeholder="默认7‰">
+            </div>    
             <div class="form-group">
-              <div class="form-check form-check">
-                <label class="form-check-label">
-                  <input type="checkbox" class="form-check-input" id="enable" for="enable" checked>可用<i class="input-helper"></i>
-                </label>
-              </div>
-              <button type="button" id="adjustSnappayAccount" class="btn btn-gradient-primary mr-2" data-dismiss="modal">Submit</button>
+              <button type="button" id="adjustSnappaySetting" class="btn btn-gradient-primary mr-2" data-dismiss="modal">Submit</button>
               <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
             </div>
           </div>
@@ -72,26 +88,7 @@
       </div>
     </div>
   </div>
-  <div class="modal fade" id="addMultiSnapPayAccounts" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="addMultiSnapPayAccounts" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
-        <div class="modal-header">
-          <h5 class="card-title" id="exampleModalLabel">批量导入</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <form>
-          <!--merchant_no:'901800000116', app_id:'9f00cd9a873c511e', key:'7e2083699dd510575faa1c72f9e35d43', supportedCurrency:'CAD'-->
-          <div class="card-body">
-            <label for="upload-photo" class="btn btn-gradient-primary">Upload</label>
-            <input type="file" accept=".csv" id="upload-photo">
-            <p class="card-description">导入CSV文件的第一行必须包含<br>merchant_no, app_id, key, supportedCurrency, name</p>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+  
   <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
     <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
@@ -291,12 +288,11 @@
               <span class="page-title-icon bg-gradient-primary text-white mr-2">
                 <i class="fab fa-alipay"></i>
               </span>
-              SnapPay账号
+              Snappay报表
             </h3>
             <nav aria-label="breadcrumb">
               <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">四方平台</a></li>
-                <li class="breadcrumb-item active" aria-current="page">SnapPay商户管理</li>
+                <li class="breadcrumb-item"><a href="#">Overview</a></li>
               </ol>
             </nav>
           </div>
@@ -304,61 +300,45 @@
               <div class="col-lg-12 grid-margin stretch-card">
                   <div class="card">
                     <div class="card-body">
-                      <h4 class="card-title">商户</h4>
-                      <div class="buttons-toolbar">
-                        <form class="form-inline" id="params">
-                          <button class="btn btn-sm btn-secondary mr-2" onclick="javascript:$('#editSnapPayAccount').modal()"><i class="mdi mdi-account-plus"></i></button>
-                          <button class="btn btn-sm btn-secondary mr-2" onclick="javascript:$('#addMultiSnapPayAccounts').modal()"><i class="mdi mdi mdi-account-multiple-plus"></i></button>
-                          <div class="input-group input-group-sm">
-                            <div class="input-group-prepend">
-                              <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-account-box"></i></span>
-                            </div>
-                            <input type="text" class="form-control mr-sm-2" placeholder="商户" name="name">
-                          </div>
-                          <div class="form-group">
-                            <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:getlist();"><i class="mdi mdi-magnify"></i></a>
-                          </div>
-                        </form>     
+                      <div class="buttons-toolbar form-inline">
+                        <button class="btn btn-sm btn-secondary mr-1" onclick="javascript:$('#editSnappaySettings').modal()"><i class="mdi mdi-settings"></i></button> 
+                        <button class="btn btn-sm btn-secondary mr-1" onclick="javascript:$('#exportBTFDlg').modal()"><i class="mdi mdi-file-document-box"></i></button> 
+                        <select class="form-control form-control-sm"></select>
+                        <span class="input-group-append">
+                          <button class="btn btn-sm btn-secondary" onclick="getlist()"><i class="mdi mdi-magnify"></i></button>
+                        </span>
                       </div>
                       <div class="table-responsive">
-                      <table class="table table-hover" id="accounts"
-                        data-classes="table-no-bordered table-hover"
+                      <table class="table table-hover" id="statement"
                         data-toggle="table"
+                        data-classes="table-no-bordered table-hover"
                         data-side-pagination="server"
                         data-pagination="true"
                         data-show-refresh="true"
                         data-show-columns="true"
                         data-show-pagination-switch="true"
                         data-buttons-class=" btn-sm btn-secondary"
-                        data-url="pvd/snappay-toll/listAccounts"
+                        data-url="pvd/snappay_base/statement"
+                        data-query-params="queryParams"
                         data-toolbar=".buttons-toolbar"
                         data-response-handler="formatRes"
-                        data-row-style="handleDisable">
+                        data-show-footer="true">
                         <thead>
-                            <th data-field="name" data-sortable="true">
-                              name
-                            </th>
-                            <th data-field="merchant_no" data-sortable="true" data-visible="true">
-                              merchant_no
-                            </th>  
-                            <th data-field="app_id" data-sortable="false" data-visible="true">
-                              app_id
-                            </th>
-                            <th data-field="key" data-sortable="false" data-visible="false">
-                              key
-                            </th>
-                            <th data-field="supportedCurrency" data-sortable="true">
-                              currency
-                            </th>    
-                            <th data-field="createTime" data-sortable="true" data-formatter="timestring" data-visible="false">
-                              创建时间
-                            </th>
-                            <th data-field="daily" data-sortable="true" data-formatter="showincoming">净收入(日/总)</th>
-                            <th data-field="gross.daily" data-sortable="true" data-formatter="showGrossIncoming">毛收入(日/总)</th>
-                            <th data-field="succrate" data-sortable="true">成功率</th>
-                            <th data-field="" data-formatter="showop" data-min-width="130">
-                              操作
-                            </th>
+                          <th data-field="dot" data-footer-formatter="Total">时间</th>
+                          <th data-field="merchantName" data-sortable="true">
+                            合作商
+                          </th>
+                          <th data-field="count" data-sortable="true" data-visible="true" data-footer-formatter="showTotalCount">
+                            订单数
+                          </th>
+                          <th data-field="succrate" data-sortable="true" data-visible="true">
+                            成功率
+                          </th>
+                          <th data-field="share" data-sortable="true" data-visible="false">
+                            费率
+                          </th>  
+                          <th data-field="amount" data-sortable="true" data-footer-formatter="showTotalAmount">日流水</th>
+                          <th data-field="profit" data-sortable="true" data-footer-formatter="showTotalProfit">日利润</th>
                         </thead>
                         <tbody id="list">
                         </tbody>
@@ -402,100 +382,91 @@
   <script src="js/base.js"></script>
   <script src="js/ejs.js"></script>
   <script src="js/admin.js"></script>
-  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.15.5/dist/extensions/group-by-v2/bootstrap-table-group-by.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+  <script src="js/FileSaver.min.js"></script>
   <!-- End custom js for this page-->
 </body>
 <script>
-  $('#editSnapPayAccount').on('shown.bs.modal', function (e) {
-    $('#editSnapPayAccount form input, textarea').val('');
-    var idx=$(e.relatedTarget).data('id');
-    if (idx==null) {
-      $('#editSnapPayAccount #exampleModalLabel').text('新增');
-    } else $('#editSnapPayAccount #exampleModalLabel').text('设置');
-    var account=$('#accounts').bootstrapTable('getData', {useCurrentPage:true})[idx];
-    if (account) {
-        for (var key in account) {
-            if (key=='_id' || key=='enable') continue;
-            $('#'+key).val(account[key]);
-        }
-        $('#enable').prop('checked', !account.disable);
-    } else {
-        $('#enable').prop('checked', true);
+  function currentTimezone() {
+    var tz=new Date().getTimezoneOffset(), hh=Math.floor(tz/60), mm=tz-hh*60;
+    if (hh>=0) return '-'+('00'+hh).slice(-2)+':'+('00'+mm).slice(-2);
+    else return '+'+('00'+(-hh)).slice(-2)+':'+('00'+mm).slice(-2);
+  }
+  function queryParams(params) {
+    params.timezone=$('.buttons-toolbar select').val()||currentTimezone();
+    return params;
+  }
+  function exportBTF(testMode) {
+    var drp=$('#dates').data('daterangepicker');
+    if (!drp) return alert('请指定时间范围');
+    var btn=testMode?$('#createTestFiles'):$('#createExportFiles'), btnOrgText=btn.text();
+    btn.text('Working...');
+    // collect all data
+    var querys={from:drp.startDate._d, to:drp.endDate._d, testMode:testMode};
+    $('#exportBTFDlg input').each((idx, ele)=>{
+      var je=$(ele), jv=je.val().trim();
+      if (ele.id=='dates') return;
+      else if (jv) querys[ele.id]=jv;
+    })
+
+    accIntf('pvd/snappay_base/BTF', querys, (err, r)=>{
+      btn.text(btnOrgText);
+      if (err) {
+        return alert(err);
+      }
+      $('#exportBTFDlg').modal('hide');
+      const byteCharacters = atob(r.src);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      var blob = new Blob([byteArray], {type: "octet/stream"});
+      saveAs(blob, `${testMode?'TEST':'PROD'} ${moment(querys.from).format('YYYYMMDDHH')}-${moment(querys.to).format('YYYYMMDDHH')}.zip`);
+    })
+  }
+  function randstring(len) {
+    var s='', len=len||7;
+    while (s.length<len) {
+      s+=Math.random().toString(36).substring(2)
     }
-    $('#adjustSnappayAccount').off('click').click(function(e) {
-      var params={};
-      $('#editSnapPayAccount form input, textarea').each(function(idx, ele) {
-        var je=$(ele), jv=je.val();
-        if (ele.id=='enable') {
-          params.disable=!ele.checked;
-        } else if (ele.id=='supportedCurrency') {
-          if (!jv) params.supportedCurrency='CAD';
-          else params.supportedCurrency=jv;
-        } else{
-            if (jv=='') return true;
-            params[ele.id]=jv.trim();
-        }
+    return s.substring(0, len);
+  }
+  $('#exportBTFDlg').on('shown.bs.modal', function (e) {
+    accIntf('pvd/snappay_base/settings', (err, r)=>{
+      if (err) r={};
+      var newest=new Date();
+      var from=r.lastExportTime?new Date(r.lastExportTime):undefined;
+      $('#dates').daterangepicker({
+        startDate:from
+        , endDate:newest
+        , maxDate: newest
+        , timePicker:true
+        , timePickerIncrement:60
+        , timePicker24Hour:true
+        , locale:{format:'MM/DD/YYYY HH:00'}
       });
-      if (account) params._id=account._id;
-      accIntf('/pvd/snappay-toll/updateAccount', params, err=>{
-        if (err) return showerr(err);
-        getlist();
-      });
+      for (var key in r) {
+        $(`#exportBTFDlg #${key}`).attr('placeholder', r[key]);
+      } 
+    });
+  });
+  $('#adjustSnappaySetting').click((e)=>{
+    var querys={};
+    $('#editSnappaySetting input').each((idx, ele)=>{
+      var je=$(ele), jv=je.val().trim();
+      if (jv) querys[ele.id]=jv;
+    })
+    accIntf('/pvd/snappay_base/settings', querys, (err)=>{
+      if (err) return alert(err);
+      alert('设置已更新');
     })
   });
-
-  $('#upload-photo').on("change", function(e) {
-      if (e.target.files && e.target.files.length) {
-        const file = e.target.files[0];
-        if (!file) {
-            return;
-        }
-        e.target.value='';
-        var btn=$('#addMultiSnapPayAccounts label'), oldText=btn.text();
-        btn.text('Working...');
-
-        var formData = new FormData();
-        formData.append('file', file);
-        $.ajax({
-          url : '/pvd/snappay-toll/uploadAccounts',
-          type : 'POST',
-          data : formData,
-          processData: false,  // tell jQuery not to process the data
-          contentType: false,  // tell jQuery not to set contentType
-          success : function(data) {
-            btn.text(oldText);
-            if (data.count) alert('成功导入'+data.count+'条记录');
-            if (data.err && data.err.result && data.err.result.nInserted!=null) {
-              alert('导入时有错误，完成'+data.err.result.nInserted+'条记录');
-            }
-            $('#addMultiSnapPayAccounts').modal('hide');
-            getlist();
-          },
-          error(err) {
-            btn.text(oldText);
-            alert(err);
-          }
-        });
-      }
-  });
-
   function getlist() {
-    var allclear=true, querys={};
-    $('#params input').each(function(idx, ele) {
-      var je=$(ele), jv=je.val();
-      if (ele.name=='dates') {
-        var drp=$('input[name="dates"]').data('daterangepicker');
-        querys.from=drp.startDate._d;
-        querys.to=drp.endDate._d;
-      }
-      else querys[ele.name]=jv.trim();
-    });
-    $('#accounts').bootstrapTable('refresh', {query:querys});
-  }
-  function showop(value, record, rowIndex) {
-    return `<button type="button" style="display:inline" class="btn btn-icon-sm btn-outline-primary" data-toggle="modal" data-target="#editSnapPayAccount" data-id="${rowIndex}"><i class="mdi mdi-key-change"></i></button>
-            <button type="button" style="display:inline" class="btn btn-icon-sm btn-outline-secondary" onclick="javascript:remove('${record._id}')"><i class="mdi mdi-delete-forever"></i></button>
-          `
+    $('#statement').bootstrapTable('refresh');
   }
   function showincoming(value, record) {
     return `${value||0}/${record.total||0}`;
@@ -503,36 +474,88 @@
   function showGrossIncoming(value, record) {
     return `${value||0}/${record.gross?(record.gross.total||0):0} `;
   }
+  var response;
   function formatRes(res) {
     if (res.err) return alert(res.err);
-    res.rows.forEach((record)=>{
-      // record.app_id=record._id;
-      // record.log=record.log||{};
-      // var fails=[];
-      // for (var name in record.log) {
-      //     if (name='success') continue;
-      //     fails.push({name:name, v:record.log[name]});
-      // }
-      // var failstr='';
-      // if (fails.length) {
-      //     fails.sort((a,b)=>{return a.v-b.v});
-      //     for (var i=0; i<fails.length; i++) {
-      //         failstr+=fails[i].name+':'+fails[i].v+' ';
-      //     }
-      // }
-      // record.failstr=failstr;
+    res.rows && res.rows.forEach((record)=>{
+      var _id=record._id;
+      record._id=undefined;
+      Object.assign(record, _id);
+      record.dot=record.dot||'选中区间';
+      record.profit=record.profit.toFixed(2);
+      record.merchantName=record.merchantName[0];
+      record.share=record.share[0];
+      record.succOrder=record.succOrder[0]||0;
+      record.orderCount=record.orderCount[0]||0;
+      if (record.orderCount) record.succrate=''+(Math.round(record.succOrder/record.orderCount*10000)/100)+'%'
     })
+    res.total_amount=(res.total_amount||0).toFixed(2);
+    res.total_profit=(res.total_profit||0).toFixed(2);
+    response=res;
     return res;
   }
-  function remove(_id) {
-      accIntf('/pvd/snappay-toll/removeAccount', {_id:_id}, err=>{
-          if (err) return alert(err);
-          getlist();
-      });
+  function showTotalAmount(data) {
+    return response?response.total_amount:'';
   }
-  function handleDisable(row, idx) {
-    if (row.disable) return {css:{color:'grey', 'text-decoration':'line-through'}}
-    return {};
+  function showTotalProfit(data) {
+    return response?response.total_profit:'';
   }
+  function showTotalCount(data) {
+    return response?response.total_count:'';
+  }
+
+  var tzInts = [
+    {"label":"(GMT-12:00)","value":"-12:00"},
+    {"label":"(GMT-11:00)","value":"-11:00"},
+    {"label":"(GMT-10:00)","value":"-10:00"},
+    {"label":"(GMT-09:00)","value":"-09:00"},
+    {"label":"(GMT-08:00)","value":"-08:00"},
+    {"label":"(GMT-07:00)","value":"-07:00"},
+    {"label":"(GMT-06:00)","value":"-06:00"},
+    {"label":"(GMT-05:00)","value":"-05:00"},
+    {"label":"(GMT-04:00)","value":"-04:00"},
+    {"label":"(GMT-03:30)","value":"-03:30"},
+    {"label":"(GMT-03:00)","value":"-03:00"},
+    {"label":"(GMT-02:00)","value":"-02:00"},
+    {"label":"(GMT-01:00)","value":"-01:00"},
+    {"label":"(GMT+00:00)","value":"+00:00"},
+    {"label":"(GMT+01:00)","value":"+01:00"},
+    {"label":"(GMT+02:00)","value":"+02:00"},
+    {"label":"(GMT+03:00)","value":"+03:00"},
+    {"label":"(GMT+03:30)","value":"+03:30"},
+    {"label":"(GMT+04:00)","value":"+04:00"},
+    {"label":"(GMT+04:30)","value":"+04:30"},
+    {"label":"(GMT+05:00)","value":"+05:00"},
+    {"label":"(GMT+05:30)","value":"+05:30"},
+    {"label":"(GMT+06:00)","value":"+06:00"},
+    {"label":"(GMT+06:30)","value":"+06:30"},
+    {"label":"(GMT+07:00)","value":"+07:00"},
+    {"label":"(GMT+08:00)","value":"+08:00"},
+    {"label":"(GMT+09:00)","value":"+09:00"},
+    {"label":"(GMT+09:30)","value":"+09:30"},
+    {"label":"(GMT+10:00)","value":"+10:00"},
+    {"label":"(GMT+11:00)","value":"+11:00"},
+    {"label":"(GMT+12:00)","value":"+12:00"},
+    {"label":"(GMT+13:00)","value":"+13:00"}
+  ]
+  function timezoneSelect(){
+    var options = [],
+        select = $('.buttons-toolbar select')[0],
+        curTz=currentTimezone();
+
+    for (var i=0; i<tzInts.length; i++){
+      var tz = tzInts[i],
+          option = document.createElement("option");
+      option.value = tz.value
+      if (tz.value==curTz) option.selected="1";
+      option.appendChild(document.createTextNode(tz.label))
+      select.appendChild(option)
+    }
+
+    return select;
+  }
+  $(()=>{
+    timezoneSelect();
+  })
 </script>
 </html>
