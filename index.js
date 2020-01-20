@@ -257,7 +257,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		});
 	}))
 	app.all('/adapter/listOrders', verifySign, httpf({merchantid:'string', orderid:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, function(merchantid, orderid, from, to, sort, order, count, offset, callback) {
-		var query={};
+		var query={_id:{$ne:'btf_lock'}};
 		if (from ||to) {
 			var times={};
 			if (from) times.$gte=from;
@@ -392,10 +392,13 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.all('/admin/confirmOutgoing', verifyAuth, verifyManager, httpf({outids:'string', callback:true}, function(outidstr, callback) {
 		db.withdrawals.updateMany({_id:{$in:outidstr.split(',').map(v=>ObjectID(v))}}, {$set:{done:true, lasttime:new Date()}}, callback);
 	}))
-	app.all('/admin/listOrders', verifyAuth, httpf({orderid:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', testOrderOnly:'?boolean', callback:true}, function(orderid, from, to, sort, order, count, offset, testOrderOnly, callback) {
-		var query={}, prj={};
+	app.all('/admin/listOrders', verifyAuth, httpf({outOrderId:'?string', orderid:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', testOrderOnly:'?boolean', callback:true}, function(outOrderId, orderid, from, to, sort, order, count, offset, testOrderOnly, callback) {
+		var query={_id:{$ne:'btf_lock'}}, prj={};
 		if (orderid) {
 			query._id=ObjectID(orderid);
+		}
+		if (outOrderId) {
+			query.merchantOrderId={$regex:outOrderId};
 		}
 		if (from ||to) {
 			var times={};
@@ -658,10 +661,14 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 				}
 			}
 			res.cookie('a',rstr);
-			if (argv.forecoreOnly) return callback(null, {to:'/statementOfSnappay-toll.html', token:rstr});
-			if (o.acl=='admin'||o.acl=='manager') return callback(null, {to:'/dashboard.html', token:rstr});
-			if (o.acl=='merchant') return callback(null, {to:'/merentry.html', token:rstr});
-			return callback(null, {to:'/agententry.html', token:rstr});
+			if (argv.forecoreOnly) {
+				if (o.acl=='admin' || o.acl=='mamanger') return callback(null, {to:'/statementOfSnappay-base.html', token:rstr});
+				if (o.acl=='merchant') return callback(null, {to:'/fromuserlist.ae', token:rstr});
+			} else {
+				if (o.acl=='admin'||o.acl=='manager') return callback(null, {to:'/dashboard.html', token:rstr});
+				if (o.acl=='merchant') return callback(null, {to:'/merentry.html', token:rstr});
+				return callback(null, {to:'/agententry.html', token:rstr});
+			}
 		})
 	}));
 	app.all('/admin/addAccount', verifyAuth, verifyAdmin, httpf({name:'string', account:'string', password:'string', identity:'string', callback:true}, function(name, account, password, identity, callback) {
