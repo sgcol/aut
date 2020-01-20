@@ -662,7 +662,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			}
 			res.cookie('a',rstr);
 			if (argv.forecoreOnly) {
-				if (o.acl=='admin' || o.acl=='mamanger') return callback(null, {to:'/statementOfSnappay-base.html', token:rstr});
+				if (o.acl=='admin' || o.acl=='mamanger') return callback(null, {to:'/statementOfSnappay-toll.html', token:rstr});
 				if (o.acl=='merchant') return callback(null, {to:'/fromuserlist.ae', token:rstr});
 			} else {
 				if (o.acl=='admin'||o.acl=='manager') return callback(null, {to:'/dashboard.html', token:rstr});
