@@ -54,7 +54,7 @@ var config = {
 	paymentKey: '748ab991ec1ca243670f811bb86e2eee', //API key to gen payment sign
 	paymentCertificatePfx: fs.readFileSync(path.join(__dirname, 'snappay.p12')),
 	//default payment notify url
-	paymentNotifyUrl: `http://${argv.wehost}/wechatpay/pvd/wechatforsnap/wechat/done`,
+	paymentNotifyUrl: `http://${argv.wehost}/wechatpay/pvd/snappay_base/wechat/done`,
 };
 if (wxproxy) {
 	config.agent=tunnel.httpsOverHttp({
@@ -755,7 +755,7 @@ function init(err, db) {
 		if (!account) return callback('没有可用的收款账户');
 		// build a wechat h5 page
 		await updateOrder(params.orderId, {status:'创建H5', snappay_account:account, lasttime:new Date()});
-		var jumpto=wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, 'pvd/wechatforsnap/wechat/cc'), 'snsapi_base', params.orderId);
+		var jumpto=wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, 'pvd/snappay_base/wechat/cc'), 'snsapi_base', params.orderId);
 		debugout(jumpto)
 		return callback(null, {
 			url:jumpto
@@ -773,7 +773,7 @@ function init(err, db) {
 			var ret =await wx.payment.unifiedOrder({
 				out_trade_no:params.state,
 				body:order.desc||'Goods',
-				notify_url: url.resolve(argv.wxhost, 'pvd/wechatforsnap/done'),
+				notify_url: url.resolve(argv.wxhost, 'pvd/snappay_base/done'),
 				spbill_create_ip : retreiveClientIp(req),
 				sub_mch_id :order.snappay_account.mch_id||order.snappay_account.sub_mch_id,
 				fee_type : order.currency,
@@ -791,7 +791,7 @@ function init(err, db) {
 				wx.jssdk.getSignature(req.protocol+'://'+req.headers.host+req.originalUrl),
 				wx.payment.generateChooseWXPayInfo(ret.prepay_id)
 			]);
-			var ccdata={init_config:init_config, payData:payData, return_url:order.return_url||url.resolve(argv.wxhost, 'pvd/wechatforsnap/return')}
+			var ccdata={init_config:init_config, payData:payData, return_url:order.return_url||url.resolve(argv.wxhost, 'pvd/snappay_base/return')}
 			debugout('pay params', ccdata)
 			res.render('cashcounter', ccdata);
 		}catch(e) {
