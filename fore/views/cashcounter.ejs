@@ -1,15 +1,19 @@
 <script src="js/client.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/eruda"></script>
+
 <script>
-(async function run() {
-  alert('in');
-    const wechatObj=new WechatJSSDK(<%= JSON.stringify(init_config) %>);
-    await wechatObj.initialize();
-    alert('init');
-    wechatObj.callWechatApi('chooseWXPay', Object.assign({
-        success: res => {
-          console.log(res);
-          location.href="<%= return_url%>";
-        }
-      }, <%= JSON.stringify(payData) %> ));
-})();
+  window.onload=()=>{
+    eruda.init();
+    (async function run() {
+      console.log(<%= JSON.stringify(init_config) %>, <%= JSON.stringify(payData) %>);
+      const wechatObj=new WechatJSSDK(<%= JSON.stringify(init_config) %>);
+      await wechatObj.initialize();
+      wechatObj.callWechatApi('chooseWXPay', Object.assign({
+          success: res => {
+            console.log(res);
+            location.href="<%= return_url%>";
+          }
+        }, <%= JSON.stringify(payData) %> ));
+    })();
+  }
 </script>
