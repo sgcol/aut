@@ -1,8 +1,10 @@
 <script src="js/client.umd.js"></script>
 <script>
 (async function run() {
+  alert('in');
     const wechatObj=new WechatJSSDK(<%= JSON.stringify(init_config) %>);
     await wechatObj.initialize();
+    alert('init');
     wechatObj.callWechatApi('chooseWXPay', Object.assign({
         success: res => {
           console.log(res);
