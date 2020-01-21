@@ -791,7 +791,7 @@ function init(err, db) {
 				wx.jssdk.getSignature(req.protocol+'://'+req.headers.host+req.originalUrl),
 				wx.payment.generateChooseWXPayInfo(ret.prepay_id)
 			]);
-			var ccdata={init_config:init_config, payData:payData, return_url:order.return_url||url.resolve(argv.wxhost, 'pvd/snappay_base/return')}
+			var ccdata={init_config:Object.assign(init_config, {jsApiList:['chooseWXPay']}, payData:payData, return_url:order.return_url||url.resolve(argv.wxhost, 'pvd/snappay_base/return')}
 			debugout('pay params', ccdata)
 			res.render('cashcounter', ccdata);
 		}catch(e) {
