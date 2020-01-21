@@ -16,6 +16,7 @@
       console.log(<%- JSON.stringify(init_config) %>, <%- JSON.stringify(payData) %>);
       const wechatObj=new WechatJSSDK(<%- JSON.stringify(init_config) %>);
       await wechatObj.initialize();
+      console.log('init');
       wechatObj.callWechatApi('chooseWXPay', Object.assign({
           success: res => {
             console.log(res);
