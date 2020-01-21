@@ -1,9 +1,17 @@
+<html>
+  <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  </head>
+  <body>
+    <div id="ee" style="left:876px;top:433px;position:relative;"></div>
+  </body>
+</html>
 <script src="/js/client.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/eruda/1.5.8/eruda.min.js"></script>
 
 <script>
   window.onload=()=>{
-    eruda.init();
+    eruda.init({container:document.getElementById('ee')});
     (async function run() {
       console.log(<%- JSON.stringify(init_config) %>, <%- JSON.stringify(payData) %>);
       const wechatObj=new WechatJSSDK(<%- JSON.stringify(init_config) %>);
