@@ -222,6 +222,9 @@ function start(err, db) {
 			callback(null);
 		} catch(e) {callback(e)}
 	}));
+	router.all('/renderCC', function(req, res) {
+		res.render('cashcounter', {init_config:{init_config:1}, payData:{payData:1}, return_url:'dummyAddress'});
+	})
 }
 
 

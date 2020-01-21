@@ -3,20 +3,17 @@
 
 <script>
   window.onload=()=>{
-    alert('hee');
     eruda.init();
     (async function run() {
-      alert('enter');
-      console.log(<%= JSON.stringify(init_config) %>, <%= JSON.stringify(payData) %>);
-      const wechatObj=new WechatJSSDK(<%= JSON.stringify(init_config) %>);
+      console.log(<%- JSON.stringify(init_config) %>, <%- JSON.stringify(payData) %>);
+      const wechatObj=new WechatJSSDK(<%- JSON.stringify(init_config) %>);
       await wechatObj.initialize();
-      alert('init');
       wechatObj.callWechatApi('chooseWXPay', Object.assign({
           success: res => {
             console.log(res);
             location.href="<%= return_url%>";
           }
-        }, <%= JSON.stringify(payData) %> ));
+        }, <%-JSON.stringify(payData) %> ));
     })();
   }
 </script>
