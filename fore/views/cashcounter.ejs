@@ -30,7 +30,9 @@ if (typeof WeixinJSBridge == "undefined"){
        document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
    }
 }else{
-  eruda.init();
   onBridgeReady();
+}
+window.onload=()=>{
+  eruda.init();
 }
 </script>
