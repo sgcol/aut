@@ -6,23 +6,30 @@
     <div id="ee" style="left:876px;top:433px;position:relative;"></div>
   </body>
 </html>
-<script src="/js/client.umd.js"></script>
+<!-- <script src="/js/client.umd.js"></script> -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/eruda/1.5.8/eruda.min.js"></script>
 
 <script>
-  window.onload=()=>{
-    eruda.init({container:document.getElementById('ee')});
-    (async function run() {
-      console.log(<%- JSON.stringify(init_config) %>, <%- JSON.stringify(payData) %>);
-      const wechatObj=new WechatJSSDK(<%- JSON.stringify(init_config) %>);
-      await wechatObj.initialize();
-      console.log('init');
-      wechatObj.callWechatApi('chooseWXPay', Object.assign({
-          success: res => {
-            console.log(res);
-            location.href="<%= return_url%>";
-          }
-        }, <%-JSON.stringify(payData) %> ));
-    })();
-  }
+function onBridgeReady(){
+  console.log('in wechat');
+   WeixinJSBridge.invoke(
+      'getBrandWCPayRequest', <%- JSON.stringify(payData) %>
+      function(res){
+      if(res.err_msg == "get_brand_wcpay_request:ok" ){
+        // 使用以上方式判断前端返回,微信团队郑重提示：
+        //res.err_msg将在用户支付成功后返回ok，但并不保证它绝对可靠。
+        location.href=<%= return_url %>
+      } 
+   }); 
+}
+if (typeof WeixinJSBridge == "undefined"){
+   if( document.addEventListener ){
+       document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+   }else if (document.attachEvent){
+       document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+       document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+   }
+}else{
+   onBridgeReady();
+}
 </script>
