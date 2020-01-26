@@ -209,6 +209,22 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}
 		res.end('pf ' + req.provider + ' not defined');
 	});
+	app.all('/wechatpay', (req, res)=>{
+		var pvd=getProviders('snappay_base');
+		if (pvd) var router=pvd.router;
+		// req.path='/cc';
+		router.call(null, req, res, function (err) { 
+			if (err) {
+				if (err instanceof Error) {
+					var o={message:err.message};
+					if (argv.debugout) o.stack=err.stack;
+					err=o;
+				}
+				return res.status(500).send({err:err});
+			}
+			return res.status(404).send({err:'no such function ' + req.url, detail:arguments}); 
+		});
+	})
 
 	if (USDT.bitcoincli) {
 		app.all('/getAddress', verifyOTC, httpf({account:'string', callback:true}, USDT.getaddress));
