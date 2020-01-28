@@ -773,12 +773,12 @@ function init(err, db) {
 			var order=await db.bills.findOne({_id:ObjectID(params.state)});
 			var ret =await wx.payment.unifiedOrder({
 				out_trade_no:params.state,
-				body:order.desc||'Goods',
+				body:objPath.get(order, 'desc', 'Goods'),
 				notify_url: url.resolve(argv.wxhost, 'pvd/snappay_base/done'),
 				spbill_create_ip : retreiveClientIp(req),
-				sub_mch_id :order.snappay_account.mch_id||order.snappay_account.sub_mch_id,
-				fee_type : order.currency,
-				total_fee : Math.floor(order.money*100),
+				sub_mch_id :objPath.get(order, 'snappay_account.mch_id')||objPath.get(order, 'snappay_account.sub_mch_id'),
+				fee_type : objPath.get(order, 'currency', 'CAD'),
+				total_fee : Math.floor(objPath.get(order, 'money', 0)*100),
 				openid:openid
 			});
 			debugout('preorder', ret);

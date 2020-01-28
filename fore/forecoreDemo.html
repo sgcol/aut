@@ -31,7 +31,9 @@
           </button>
         </div>
         <div class="card-body">
-          <div id="qrcode" style="text-align:center;"></div>
+          <div id="qrcode" style="text-align:center;">
+            <canvas id="code"></canvas>
+          </div>
         </div>
       </div>
     </div>
@@ -361,7 +363,7 @@
   <script src="js/qs.js"></script>
   <script src="js/base.js"></script>
   <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
-  <script src="js/qrcode.js"></script>
+  <script src="js/qrcode.min.js"></script>
   <!-- endinject -->
 </body>
 <script>
@@ -409,7 +411,7 @@ $(()=>{
     var btn=$('form button[type="submit"]');
     var oldText=btn.text();
     btn.text('Working...');
-    $('#qrcode').empty();
+    // $('#qrcode').empty();
     var now=new Date();
     var params={
         account:$('#account').val(),
@@ -429,15 +431,18 @@ $(()=>{
       btn.text(oldText);
       console.log(err, r);
       if (err) return alert(err);
-      var qrcode = new QRCode("qrcode", {
-          text: r.url,
-          width: 256,
-          height: 256,
-          colorDark : "#333",
-          colorLight : "#ffffff",
-          correctLevel : QRCode.CorrectLevel.H
+      QRCode.toCanvas(document.getElementById('code'), r.url, (err)=>{
+        if (err) return alert(err);
+        $('#qrDlg').modal('show');
       });
-      $('#qrDlg').modal('show');
+      // var qrcode = new QRCode("qrcode", {
+      //     text: r.url,
+      //     width: 256,
+      //     height: 256,
+      //     colorDark : "#333",
+      //     colorLight : "#ffffff",
+      //     correctLevel : QRCode.CorrectLevel.H
+      // });
     });
     // make sure all interface working correctly
     // var p2={currency:params.currency, partnerId:params.partnerId, payment:'WECHATPAYH5'};

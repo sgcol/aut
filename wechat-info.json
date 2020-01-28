@@ -1,26 +1,12 @@
 {
   "wechatConfig": {
-    "appId": "wxec73fe538fbc098e",
-    "wechatRedirectUrl": "http://undefined/wechat/oauth-callback",
     "store": "FileStore_/Users/bacc/projects/auto-trade/wechat-info.json"
   },
   "globalToken": {
     "count": 0
   },
   "urls": {},
-  "oauth": {
-    "oVRQJ080SvgJcQJ4-bIQXorrcui0": {
-      "access_token": "29_ZT5IWMQ3I4LPmkHeOjqZH4LU269T6feT30zdftoSFGr3jExssWE5YaNacngGyhc8NS2GX6ADM5oiewN4UmGBUrR9Ufo7C7SatBtQS9W6VFA",
-      "expires_in": 7200,
-      "refresh_token": "29_czqOECVp5z_lie3lVJ4bSOCae3T12jEUgYnq_Ny8GQYGXV0P1oXvPPBo9Er5S3NvywBXjUrJVWu-NLkC5ANBMtuQLV-9FvecQP3QZYHd4-Y",
-      "openid": "oVRQJ080SvgJcQJ4-bIQXorrcui0",
-      "scope": "snsapi_base",
-      "expirationTime": 1578399415975,
-      "key": "oVRQJ080SvgJcQJ4-bIQXorrcui0",
-      "createDate": "2020-01-07T10:17:55.975Z",
-      "modifyDate": "2020-01-07T10:17:55.975Z"
-    }
-  },
+  "oauth": {},
   "card": {},
   "mp": {}
 }
