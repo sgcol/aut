@@ -440,9 +440,9 @@ $(()=>{
       $('#qrDlg').modal('show');
     });
     // make sure all interface working correctly
-    var p2={currency:params.currency, partnerId:params.partnerId, payment:'WECHATPAYH5'};
-    p2.sign=md5(key+Qs.stringify(p2));
-    accIntf('/forecore/exchangeRate', p2, console.log.bind(console));
+    // var p2={currency:params.currency, partnerId:params.partnerId, payment:'WECHATPAYH5'};
+    // p2.sign=md5(key+Qs.stringify(p2));
+    // accIntf('/forecore/exchangeRate', p2, console.log.bind(console));
   })
 });
 function queryOrders(params) {
