@@ -762,7 +762,7 @@ function init(err, db) {
 			, pay_type:params.type
 		});
 	}
-	router.all('/cc', async (req, res)=>{
+	router.all('/wechat/cc', async (req, res)=>{
 		try {
 			var params=Object.assign(req.query, req.body);
 			if (!params.code) throw '请勿自行访问本页面';
