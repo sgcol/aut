@@ -23,7 +23,7 @@ const url = require('url')
 	.describe('wxhost', 'a base url used to access wechat func')
 	.describe('wxproxy', 'proxy to access wechat interfaces, ip[:port]')
 	.argv
-, { Wechat, Payment } = require('wechat-jssdk')
+, { Wechat, Payment } = require('gy-wechat-jssdk')
 , debugout =require('debugout')(argv.debugout)
 , bodyParser =require('body-parser')
 , fs =require('fs-extra')
