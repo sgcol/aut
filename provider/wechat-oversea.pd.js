@@ -755,14 +755,14 @@ function init(err, db) {
 		if (!account) return callback('没有可用的收款账户');
 		// build a wechat h5 page
 		await updateOrder(params.orderId, {status:'创建H5', snappay_account:account, lasttime:new Date()});
-		var jumpto=wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, 'pvd/snappay_base/wechat/cc'), 'snsapi_base', params.orderId);
+		var jumpto=wx.oauth.generateOAuthUrl(argv.wxhost.substring(0, argv.wxhost.length-1), 'snsapi_base', params.orderId);
 		debugout(jumpto)
 		return callback(null, {
 			url:jumpto
 			, pay_type:params.type
 		});
 	}
-	router.all('/wechat/cc', async (req, res)=>{
+	router.all('/cc', async (req, res)=>{
 		try {
 			var params=Object.assign(req.query, req.body);
 			if (!params.code) throw '请勿自行访问本页面';
