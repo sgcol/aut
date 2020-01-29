@@ -755,8 +755,8 @@ function init(err, db) {
 		if (!account) return callback('没有可用的收款账户');
 		// build a wechat h5 page
 		await updateOrder(params.orderId, {status:'创建H5', snappay_account:account, lasttime:new Date()});
-		// var jumpto=wx.oauth.generateOAuthUrl(argv.wxhost.substring(0, argv.wxhost.length-1), 'snsapi_base', params.orderId);
-		var jumpto=wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, '/donothing'), 'snsapi_base', params.orderId);
+		var jumpto=wx.oauth.generateOAuthUrl(argv.wxhost.substring(0, argv.wxhost.length-1), 'snsapi_base', params.orderId);
+		// var jumpto=wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, '/donothing'), 'snsapi_base', params.orderId);
 		debugout(jumpto)
 		return callback(null, {
 			url:jumpto
