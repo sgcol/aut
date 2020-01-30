@@ -37,7 +37,7 @@ const supportedType={'WECHATPAYH5':{type:'WECHATPAY', method:'pay.h5pay'}, 'ALIP
 
 var config = {
 	//set your oauth redirect url, defaults to localhost
-	"wechatRedirectUrl": `http://${argv.wxhost}/wechat/oauth-callback`,
+	"wechatRedirectUrl": `${argv.wxhost}/wechat/oauth-callback`,
 	//"wechatToken": "wechat_token", //not necessary required
 	"appId": "wxec73fe538fbc098e",
 	"appSecret": "748ab991ec1ca243670f811bb86e2eee",
@@ -47,27 +47,33 @@ var config = {
 	paymentKey: '748ab991ec1ca243670f811bb86e2eee', //API key to gen payment sign
 	paymentCertificatePfx: fs.readFileSync(path.join(__dirname, 'snappay.p12')),
 	//default payment notify url
-	paymentNotifyUrl: `http://${argv.wehost}/wechatpay/pvd/snappay_base/wechat/done`,
+	paymentNotifyUrl: `${argv.wxhost}/wechatpay/pvd/snappay_base/wechat/done`,
 };
 if (argv.wxproxy) {
 	var wxproxy=argv.wxproxy;
-	config.paymentUrls ={
-		UNIFIED_ORDER: `${wxproxy}/pay/unifiedorder`,
-		QUERY_ORDER: `${wxproxy}/pay/orderquery`,
-		CLOSE_ORDER: `${wxproxy}/pay/closeorder`,
-		REFUND: `${wxproxy}/secapi/pay/refund`,
-		QUERY_REFUND: `${wxproxy}/pay/refundquery`,
-		DOWNLOAD_BILL: `${wxproxy}/pay/downloadbill`,
-		SHORT_URL: `${wxproxy}/tools/shorturl`,
-		REPORT: `${wxproxy}/payitil/report`,
-		SIGN_KEY: `${wxproxy}/pay/getsignkey`,
-		DOWNLOAD_FUND_FLOW: `${wxproxy}/pay/downloadfundflow`,
-		BATCH_QUERY_COMMENT:
-		`${wxproxy}/billcommentsp/batchquerycomment`,
-		QUERY_SETTLEMENT: `${wxproxy}/pay/settlementquery`,
-		// yes this is correct, spelling "exchange" correctly is difficult 🤷️
-		QUERY_EXCHANGE_RATE: '${wxproxy}/pay/queryexchagerate',
-	}
+	Object.assign(config, {
+		ticketUrl: `${wxproxy}/api.weixin.qq.com/cgi-bin/ticket/getticket`,
+		accessTokenUrl: `${wxproxy}/api.weixin.qq.com/cgi-bin/token`,
+		oAuthUrl: `${wxproxy}/open.weixin.qq.com/connect/oauth2/authorize`,
+		apiUrl: `${wxproxy}/api.weixin.qq.com`,
+		paymentUrls : {
+			UNIFIED_ORDER: `${wxproxy}/api.mch.weixin.qq.com/pay/unifiedorder`,
+			QUERY_ORDER: `${wxproxy}/api.mch.weixin.qq.com/pay/orderquery`,
+			CLOSE_ORDER: `${wxproxy}/api.mch.weixin.qq.com/pay/closeorder`,
+			REFUND: `${wxproxy}/api.mch.weixin.qq.com/secapi/pay/refund`,
+			QUERY_REFUND: `${wxproxy}/api.mch.weixin.qq.com/pay/refundquery`,
+			DOWNLOAD_BILL: `${wxproxy}/api.mch.weixin.qq.com/pay/downloadbill`,
+			SHORT_URL: `${wxproxy}/api.mch.weixin.qq.com/tools/shorturl`,
+			REPORT: `${wxproxy}/api.mch.weixin.qq.com/payitil/report`,
+			SIGN_KEY: `${wxproxy}/api.mch.weixin.qq.com/pay/getsignkey`,
+			DOWNLOAD_FUND_FLOW: `${wxproxy}/api.mch.weixin.qq.com/pay/downloadfundflow`,
+			BATCH_QUERY_COMMENT:
+			`${wxproxy}/api.mch.weixin.qq.com/billcommentsp/batchquerycomment`,
+			QUERY_SETTLEMENT: `${wxproxy}/api.mch.weixin.qq.com/pay/settlementquery`,
+			// yes this is correct, spelling "exchange" correctly is difficult 🤷️
+			QUERY_EXCHANGE_RATE: '${wxproxy}/api.mch.weixin.qq.com/pay/queryexchagerate',
+		}
+	})
 }
 const wx = new Wechat(config);
 
