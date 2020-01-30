@@ -35,13 +35,6 @@ const _noop=function() {};
 const supportedType={'WECHATPAYH5':{type:'WECHATPAY', method:'pay.h5pay'}, 'ALIPAYH5':{type:'ALIPAY', method:'pay.h5pay'}}
 , supportedCurrency=['CAD', 'USD'];
 
-var wxproxy, wxproxy_port;
-if (argv.wxproxy) {
-	var pp=argv.wxproxy.split(':');
-	wxproxy=pp[0];
-	wxproxy_port=pp[1]||3128;
-}
-
 var config = {
 	//set your oauth redirect url, defaults to localhost
 	"wechatRedirectUrl": `http://${argv.wxhost}/wechat/oauth-callback`,
@@ -56,23 +49,24 @@ var config = {
 	//default payment notify url
 	paymentNotifyUrl: `http://${argv.wehost}/wechatpay/pvd/snappay_base/wechat/done`,
 };
-if (wxproxy) {
+if (argv.wxproxy) {
+	var wxproxy=argv.wxproxy;
 	config.paymentUrls ={
-		UNIFIED_ORDER: `wxproxy/pay/unifiedorder`,
-		QUERY_ORDER: `wxproxy/pay/orderquery`,
-		CLOSE_ORDER: `wxproxy/pay/closeorder`,
-		REFUND: `wxproxy/secapi/pay/refund`,
-		QUERY_REFUND: `wxproxy/pay/refundquery`,
-		DOWNLOAD_BILL: `wxproxy/pay/downloadbill`,
-		SHORT_URL: `wxproxy/tools/shorturl`,
-		REPORT: `wxproxy/payitil/report`,
-		SIGN_KEY: `wxproxy/pay/getsignkey`,
-		DOWNLOAD_FUND_FLOW: `wxproxy/pay/downloadfundflow`,
+		UNIFIED_ORDER: `${wxproxy}/pay/unifiedorder`,
+		QUERY_ORDER: `${wxproxy}/pay/orderquery`,
+		CLOSE_ORDER: `${wxproxy}/pay/closeorder`,
+		REFUND: `${wxproxy}/secapi/pay/refund`,
+		QUERY_REFUND: `${wxproxy}/pay/refundquery`,
+		DOWNLOAD_BILL: `${wxproxy}/pay/downloadbill`,
+		SHORT_URL: `${wxproxy}/tools/shorturl`,
+		REPORT: `${wxproxy}/payitil/report`,
+		SIGN_KEY: `${wxproxy}/pay/getsignkey`,
+		DOWNLOAD_FUND_FLOW: `${wxproxy}/pay/downloadfundflow`,
 		BATCH_QUERY_COMMENT:
-		`wxproxy/billcommentsp/batchquerycomment`,
-		QUERY_SETTLEMENT: `wxproxy/pay/settlementquery`,
+		`${wxproxy}/billcommentsp/batchquerycomment`,
+		QUERY_SETTLEMENT: `${wxproxy}/pay/settlementquery`,
 		// yes this is correct, spelling "exchange" correctly is difficult 🤷️
-		QUERY_EXCHANGE_RATE: 'wxproxy/pay/queryexchagerate',
+		QUERY_EXCHANGE_RATE: '${wxproxy}/pay/queryexchagerate',
 	}
 }
 const wx = new Wechat(config);
