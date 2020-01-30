@@ -55,7 +55,6 @@ if (argv.wxproxy) {
 		ticketUrl: `${wxproxy}/api.weixin.qq.com/cgi-bin/ticket/getticket`,
 		accessTokenUrl: `${wxproxy}/api.weixin.qq.com/cgi-bin/token`,
 		oAuthUrl: `${wxproxy}/open.weixin.qq.com/connect/oauth2/authorize`,
-		apiUrl: `${wxproxy}/api.weixin.qq.com`,
 		paymentUrls : {
 			UNIFIED_ORDER: `${wxproxy}/api.mch.weixin.qq.com/pay/unifiedorder`,
 			QUERY_ORDER: `${wxproxy}/api.mch.weixin.qq.com/pay/orderquery`,
