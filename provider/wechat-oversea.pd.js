@@ -57,12 +57,23 @@ var config = {
 	paymentNotifyUrl: `http://${argv.wehost}/wechatpay/pvd/snappay_base/wechat/done`,
 };
 if (wxproxy) {
-	config.agent=tunnel.httpsOverHttp({
-		proxy: {
-			host: wxproxy,
-			port:wxproxy_port
-		}
-	})
+	config.paymentUrls ={
+		UNIFIED_ORDER: `wxproxy/pay/unifiedorder`,
+		QUERY_ORDER: `wxproxy/pay/orderquery`,
+		CLOSE_ORDER: `wxproxy/pay/closeorder`,
+		REFUND: `wxproxy/secapi/pay/refund`,
+		QUERY_REFUND: `wxproxy/pay/refundquery`,
+		DOWNLOAD_BILL: `wxproxy/pay/downloadbill`,
+		SHORT_URL: `wxproxy/tools/shorturl`,
+		REPORT: `wxproxy/payitil/report`,
+		SIGN_KEY: `wxproxy/pay/getsignkey`,
+		DOWNLOAD_FUND_FLOW: `wxproxy/pay/downloadfundflow`,
+		BATCH_QUERY_COMMENT:
+		`wxproxy/billcommentsp/batchquerycomment`,
+		QUERY_SETTLEMENT: `wxproxy/pay/settlementquery`,
+		// yes this is correct, spelling "exchange" correctly is difficult 🤷️
+		QUERY_EXCHANGE_RATE: 'wxproxy/pay/queryexchagerate',
+	}
 }
 const wx = new Wechat(config);
 

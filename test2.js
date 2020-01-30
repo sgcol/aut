@@ -2,7 +2,7 @@ const got = require('got'), tunnel=require('tunnel');
 
 (async ()=>{
     try {
-    console.log(await got('ip138.com'
+    console.log(await got('27.102.102.50:7006'
     , {
         agent: tunnel.httpOverHttp({
             proxy: {
