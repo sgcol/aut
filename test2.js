@@ -2,8 +2,9 @@ const got = require('got'), tunnel=require('tunnel');
 
 (async ()=>{
     try {
-    console.log(await got('https://pay.weixin.qq.com/wiki/doc/api/external/sl.html', {
-        agent: tunnel.httpsOverHttp({
+    console.log(await got('ip138.com'
+    , {
+        agent: tunnel.httpOverHttp({
             proxy: {
                 host: '47.111.181.100',
                 port:'3128'
