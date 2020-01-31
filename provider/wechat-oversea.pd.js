@@ -28,7 +28,7 @@ const url = require('url')
 , bodyParser =require('body-parser')
 , fs =require('fs-extra')
 , path =require('path')
-, tunnel =require('tunnel')
+, cookieParser = require('cookie-parser')
 
 
 const _noop=function() {};
@@ -767,18 +767,33 @@ function init(err, db) {
 		await updateOrder(params.orderId, {status:'创建H5', snappay_account:account, lasttime:new Date()});
 		// var jumpto=wx.oauth.generateOAuthUrl(argv.wxhost.substring(0, argv.wxhost.length-1), 'snsapi_base', params.orderId);
 		// var jumpto=wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, '/donothing'), 'snsapi_base', params.orderId);
-		var jumpto=wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, 'cc'), 'snsapi_base', params.orderId);
-		debugout(jumpto)
-		return callback(null, {
-			url:jumpto
-			, pay_type:params.type
-		});
+		callback({
+			url:url.resolve(argv.wxhost, '/wechatpay/cc')+'?state='+params.orderId
+			,pay_type:params.type
+		})
+		// var jumpto=wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, 'cc'), 'snsapi_base', params.orderId);
+		// debugout(jumpto)
+		// return callback(null, {
+		// 	url:jumpto
+		// 	, pay_type:params.type
+		// });
 	}
-	router.all('/wechat/cc', async (req, res)=>{
+	router.all('/wechat/cc', cookieParser(), async (req, res)=>{
 		try {
 			var params=Object.assign(req.query, req.body);
-			if (!params.code) throw '请勿自行访问本页面';
-			var {openid}=await wx.oauth.getUserBaseInfo(params.code);
+			if (!params.code || !params.state) throw '请勿自行访问本页面';
+			var key=req.cookies.k;
+			try {
+				if (!key) {
+					key=new ObjectID().toHexString();
+					res.cookie('k', key);
+					throw 'no key';
+				}
+				var {openid}=await wx.oauth.getUserBaseInfo(params.code, key);
+			} catch(e) {
+				debugout('no key or key expired');
+				return res.redirect(wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, 'cc'), 'snsapi_base', params.state));
+			}
 			debugout('got openid', openid);
 			// preorder
 			var order=await db.bills.findOne({_id:ObjectID(params.state)});
