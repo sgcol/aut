@@ -800,7 +800,7 @@ function init(err, db) {
 			// get signature
 			debugout(req.protocol+'://'+req.headers.host+req.originalUrl);
 			var [init_config, payData]=await Promise.all([
-				wx.jssdk.getSignature(req.protocol+'://'+req.headers.host+req.originalUrl),
+				wx.jssdk.getSignature(req.protocol+'://'+req.headers.host+'/wechatpay'+req.originalUrl),
 				wx.payment.generateChooseWXPayInfo(ret.prepay_id)
 			]);
 			payData.timeStamp=payData.timestamp;
