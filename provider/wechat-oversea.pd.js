@@ -767,7 +767,7 @@ function init(err, db) {
 		await updateOrder(params.orderId, {status:'创建H5', snappay_account:account, lasttime:new Date()});
 		// var jumpto=wx.oauth.generateOAuthUrl(argv.wxhost.substring(0, argv.wxhost.length-1), 'snsapi_base', params.orderId);
 		// var jumpto=wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, '/donothing'), 'snsapi_base', params.orderId);
-		callback({
+		callback(null, {
 			url:url.resolve(argv.wxhost, '/wechatpay/cc')+'?state='+params.orderId
 			,pay_type:params.type
 		})
@@ -781,7 +781,7 @@ function init(err, db) {
 	router.all('/wechat/cc', cookieParser(), async (req, res)=>{
 		try {
 			var params=Object.assign(req.query, req.body);
-			if (!params.code || !params.state) throw '请勿自行访问本页面';
+			if (!params.code && !params.state) throw '请勿自行访问本页面';
 			var key=req.cookies.k;
 			try {
 				if (!key) {
