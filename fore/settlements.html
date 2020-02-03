@@ -158,13 +158,13 @@
     <li class="nav-item">
       <a class="nav-link" href="fromuserlist.ae">
         <span class="menu-title">充值详单</span>
-        <i class="mdi mdi-human-greeting menu-icon"></i>
+        <i class="mdi mdi-view-list menu-icon"></i>
       </a>
     </li> 
     <li class="nav-item">
       <a class="nav-link" href="settlements.html">
         <span class="menu-title">结算清单</span>
-        <i class="mdi mdi-human-greeting menu-icon"></i>
+        <i class="mdi mdi-playlist-check menu-icon"></i>
       </a>
     </li> 
     
@@ -198,13 +198,13 @@
                   <div class="card">
                     <div class="card-body">
                       <div class="buttons-toolbar">
-                        <form class="form-inline" id="params">
+                        <!-- <form class="form-inline" id="params">
                           <div class="input-group input-group-sm">
                           </div>
                           <div class="form-group">
                             <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:getlist();"><i class="mdi mdi-magnify"></i></a>
                           </div>
-                        </form>     
+                        </form>      -->
                       </div>
                       <div class="table-responsive">
                       <table class="table table-hover" id="list"
@@ -216,24 +216,23 @@
                         data-show-columns="true"
                         data-show-pagination-switch="true"
                         data-buttons-class=" btn-sm btn-secondary"
-                        data-url="forecore/settlementOrders"
+                        data-url="forecore/settlements"
                         data-toolbar=".buttons-toolbar"
-                        data-response-handler="formatRes"
                        >
                         <thead>
-                            <th data-field="checkout" data-formatter="timestring" data-sortable="true">
+                            <th data-field="time" data-formatter="timestring" data-sortable="true" data-sort-order="desc">
                               结算时间
                             </th>
                             <th data-field="mchName" data-visible="true">
                               合作商
                             </th>  
-                            <th data-field="amount" data-sortable="true" data-visible="true">
-                              金额
+                            <th data-field="amount" data-formatter="showSettlement" data-sortable="true" data-visible="true">
+                              结算金额
                             </th>
                             <th data-field="currency" data-sortable="true">
                               currency
                             </th>    
-                            <th data-field="relative" data-sortable="false" data-formatter="showDownloadBtn">
+                            <th data-field="relative" data-sortable="false" data-formatter="showDownloadBtn"> 
                               详单
                             </th>
                         </thead>
@@ -280,6 +279,8 @@
   <script src="js/ejs.js"></script>
   <script src="js/admin.js"></script>
   <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <script src="js/FileSaver.min.js"></script>
+
   <!-- End custom js for this page-->
 </body>
 <script>
@@ -299,6 +300,12 @@
   function showop(value, record, rowIndex) {
     return `<button type="button" style="display:inline" class="btn btn-icon-sm btn-outline-primary" data-toggle="modal" data-target="#editSnapPayAccount" data-id="${rowIndex}"><i class="mdi mdi-key-change"></i></button>
           `
+  }
+  function showDownloadBtn(v, r, idx) {
+    return `<a type="button" style="padding-top:5.5px; text-align:center" class="btn btn-icon-sm btn-outline-primary" href="forecore/downloadOrdersInSettlement?id=${r._id}"><i class="mdi mdi-download"></i></a>`
+  }
+  function showSettlement(v, r) {
+    return (v*(1-(r.pc_fee||0.015))).toFixed(5);
   }
 </script>
 </html>

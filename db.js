@@ -32,11 +32,12 @@ var q=async.queue(function (extern_callback, queue_callback) {
         'snappay_orders',
         {'snappay_toll_accounts':{index:['disable', {key:{merchant_no:1}, name:'uni_merchant_no', unique:true}]}},
         'snappay_toll_settings',
-        {'snappay_base_accounts':{index:['disable', {key:{merchant_no:1}, name:'uni_merchant_no', unique:true}]}},
+        {'snappay_base_accounts':{index:['disable', {key:{mch_id:1}, name:'uni_mch_id', unique:true}]}},
         'snappay_base_settings',
         {'withdrawals':{index:['userid', 'done', {_t:-1, userid:1, money:1, name:-1}, 'money', 'name']}},
         {'settlements':{index:['time', 'mchId']}},
         {notify:{capped:true, size:100*1024, max:1000000, index:'read'}},
+        'forbidden',
         ]}, 
         function(err, db) {
           if (err) return cb(err);

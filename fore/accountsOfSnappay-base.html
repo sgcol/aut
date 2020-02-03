@@ -47,16 +47,12 @@
             <div class="form-group">
               <label for="name">name</label>
               <input type="text" class="form-control" id="name" placeholder="name">
-              <label for="app_id">app_id</label>
-              <input type="text" class="form-control" id="app_id" placeholder="app_id">
-              <label for="merchant_no">merchant_no</label>
-              <input type="text" class="form-control" id="merchant_no" placeholder="merchant_no">
-              <label for="key">key</label>
-              <input type="text" class="form-control" id="key" placeholder="key">
+              <label for="mch_id">微信分配的子商户id</label>
+              <input type="text" class="form-control" id="mch_id" placeholder="mch_id">
               <label for="supportedCurrency">supportedCurrency</label>
               <input type="text" class="form-control" id="supportedCurrency" placeholder="CAD">
               <label for="belongs">归属</label>
-              <input type="text" class="form-control" id="belongs" placeholder="合作商显示名">
+              <input type="text" class="form-control" id="belongs" placeholder="该账号只用于指定合作商">
             </div>
             <div class="form-group">
               <div class="form-check form-check">
@@ -86,7 +82,7 @@
           <div class="card-body">
             <label for="upload-photo" class="btn btn-gradient-primary">Upload</label>
             <input type="file" accept=".csv" id="upload-photo">
-            <p class="card-description">导入CSV文件的第一行必须包含<br>merchant_no, app_id, key, supportedCurrency, name</p>
+            <p class="card-description">导入CSV文件的第一行必须包含<br>mch_id, supportedCurrency, name</p>
           </div>
         </form>
       </div>
@@ -307,8 +303,8 @@
                       <h4 class="card-title">商户</h4>
                       <div class="buttons-toolbar">
                         <form class="form-inline" id="params">
-                          <button class="btn btn-sm btn-secondary mr-2" onclick="javascript:$('#editSnapPayAccount').modal()"><i class="mdi mdi-account-plus"></i></button>
-                          <button class="btn btn-sm btn-secondary mr-2" onclick="javascript:$('#addMultiSnapPayAccounts').modal()"><i class="mdi mdi mdi-account-multiple-plus"></i></button>
+                          <button class="btn btn-sm btn-secondary mr-2" id="newOne"><i class="mdi mdi-account-plus"></i></button>
+                          <button class="btn btn-sm btn-secondary mr-2" id="uploadMultiple"><i class="mdi mdi mdi-account-multiple-plus"></i></button>
                           <div class="input-group input-group-sm">
                             <div class="input-group-prepend">
                               <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-account-box"></i></span>
@@ -330,7 +326,7 @@
                         data-show-columns="true"
                         data-show-pagination-switch="true"
                         data-buttons-class=" btn-sm btn-secondary"
-                        data-url="pvd/snappay-toll/listAccounts"
+                        data-url="pvd/snappay_base/listAccounts"
                         data-toolbar=".buttons-toolbar"
                         data-response-handler="formatRes"
                         data-row-style="handleDisable">
@@ -356,7 +352,7 @@
                             <th data-field="daily" data-sortable="true" data-formatter="showincoming">净收入(日/总)</th>
                             <th data-field="gross.daily" data-sortable="true" data-formatter="showGrossIncoming">毛收入(日/总)</th>
                             <th data-field="succrate" data-sortable="true">成功率</th>
-                            <th data-field="" data-formatter="showop" data-min-width="130">
+                            <th data-field="" data-formatter="showop">
                               操作
                             </th>
                         </thead>
@@ -406,6 +402,16 @@
   <!-- End custom js for this page-->
 </body>
 <script>
+  $('#newOne').click((e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    $('#editSnapPayAccount').modal();
+  })
+  $('#uploadMultiple').click((e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    $('#addMultiSnapPayAccounts').modal();
+  })
   $('#editSnapPayAccount').on('shown.bs.modal', function (e) {
     $('#editSnapPayAccount form input, textarea').val('');
     var idx=$(e.relatedTarget).data('id');
@@ -437,7 +443,7 @@
         }
       });
       if (account) params._id=account._id;
-      accIntf('/pvd/snappay-toll/updateAccount', params, err=>{
+      accIntf('/pvd/snappay_base/updateAccount', params, err=>{
         if (err) return showerr(err);
         getlist();
       });
@@ -457,7 +463,7 @@
         var formData = new FormData();
         formData.append('file', file);
         $.ajax({
-          url : '/pvd/snappay-toll/uploadAccounts',
+          url : '/pvd/snappay_base/uploadAccounts',
           type : 'POST',
           data : formData,
           processData: false,  // tell jQuery not to process the data
@@ -525,7 +531,7 @@
     return res;
   }
   function remove(_id) {
-      accIntf('/pvd/snappay-toll/removeAccount', {_id:_id}, err=>{
+      accIntf('/pvd/snappay_base/removeAccount', {_id:_id}, err=>{
           if (err) return alert(err);
           getlist();
       });
@@ -534,5 +540,8 @@
     if (row.disable) return {css:{color:'grey', 'text-decoration':'line-through'}}
     return {};
   }
+  $('#accounts').on('refresh.bs.table', ()=>{
+    $('#params input').val('');
+  })
 </script>
 </html>

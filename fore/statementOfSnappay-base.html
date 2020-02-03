@@ -337,7 +337,7 @@
                           <th data-field="share" data-sortable="true" data-visible="false">
                             费率
                           </th>  
-                          <th data-field="amount" data-sortable="true" data-footer-formatter="showTotalAmount">日流水</th>
+                          <th data-field="amount" data-sortable="true" data-footer-formatter="showTotalAmount" data-formatter="showDailyIn">日流水</th>
                           <th data-field="profit" data-sortable="true" data-footer-formatter="showTotalProfit">日利润</th>
                         </thead>
                         <tbody id="list">
@@ -474,6 +474,12 @@
   function showGrossIncoming(value, record) {
     return `${value||0}/${record.gross?(record.gross.total||0):0} `;
   }
+  function showDailyIn(value, record) {
+    if (record.amount && record.refund) return (record.amount+record.refund).toFixed(2)+'(收 '+record.amount+'退 '+(-record.refund)+')';
+    if (record.refund) return record.refund;
+    if (record.amount) return record.amount;
+    return 0;
+  }
   var response;
   function formatRes(res) {
     if (res.err) return alert(res.err);
@@ -489,13 +495,14 @@
       record.orderCount=record.orderCount[0]||0;
       if (record.orderCount) record.succrate=''+(Math.round(record.succOrder/record.orderCount*10000)/100)+'%'
     })
-    res.total_amount=(res.total_amount||0).toFixed(2);
-    res.total_profit=(res.total_profit||0).toFixed(2);
+    res.total_amount=Number((res.total_amount||0).toFixed(2));
+    res.total_profit=Number((res.total_profit||0).toFixed(2));
+    res.total_refund=Number((res.total_refund||0).toFixed(2));
     response=res;
     return res;
   }
   function showTotalAmount(data) {
-    return response?response.total_amount:'';
+    return response?(response.total_amount+response.total_refund):'';
   }
   function showTotalProfit(data) {
     return response?response.total_profit:'';

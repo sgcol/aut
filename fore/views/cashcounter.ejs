@@ -2,22 +2,14 @@
   <head>
       <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   </head>
-  <body>
-    <div id="ee" style="left:876px;top:433px;position:relative;"></div>
-  </body>
 </html>
-<!-- <script src="/js/client.umd.js"></script> -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/eruda/1.5.8/eruda.min.js"></script>
 
 <script>
 function onBridgeReady(){
-  console.log('in wechat');
   WeixinJSBridge.invoke(
     'getBrandWCPayRequest', <%- JSON.stringify(payData) %>,
     function(res){
       if(res.err_msg == "get_brand_wcpay_request:ok" ){
-        // 使用以上方式判断前端返回,微信团队郑重提示：
-        //res.err_msg将在用户支付成功后返回ok，但并不保证它绝对可靠。
         location.href='<%= return_url %>';
       } 
     }
@@ -32,12 +24,5 @@ if (typeof WeixinJSBridge == "undefined"){
   }
 }else{
   onBridgeReady();
-}
-window.onload=()=>{
-  eruda.init();
-
-var pd=<%- JSON.stringify(payData)%>;
-
-  console.log(pd)
 }
 </script>

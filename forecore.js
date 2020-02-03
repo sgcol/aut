@@ -12,6 +12,7 @@ const router=require('express').Router()
 , decimalfy=require('./etc').decimalfy
 , dedecimal=require('./etc').dedecimal
 , objPath=require('object-path')
+, stringify=require('csv-stringify/lib/sync')
 , argv=require('yargs').argv
 
 const allPayType=['ALIPAYH5', 'WECHATPAYH5', 'UNIONPAYH5', 'ALIPAYAPP', 'WECHATPAYAPP', 'ALIPAYMINI', 'WECHATPAYMINI', 'ALIPAYPC', 'WECHATPAYPC', 'UNIONPAYPC'];
@@ -135,9 +136,10 @@ function start(err, db) {
 			if (!order.provider || !order.paidmoney) return callback('订单尚未支付');
 			var pvd=getProvider(order.provider);
 			if (!pvd) return callback('订单尚未支付');
-			if (!pvd.refund) return callback('提供方不支持退单')
-			var result=await pvd.refund(order, money);
-			await db.bills.updateOne({_id:order._id}, {$set:{status:'refund'}}, {w:1});
+			if (!pvd.refund) return callback('提供方不支持退单');
+			var merchant=await db.users.findOne({_id:partnerId});
+			var result=await pvd.refund(order, money, merchant);
+			// await db.bills.updateOne({_id:order._id}, {$set:{status:'refund'}}, {w:1});
 			callback(null, result);
 		} catch(e) {callback(e)}
 	}));
@@ -147,17 +149,40 @@ function start(err, db) {
 		if (this.req.auth.acl=='mrechant') cond.mchId=this.req.auth._id;
 		if (from) cond.time={$gte:from};
 		if (to) objPath.set(cond, 'time.$lte', to);
-		var cur=db.settlements.find(cond, {readPreference:'secondaryPreferred'});
+		var cur=db.settlements.find(cond, {readPreference:'secondaryPreferred', projection:{relative:0}});
+		var so={time:-1};
 		if (sort) {
 			var so={};
 			so[sort]=(order=='asc'?1:-1);
-			cur=cur.sort(so);
 		}
+		cur=cur.sort(so);
 		if (offset) cur=cur.skip(offset);
 		if (limit) cur=cur.limit(limit);
 
 		var [c, rows]=await Promise.all([cur.count(), cur.toArray()]);
 		return callback(null, {total:c, rows:rows});
+	}))
+	router.all('/downloadOrdersInSettlement', verifyAuth, httpf({id:'string', no_return:true}, async function(id) {
+		var res=this.res;
+		try {
+			var {relative}=await db.settlements.findOne({_id:ObjectId(id)}, {projection:{relative:1}});
+			if (!relative) throw '没有数据';
+			res.setHeader('Content-Type', 'application/octet-stream');
+			res.setHeader('Content-Disposition', 'attachment; filename=\"' + 'download-' + Date.now() + '.csv\"');
+			res.setHeader('Cache-Control', 'no-cache');
+  			res.setHeader('Pragma', 'no-cache');
+			var content=stringify(relative, 
+				{
+					header:true
+					, columns:Object.keys(relative[0])
+				}
+			)
+			res.write(content);
+			res.end();
+		} catch(e) {
+			res.send({err:e})
+		}
+
 	}))
 	router.all('/settleOrders', verifyMchSign, err_h, httpf({partnerId:'string', from:'date', to:'date', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, async function(partnerId, from, to, sort, order, offset, limit, callback) {
 		try {

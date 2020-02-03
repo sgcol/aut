@@ -80,10 +80,14 @@ exports.checkParams=function(params) {
 // get which those accounts availble
 var account, ipay88Limitation, ipay88Fee;
 (async function start(cb) {
-    var init_params=await Promise.all([
-        pify(getDB)(),
-        soap.createClientAsync('https://payment.ipay88.com.my/ePayment/WebService/MHGatewayService/GatewayService.svc?singleWsdl')
-    ]);
+    try {
+        var init_params=await Promise.all([
+            pify(getDB)(),
+            soap.createClientAsync('https://payment.ipay88.com.my/ePayment/WebService/MHGatewayService/GatewayService.svc?singleWsdl')
+        ]);
+    } catch(e) {
+        cb(e);
+    } 
     cb.apply(null, [null].concat(init_params));
 })(init);
 function init(err, db, soapClient) {

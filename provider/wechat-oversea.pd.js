@@ -300,12 +300,10 @@ var snappayGlobalSetting, snappayFee;
 })(init);
 function init(err, db) {
 	if (err) return console.log('启动snappay_base.pd失败', err);
-	router.all('/updateAccount', verifyAuth, verifyManager, httpf({_id:'?string', app_id:'?string', key:'?string', merchant_no:'?string', name:'?string', supportedCurrency:'?string', disable:'?boolean', callback:true}, 
-	function(id, app_id, key, merchant_no, name, supportedCurrency, disable, callback) {
+	router.all('/updateAccount', verifyAuth, verifyManager, httpf({_id:'?string', mch_id:'?string', name:'?string', supportedCurrency:'?string', disable:'?boolean', callback:true}, 
+	function(id, mch_id, name, supportedCurrency, disable, callback) {
 		var upd={}
-		app_id && (upd.app_id=app_id);
-		key &&(upd.key=key);
-		merchant_no &&(upd.merchant_no=merchant_no);
+		mch_id && (upd.mch_id=mch_id);
 		name && (upd.name=name);
 		supportedCurrency &&(upd.supportedCurrency=supportedCurrency);
 		disable!=null && (upd.disable=disable);
@@ -355,13 +353,13 @@ function init(err, db) {
 			if (accounts.length>10000) return res.send({err:'记录数超过了10000，每次提交请减少到10000以内'})
 			for (var i=0; i<accounts.length; i++) {
 				var acc=accounts[i];
-				if (!(acc.app_id &&acc.key &&acc.supportedCurrency && acc.merchant_no)) {
+				if (!(acc.mch_id &&acc.supportedCurrency)) {
 					accounts[i]=accounts[accounts.length-1];
 					accounts.pop();
 					i--;
 					continue;
 				}
-				acc.name=acc.name||acc.merchant_no;
+				acc.name=acc.name||acc.mch_id;
 				acc.createTime=now;
 				// acc._id=acc.merchant_no;
 				count++;
@@ -468,7 +466,7 @@ function init(err, db) {
 					item.snappay_result=undefined;
 					Object.assign(item, snappay_result);
 					item._id=item._id.toHexString()
-					item.snappayFee=snappayFee*100;
+					item.snappayFee=(snappayFee*100).toFixed(2);
 					if (item.paidmoney>0) {
 						item.sp_fee=item.paidmoney*(item.sp_fee||snappayFee);
 						item.ap_fee=item.paidmoney*(item.ap_fee || 0.006);
@@ -476,8 +474,9 @@ function init(err, db) {
 						item.fee=Math.floor((item.paidmoney-item.net)*10000)/10000;
 						item.pc_fee=item.net*item.pc_fee;
 					} else {
-						item.sp_fee=item.ap_fee=item.fee=item.pc_fee='0.0';
+						item.sp_fee=item.ap_fee=item.fee='0.0';
 						item.net=item.paidmoney;
+						item.pc_fee=item.net*item.pc_fee;
 					}
 					renameKeys(item, mapper);
 				});
@@ -493,7 +492,8 @@ function init(err, db) {
 							amount:item.amount,
 							currency:item._id.currency,
 							mchId:item._id.mchId,
-							mchName: objPath.get(item, ['userData', 0, 'name'], '')
+							mchName: objPath.get(item, ['userData', 0, 'name'], ''),
+							pc_fee: objPath.get(item, ['userData', 0, 'pc_fee'], 0.015)
 						}, objPath.get(item, ['userData', 0, 'providers', 'snappay_base'], {})));
 					} else {
 						objPath.push(cond, 'userid.$nin', item._id.mchId);
@@ -531,7 +531,11 @@ function init(err, db) {
 				if (!testMode) {
 					await db.bills.updateMany(cond, {$set:{checkout:checkoutTime}});
 					BTFs.forEach((arr)=>{
-						db.settlements.insertMany(arr.map(v=>Object.assign({time:checkoutTime}, v)));
+						db.settlements.insertMany(arr.map(v=>Object.assign({time:checkoutTime}, v, 
+						{
+							relative:rec.map((item)=>{
+							return {outOrderId:item.merchantOrderId||item.relative, orderId:item._id, type:item.money>0?'charge':'refund', orderMoney:item.money, recieved:item.paidmoney, settlement:(item.paidmoney-item.sp_fee-item.ap_fee-item.pc_fee).toFixed(5), time:item.time}
+						})})));
 					})
 					files.forEach((fi)=>{
 						fs.outputFile(path.join(__dirname, '../fore/payments/', ''+checkoutTime.getTime(), fi.name), fi.content)
@@ -582,8 +586,26 @@ function init(err, db) {
 			cond.time=cond.time||{};
 			cond.time.$lt=to;
 		}
-		cond.provider='snappay_base';cond.used=true;cond.status={$ne:'refund'}
-		var groupby={currency:'$currency', mchId:'$userid'}, af={holding:{$multiply:['$money', '$share', 100]}};
+		cond.provider='snappay_base';
+		//cond.used=true;cond.status={$ne:'refund'}
+		cond.status={$in:['SUCCESS', 'refund', 'refundclosed', 'complete', '通知商户', '通知失败']}
+		var groupby={currency:'$currency', mchId:'$userid'}, 
+		af={
+			holding:{
+				$cond:[
+					{$gte:['$money', 0]},					// if money>0
+					{$multiply:['$money', '$share', 100]},	// then money*share*100
+					0										// else 0
+				]
+			},
+			refund:{
+				$cond:[
+					{$lt:['$money', 0]},					// if money<0
+					{$multiply:['$money', 100]},				// then money*100
+					0										// else 0
+				]
+			}
+		};
 		if(!cond.time) {
 			//不指定时间按照天统计
 			af.dot={$dateToString:{date:'$time', format:'%Y%m%d'}};
@@ -594,7 +616,7 @@ function init(err, db) {
 		var cursor =dbBills.aggregate([
 			{$match:cond},
 			{$addFields:af},
-			{$group:{_id:groupby, amount:{$sum:{$floor:'$holding'}}, net:{$sum: '$net'}, count:{$sum:1}, profit:{$sum:'$profit'}}},
+			{$group:{_id:groupby, amount:{$sum:{$floor:'$holding'}}, net:{$sum: '$net'}, refund:{$sum:{$floor:'$refund'}}, count:{$sum:1}, profit:{$sum:'$profit'}}},
 			{$lookup:{
 				localField:'_id.mchId',
 				from:'users',
@@ -616,13 +638,14 @@ function init(err, db) {
 					share:'$userData.share',
 					amount:{$divide:['$amount', 100]},
 					profit:{$subtract:['$net', {$divide:['$amount', 100]}]},
+					refund:{$divide:['$refund', 100]},
 					count:'$count',
 					time:'$time',
 					succOrder:'$userData.succOrder', 
 					orderCount: '$userData.orderCount'
 				}
 			}},
-			{$group:{_id:null, total:{$sum:1}, total_count:{$sum:'$doc.count'}, total_amount:{$sum:'$doc.amount'}, total_profit:{$sum:'$doc.profit'}, rows:{$push:'$doc'}}},
+			{$group:{_id:null, total:{$sum:1}, total_count:{$sum:'$doc.count'}, total_amount:{$sum:'$doc.amount'}, total_refund:{$sum:'$doc.refund'}, total_profit:{$sum:'$doc.profit'}, rows:{$push:'$doc'}}},
 		]);
 		if (sort) {
 			var so={};
@@ -694,7 +717,7 @@ function init(err, db) {
 		});
 	}
 
-	async function bestAccount(money, merchantData, userid, currency) {
+	async function bestAccount(money, merchantid, userid, currency, openid) {
 		if (process.env.NODE_ENV=='debugmode') {
 			if (currency!='CAD') return null;
 			return {_id:'testAccount', mch_id:'224339062', supportedCurrency:'CAD'}
@@ -702,7 +725,11 @@ function init(err, db) {
 		if (merchantData.debugMode) {
 			var [acc]= await db.snappay_base_accounts.find({name:'测试', supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
 		}
-		else var [acc]= await db.snappay_base_accounts.find({disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
+		else {
+			var isBlocked=await db.forbidden.findOne({_id:openid});
+			if (isBlocked) throw '系统无法提供服务';
+			var [acc]= await db.snappay_base_accounts.find({disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
+		}
 		return acc;
 	}
 	function retreiveClientIp(req) {
@@ -756,15 +783,15 @@ function init(err, db) {
 			if (err) throw err;
 			else return r
 		});
-		if (params.providerSpec) {
-			var spec=params.providerSpec;
-			params.providerSpec=undefined
-			params=Object.assign(spec, params);
-		}
-		var account =await bestAccount(params.money, params.merchant, params.userId, params.currency);
-		if (!account) return callback('没有可用的收款账户');
+		// if (params.providerSpec) {
+		// 	var spec=params.providerSpec;
+		// 	params.providerSpec=undefined
+		// 	params=Object.assign(spec, params);
+		// }
+		// var account =await bestAccount(params.money, params.merchant, params.userId, params.currency);
+		// if (!account) return callback('没有可用的收款账户');
 		// build a wechat h5 page
-		await updateOrder(params.orderId, {status:'创建H5', snappay_account:account, lasttime:new Date()});
+		updateOrder(params.orderId, {status:'创建Url', lasttime:new Date()});
 		// var jumpto=wx.oauth.generateOAuthUrl(argv.wxhost.substring(0, argv.wxhost.length-1), 'snsapi_base', params.orderId);
 		// var jumpto=wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, '/donothing'), 'snsapi_base', params.orderId);
 		callback(null, {
@@ -796,7 +823,11 @@ function init(err, db) {
 			}
 			debugout('got openid', openid);
 			// preorder
+			// build a wechat h5 page
+
 			var order=await db.bills.findOne({_id:ObjectID(params.state)});
+			var account =await bestAccount(order.money, order.userid, order.mer_userid, order.currency, openid);
+			if (!account) throw '没有可用的收款账户';
 			var ret =await wx.payment.unifiedOrder({
 				out_trade_no:params.state,
 				body:objPath.get(order, 'desc', 'Goods'),
@@ -811,23 +842,30 @@ function init(err, db) {
 			ret=ret.responseData;
 			if (ret.return_code!='SUCCESS') throw ret.return_msg;
 			if (ret.result_code!='SUCCESS') throw ret.err_code_des;
-			updateOrder(params.state, {status:'进入收银台', lasttime:new Date(), wechat_unifiedorder:ret});
+			updateOrder(params.state, {status:'进入收银台', snappay_account:account, lasttime:new Date(), wechat_unifiedorder:ret});
 			// get signature
-			debugout(req.protocol+'://'+req.headers.host+req.originalUrl);
-			var [init_config, payData]=await Promise.all([
-				wx.jssdk.getSignature(req.protocol+'://'+req.headers.host+'/wechatpay'+req.originalUrl),
-				wx.payment.generateChooseWXPayInfo(ret.prepay_id)
-			]);
+			var payData=await wx.payment.generateChooseWXPayInfo(ret.prepay_id);
 			payData.timeStamp=payData.timestamp;
 			delete payData.timestamp;
-			var ccdata={init_config:Object.assign(init_config, {jsApiList:['chooseWXPay']}), payData:Object.assign({appId:config.appId}, payData), return_url:order.return_url||url.resolve(argv.wxhost, 'pvd/snappay_base/return')}
+			var ccdata={
+				payData:Object.assign({appId:config.appId}, payData), 
+				return_url:order.return_url||url.resolve(argv.wxhost, 'pvd/snappay_base/return')
+			}
 			debugout('pay params', ccdata)
 			res.render('cashcounter', ccdata);
 		}catch(e) {
 			debugout(e);
-			return res.render('error', {err:e.errmsg||JSON.stringify(e)})
+			updateOrder(params.state, {status:'error', snappay_account:account, lasttime:new Date(), wechat_unifiedorder:ret, error:e});
+			return res.render('error', {err:errstr(e)})
 		}
 	})
+	function errstr(e) {
+		if (typeof e=='string') return e;
+		if (typeof e.message=='string') return e.message;
+		if (typeof e.msg=='string') return e.msg;
+		if (typeof e.errmsg=='string') return e.errmsg;
+		return JSON.stringify(e);
+	}
 	queryOrder=async (order, callback)=>{
 		callback=callback||((err, r)=>{
 			if (err) throw err;
@@ -862,7 +900,7 @@ function init(err, db) {
 			rate:ret.rate/100000000
 		}, orderInfo));
 	}
-	refund =async function(orderData, money, callback) {
+	refund =async function(orderData, money, merchant, callback) {
 		callback=callback||((err, r)=>{
 			if (err) throw err;
 			else return r
@@ -895,7 +933,7 @@ function init(err, db) {
 			// get money back
 			return callback(ret.err_code_des||ret.return_msg);
 		}
-		db.bills.insertOne(decimalfy({_id:refundOrderId, money:-money, paidmoney:-money, share:1, provider:'snappay_base', providerOrderId:ret.refund_id, currency:orderData.currency, relative:orderData._id.toHexString(), userid:orderData.userid, sub_mch_id:orderData.snappay_account.mch_id, type:'refund', status:'REFUNDING', time:new Date()}));
+		db.bills.insertOne(decimalfy({_id:refundOrderId, money:-money, paidmoney:-money, share:1, sp_fee:merchant.sp_fee, ap_fee:merchant.ap_fee, pc_fee:merchant.pc_fee, provider:'snappay_base', providerOrderId:ret.refund_id, currency:orderData.currency, relative:orderData._id.toHexString(), userid:orderData.userid, sub_mch_id:orderData.snappay_account.mch_id, type:'refund', status:'REFUNDING', time:new Date()}));
 		return callback(null, {trans_no:ret.refund_id, out_order_no:orderData.merchantOrderId, out_refund_no:refundOrderId.toHexString(), refund:ret.refund_fee/100, trans_status:'REFUNDING'});
 	}
 	var today=new Date();

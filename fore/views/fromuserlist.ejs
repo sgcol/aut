@@ -124,7 +124,7 @@
                              <th data-field="lasttime" data-formatter="timestring">
                                改变时间
                              </th>
-                             <th data-formatter="showOp">
+                             <th data-formatter="showOp" data-events="ops">
                                操作
                              </th>
                            </tr>
@@ -216,15 +216,34 @@ function showProviderOrderId(v, record) {
   return v||record.merchantOrderId;
 }
 function showOp(v, o) {
-  var ret=`<form class="form-inline"><button class="btn btn-outline-primary btn-icon-sm tooltipfy mr-sm-2" title="重发通知" onclick="javascript:sendNotify('${o._id}')"><i class="mdi mdi-replay"></i></button>`;
+  var ret=`<form class="form-inline"><button class="btn resend btn-outline-primary btn-icon-sm tooltipfy mr-sm-2" title="重发通知""><i class="mdi mdi-replay"></i></button>`;
   <% if (forecoreOnly) { %>
-      ret+=`<button class="btn btn-outline-warning btn-icon-sm tooltipfy mr-sm-2" title="退单" onclick="javascript:refund('${o._id}')"><i class="mdi mdi-send"></i></button>`
+      ret+=`<button class="btn refund btn-outline-warning btn-icon-sm tooltipfy mr-sm-2" title="退单"><i class="mdi mdi-send"></i></button>`
   <% } %>
   <% if (acl=='admin') { %>
-    ret+=`<button class="btn btn-outline-danger btn-icon-sm tooltipfy mr-sm-2" title="强制结单" onclick="javascript:forceconfirm('${o._id}')"><i class="mdi mdi-archive"></i></button>`;
+    ret+=`<button class="btn confirm btn-outline-danger btn-icon-sm tooltipfy mr-sm-2" title="强制结单"><i class="mdi mdi-archive"></i></button>`;
   <% } %>
     ret+='</form>'
   return ret;
+}
+window.ops={
+  'click .resend':(e, v, r, idx)=> {
+    e.preventDefault();
+    e.stopPropagation();
+    sendNotify(r._id);
+  },
+  'click .refund':(e, v, r, idx)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    refund(r._id);
+  },
+  <% if (acl=='admin') {%>
+  'click .confirm':(e, v, r, idx)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    forceconfirm(r._id);
+  }
+  <% } %>
 }
 function getProp(o, path) {
   if (typeof path=='string') {
