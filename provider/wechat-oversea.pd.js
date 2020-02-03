@@ -564,6 +564,12 @@ function init(err, db) {
 		zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
 		.pipe(res)
 	}))
+	router.all('/availbeAccounts', verifyAuth, verifyManager, httpf({belongs:'string', callback:true}, async function(belongs, callback) {
+		try {
+			return callback(null, {rows:await db.snappay_toll_accounts.find({belongs:{$in:[null, belongs]}}).toArray()});
+		} catch(e) {return callback(e)}
+	}))
+
 	router.all('/settings', verifyAuth, verifyManager, httpf({settings:'?object', callback:true}, function(settings, callback) {
 		if (!settings) return db.snappay_base_settings.findOne({_id:'setting'}, (err, r)=>{
 			if (err) return callback(err);
