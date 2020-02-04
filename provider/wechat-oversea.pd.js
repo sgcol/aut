@@ -670,6 +670,7 @@ function init(err, db) {
 		res.send('充值完成');
 	})
 	router.all('/done', bodyParser.text(), async function(req, res) {
+		debugout('done', req.body)
 		try {
 			var data =await wx.payment.parseNotifyData(req.body);
 			const sign = data.sign;
@@ -681,6 +682,7 @@ function init(err, db) {
 			const genSignData = wx.payment.generateSignature(data, data.sign_type);
 			//case test, only case 6 will return sign
 			if (sign != genSignData.sign) {
+				debugout('sign err', genSignData.sign, sign);
 				var ret=await wx.payment.replyData(false);
 				return res.send(ret);
 			}
@@ -690,6 +692,7 @@ function init(err, db) {
 			var ret =wx.payment.replyData(true)
 			return res.send(ret);
 		} catch(e) {
+			debugout(e);
 			res.send(await wx.payment.replyData(false));
 		}
     })
