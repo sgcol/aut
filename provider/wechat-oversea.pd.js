@@ -670,7 +670,7 @@ function init(err, db) {
 		res.send('充值完成');
 	})
 	router.all('/done', bodyParser.text(), async function(req, res) {
-		debugout('done', req.body)
+		debugout('done', req.headers, req.body)
 		try {
 			var data =await wx.payment.parseNotifyData(req.body);
 			const sign = data.sign;
