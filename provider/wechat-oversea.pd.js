@@ -669,7 +669,7 @@ function init(err, db) {
 	router.all('/return', (req, res)=>{
 		res.send('充值完成');
 	})
-	router.all('/done', /*bodyParser.text(), */async function(req, res) {
+	router.all('/done', bodyParser.text({type:'text/*'}), async function(req, res) {
 		debugout('done', req.headers, req.body)
 		try {
 			var data =await wx.payment.parseNotifyData(req.body);
@@ -689,7 +689,7 @@ function init(err, db) {
 			const tradeNo = data.out_trade_no;
 			//sign check and send back
 			await pify(makeItDone)(tradeNo, data);
-			var ret =wx.payment.replyData(true)
+			var ret =await wx.payment.replyData(true)
 			return res.send(ret);
 		} catch(e) {
 			debugout(e);
@@ -761,7 +761,7 @@ function init(err, db) {
 			var ret =await api.unifiedOrder({
 				out_trade_no:params.orderId,
 				body:params.desc||'Goods',
-				notify_url: url.resolve(params._host, '../../pvd/wechat-oversea/done'),
+				notify_url: url.resolve(params._host, 'http://27.102.102.50:7007', '../../pvd/wechat-oversea/done'),
 				spbill_create_ip : retreiveClientIp(params._req),
 				sub_mch_id :account.mch_id||account.sub_mch_id,
 				fee_type : params.currency,

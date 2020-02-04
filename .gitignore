@@ -11,4 +11,4 @@ otc/Application/Common/Conf/config.php
 outsource/
 app/
 
-provider/wechat-oversea.pd.js
+wechat-info.json
