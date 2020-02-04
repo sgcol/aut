@@ -834,12 +834,13 @@ function init(err, db) {
 			var order=await db.bills.findOne({_id:ObjectID(params.state)});
 			var account =await bestAccount(order.money, order.userid, order.mer_userid, order.currency, openid);
 			if (!account) throw '没有可用的收款账户';
+			debugout('use acc', account);
 			var uo_data={
 				out_trade_no:params.state,
 				body:objPath.get(order, 'desc', 'Goods'),
 				notify_url: url.resolve(argv.wxhost, 'pvd/snappay_base/done'),
 				spbill_create_ip : retreiveClientIp(req),
-				sub_mch_id :objPath.get(order, 'snappay_account.mch_id')||objPath.get(order, 'snappay_account.sub_mch_id'),
+				sub_mch_id :account.mch_id||account.sub_mch_id,
 				fee_type : objPath.get(order, 'currency', 'CAD'),
 				total_fee : Math.floor(objPath.get(order, 'money', 0)*100),
 				openid:openid
