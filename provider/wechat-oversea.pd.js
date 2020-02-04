@@ -669,7 +669,7 @@ function init(err, db) {
 	router.all('/return', (req, res)=>{
 		res.send('充值完成');
 	})
-	router.all('/done', bodyParser.text(), async function(req, res) {
+	router.all('/done', /*bodyParser.text(), */async function(req, res) {
 		debugout('done', req.headers, req.body)
 		try {
 			var data =await wx.payment.parseNotifyData(req.body);

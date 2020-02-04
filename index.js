@@ -150,6 +150,7 @@ function initmode(db, cb) {
 	app.use(cookieParser());
 	app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 	app.use(bodyParser.json());
+	app.use(bodyParser.text());
 	app.all('/createAdmin', httpf({u:'string', p:'string', callback:true}, function(username, password, callback) {
 		var salt=randomstring();
 		db.users.insertOne({_id:username, password:md5(salt+password), salt:salt, acl:'admin', name:'超级管理员', createTime:new Date()}, err=>{
