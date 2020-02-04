@@ -834,7 +834,7 @@ function init(err, db) {
 			var order=await db.bills.findOne({_id:ObjectID(params.state)});
 			var account =await bestAccount(order.money, order.userid, order.mer_userid, order.currency, openid);
 			if (!account) throw '没有可用的收款账户';
-			var ret =await wx.payment.unifiedOrder({
+			var uo_data={
 				out_trade_no:params.state,
 				body:objPath.get(order, 'desc', 'Goods'),
 				notify_url: url.resolve(argv.wxhost, 'pvd/snappay_base/done'),
@@ -843,8 +843,9 @@ function init(err, db) {
 				fee_type : objPath.get(order, 'currency', 'CAD'),
 				total_fee : Math.floor(objPath.get(order, 'money', 0)*100),
 				openid:openid
-			});
-			debugout('preorder', ret);
+			};
+			var ret =await wx.payment.unifiedOrder(uo_data);
+			debugout('preorder', uo_data, ret);
 			ret=ret.responseData;
 			if (ret.return_code!='SUCCESS') throw ret.return_msg;
 			if (ret.result_code!='SUCCESS') throw ret.err_code_des;
@@ -916,13 +917,15 @@ function init(err, db) {
 		var dbBills=db.db.collection('bills', {readPreference:'secondaryPreferred', readConcern:{level:'majority'}});
 		var [b]=await dbBills.aggregate([
 			{$match:{provider:'snappay_base', status:{$in:['SUCEESS', 'REFUNDING', 'refundclosed', 'refund', 'complete', '通知商户', '通知失败']}, checkout:null}},
+			{$addFields:{holding:{$multiply:['$paidmoney', '$share']}}},
 			{$group:
 				{
 					_id:'balance',
-					'amount':{$sum:'$paidmoney'}
+					'amount':{$sum:'$holding'}
 				}
 			}
 		]).toArray();
+		if (!b) return callback('余额不足');
 		var balance=dedecimal(b).amount;
 		// var {balance}=await db.users.findOneAndUpdate({_id:orderData.userid, balance:{$gte:money}}, {$inc:{balance:-money}});
 		if (balance<money) return callback('余额不足');
@@ -968,7 +971,10 @@ function init(err, db) {
 					out_trade_no: order.relative,
 					refund_id:order.providerOrderId
 				});
-				if (ret.return_code!='SUCCESS' || ret.result_code!='SUCCESS') return;
+				if (ret.return_code!='SUCCESS' || ret.result_code!='SUCCESS') {
+					db.bills.updateOne({_id:order._id}, {$set:{wechat_result:ret, lasttime:new Date()}});
+					return;
+				}
 				switch (ret.refund_status_0) {
 					case 'SUCCESS':
 						db.bills.updateOne({_id:order._id}, {$set:{status:'SUCCESS', lasttime:new Date()}})

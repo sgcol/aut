@@ -100,7 +100,7 @@
                              <th data-field="mername">
                                商户
                              </th>
-                             <th data-field="merchantOrderId">
+                             <th data-field="merchantOrderId" data-formatter="showOrderId">
                                商户单号
                              </th>
                              <th data-field="provider" data-formatter="showProvider">
@@ -215,7 +215,12 @@ function showProvider(v) {
 function showProviderOrderId(v, record) {
   return v||record.merchantOrderId;
 }
+function showOrderId(v, r) {
+  if (r.type=='refund') return r.relative;
+  return v;
+}
 function showOp(v, o) {
+  if (o.type=='refund') return; // no op if this was a refund order
   var ret=`<form class="form-inline"><button class="btn resend btn-outline-primary btn-icon-sm tooltipfy mr-sm-2" title="重发通知""><i class="mdi mdi-replay"></i></button>`;
   <% if (forecoreOnly) { %>
       ret+=`<button class="btn refund btn-outline-warning btn-icon-sm tooltipfy mr-sm-2" title="退单"><i class="mdi mdi-send"></i></button>`
@@ -258,13 +263,18 @@ function getProp(o, path) {
   return out;
 }
 <% if (acl=='admin'||acl=='manager') { %>
+function formatJson(o) {
+  if (!o) return null;
+  return JSON.stringify(o);
+}
 function showDetail(index, row) {
   var data=$('#orderlist').bootstrapTable('getData');
   data=data[index];
+  if (data.type=='refund' && data.wechat_result) return `<p>${formatJson(data.wechat_result)}</p>`;
   if (!data.snappay_account) return '<p>--</p>'
-  var ret=`<p>snappay_account:${getProp(data, 'snappay_account.name')} ${getProp(data, 'snappay_account.supportedCurrency')} ${Math.floor(getProp(data, 'snappay_account.succrate')*100)}% ${getProp(data, 'snappay_account.total')}</p>
-  <p>partner return ${JSON.stringify(data.merchant_return)}</p>
-  `
+  var ret=`<p>snappay_account:${getProp(data, 'snappay_account.name')} ${getProp(data, 'snappay_account.supportedCurrency')} ${Math.floor(getProp(data, 'snappay_account.succrate')*100)}% ${getProp(data, 'snappay_account.total')}</p>`
+  if (data.merchant_return) ret+=`<p>partner return ${JSON.stringify(data.merchant_return)}</p>`
+  
   return ret;
 }
 <% } %>
