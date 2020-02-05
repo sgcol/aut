@@ -403,7 +403,7 @@ function init(err, db) {
 			await session.withTransaction(async ()=>{
 				// lock the transaction;
 				await db.bills.findOneAndUpdate({_id:'btf_lock'}, {$set:{time:checkoutTime, lock:new ObjectID()}}, {upsert:true});
-				var cond={time:{$lt:to}, provider:'snappay_base', status:{$in:['SUCCESS', 'refundclosed', 'refund', 'complete', '已支付', '通知商户', '通知失败']}, checkout:null};
+				var cond={time:{$lt:to}, provider:'snappay_base', status:{$in:['SUCCESS', 'refundclosed', 'refund', 'refunding', 'complete', '已支付', '通知商户', '通知失败']}, checkout:null};
 				var rec=await db.bills.find(cond).sort({time:1}).toArray();
 				if (!rec.length) return callback('没有记录');
 				// var rec=await dbBills.find({checkout:checkoutTime}).sort({time:1}).toArray();
@@ -920,7 +920,7 @@ function init(err, db) {
 
 		var dbBills=db.db.collection('bills', {readPreference:'secondaryPreferred', readConcern:{level:'majority'}});
 		var [b]=await dbBills.aggregate([
-			{$match:{provider:'snappay_base', status:{$in:['SUCEESS', 'REFUNDING', 'refundclosed', 'refund', 'complete', '已支付', '通知商户', '通知失败']}, checkout:null}},
+			{$match:{provider:'snappay_base', status:{$in:['SUCEESS', 'REFUNDING', 'refundclosed', 'refund', 'refunding', 'complete', '已支付', '通知商户', '通知失败']}, checkout:null}},
 			{$addFields:{holding:{$multiply:['$paidmoney', '$share']}}},
 			{$group:
 				{
@@ -943,10 +943,24 @@ function init(err, db) {
 		}
 		var ret=await wx.payment.refund(data);
 		if (ret.return_code!='SUCCESS' || ret.result_code!='SUCCESS') {
+			if (ret.err_code_des=="订单已全额退款") {
+				await Promise.all([
+					db.bills.updateOne({relative:orderData._id.toHexString()}, 
+						{
+							$set:{status:'SUCCESS', wechat_result:ret, lasttime:new Date()},
+							$setOnInsert:decimalfy({_id:refundOrderId, money:-money, paidmoney:-money, share:1, sp_fee:merchant.sp_fee, ap_fee:merchant.ap_fee, pc_fee:merchant.pc_fee, provider:'snappay_base', providerOrderId:ret.refund_id, currency:orderData.currency, relative:orderData._id.toHexString(), userid:orderData.userid, merchantid:orderData.merchantid, sub_mch_id:orderData.snappay_account.mch_id, type:'refund', time:new Date()})
+						},
+						{upsert:true,w:1}
+					),
+					db.bills.updateOne({_id:orderData._id}, {$set:{status:'refund', lasttime:new Date()}})
+				]);
+				return callback(null, {trans_no:ret.refund_id, out_order_no:orderData.merchantOrderId, out_refund_no:refundOrderId.toHexString(), refund:ret.refund_fee/100, trans_status:'SUCCESS'});
+			}
 			// get money back
 			return callback(ret.err_code_des||ret.return_msg);
 		}
-		db.bills.insertOne(decimalfy({_id:refundOrderId, money:-money, paidmoney:-money, share:1, sp_fee:merchant.sp_fee, ap_fee:merchant.ap_fee, pc_fee:merchant.pc_fee, provider:'snappay_base', providerOrderId:ret.refund_id, currency:orderData.currency, relative:orderData._id.toHexString(), userid:orderData.userid, sub_mch_id:orderData.snappay_account.mch_id, type:'refund', status:'REFUNDING', time:new Date()}));
+		db.bills.insertOne(decimalfy({_id:refundOrderId, money:-money, paidmoney:-money, share:1, sp_fee:merchant.sp_fee, ap_fee:merchant.ap_fee, pc_fee:merchant.pc_fee, provider:'snappay_base', providerOrderId:ret.refund_id, currency:orderData.currency, relative:orderData._id.toHexString(), userid:orderData.userid, merchantid:orderData.merchantid, sub_mch_id:orderData.snappay_account.mch_id, type:'refund', status:'REFUNDING', time:new Date()}));
+		db.bills.updateOne({_id:orderData._id}, {$set:{status:'refunding', lasttime:new Date()}});
 		return callback(null, {trans_no:ret.refund_id, out_order_no:orderData.merchantOrderId, out_refund_no:refundOrderId.toHexString(), refund:ret.refund_fee/100, trans_status:'REFUNDING'});
 	}
 	var today=new Date();
@@ -970,11 +984,12 @@ function init(err, db) {
 		try {
 			var orders=await db.bills.find({status:'REFUNDING'}).toArray();
 			orders.forEach(async (order)=> {
-				var ret =await wx.payment.queryRefund({
+				var {responseData} =await wx.payment.queryRefund({
 					sub_mch_id:order.sub_mch_id,
 					out_trade_no: order.relative,
 					refund_id:order.providerOrderId
 				});
+				var ret=responseData;
 				if (ret.return_code!='SUCCESS' || ret.result_code!='SUCCESS') {
 					db.bills.updateOne({_id:order._id}, {$set:{wechat_result:ret, lasttime:new Date()}});
 					return;
@@ -982,6 +997,7 @@ function init(err, db) {
 				switch (ret.refund_status_0) {
 					case 'SUCCESS':
 						db.bills.updateOne({_id:order._id}, {$set:{status:'SUCCESS', lasttime:new Date()}})
+						db.bills.updateOne({_id:ObjectID(order.relative)}, {$set:{status:'refund', lasttime:new Date()}});
 						break;
 					case 'REFUNDCLOSE':
 						db.bills.updateOne({_id:order._id}, {$set:{status:'CLOSE'}});
