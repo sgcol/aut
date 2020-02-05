@@ -265,7 +265,7 @@ function getProp(o, path) {
 <% if (acl=='admin'||acl=='manager') { %>
 function formatJson(o) {
   if (!o) return null;
-  return JSON.stringify(o);
+  return JSON.stringify(o, null, ' ');
 }
 function showDetail(index, row) {
   var data=$('#orderlist').bootstrapTable('getData');

@@ -59,7 +59,7 @@ if (argv.wxproxy) {
 			UNIFIED_ORDER: `${wxproxy}/api.mch.weixin.qq.com/pay/unifiedorder`,
 			QUERY_ORDER: `${wxproxy}/api.mch.weixin.qq.com/pay/orderquery`,
 			CLOSE_ORDER: `${wxproxy}/api.mch.weixin.qq.com/pay/closeorder`,
-			REFUND: `${wxproxy}/api.mch.weixin.qq.com/secapi/pay/refund`,
+			// REFUND: `${wxproxy}/api.mch.weixin.qq.com/secapi/pay/refund`,
 			QUERY_REFUND: `${wxproxy}/api.mch.weixin.qq.com/pay/refundquery`,
 			DOWNLOAD_BILL: `${wxproxy}/api.mch.weixin.qq.com/pay/downloadbill`,
 			SHORT_URL: `${wxproxy}/api.mch.weixin.qq.com/tools/shorturl`,
@@ -700,14 +700,14 @@ function init(err, db) {
 		callback=callback||function(){};
 		db.bills.findOne({_id:ObjectID(orderid)},function(err, orderData) {
 			if (err) callback('no such order');
-			var acc=orderData.snappay_account, net, succrate, total_amount=Number(data.total_fee), fee;
+			var acc=orderData.snappay_account, net, succrate, total_amount=Number(data.total_fee)/100, fee;
 			if (acc) {
 				if (!acc.log) acc.log={};
 				if (acc.log.success) acc.log.success++;
 				else acc.log.success=1;
 				if (!acc.used) acc.used=1;
-				fee=Math.ceil(orderData.money*(acc.fee||snappayFee)*100)/100;
-				net=Number(Number(orderData.money-fee).toFixed(2));
+				fee=Math.ceil(total_amount*(acc.fee||snappayFee)*100)/100;
+				net=Number((total_amount-fee).toFixed(2));
 				succrate=acc.log.success/acc.used;
 			}
 			db.users.updateOne({_id:orderData.userid}, {$inc:{succOrder:1, balance:total_amount}});

@@ -235,7 +235,7 @@ function start(err, db) {
 			var pvd=getProvider(order.provider);
 			if (!pvd) return callback('订单尚未支付');
 			if (!pvd.refund) return callback('提供方不支持退单')
-			var result=await pvd.refund(order, order.paidmoney);
+			var result=await pvd.refund(order, order.paidmoney, await db.user.findOne({_id:order.userid}));
 			await db.bills.updateOne({_id:order._id}, {$set:{status:'refund'}}, {w:1});
 			callback(null, result);
 		} catch(e) {callback(e)}
