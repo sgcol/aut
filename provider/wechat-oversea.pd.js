@@ -728,8 +728,8 @@ function init(err, db) {
 
 	async function bestAccount(money, merchantid, userid, currency, openid) {
 		if (process.env.NODE_ENV=='debugmode') {
-			// if (currency!='CAD') return null;
-			return {_id:'testAccount', mch_id:'224339062', supportedCurrency:currency}
+			if (currency!='CAD') return null;
+			return {_id:'testAccount', mch_id:'224339062', supportedCurrency:'CAD'}
 		}
 		if (merchantData.debugMode) {
 			var [acc]= await db.snappay_base_accounts.find({name:'测试', supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
