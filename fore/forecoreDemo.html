@@ -209,6 +209,7 @@
       <div class="collapse" id="ui-snappay">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> <a class="nav-link" href="statementOfSnappay-base.html">SnapPay</a></li>
+          <li class="nav-item"> <a class="nav-link" href="settlementsHistory.html">出款记录</a></li>
           <li class="nav-item"> <a class="nav-link" href="accountsOfSnappay-base.html">SnapPay商户管理</a></li>
         </ul>
       </div>
@@ -382,12 +383,12 @@ $(()=>{
     }
   })
   function fillAccounts(belongs) {
-    accIntf('pvd/snappay-toll/availbeAccounts', {belongs:belongs}, (err, r)=>{
+    accIntf('pvd/snappay_base/availbeAccounts', {belongs:belongs}, (err, r)=>{
       if (err) return;
       var accounts=$('#account');
       accounts.empty().append('<option selected value="">自动选择</option');
       r.rows.forEach((item)=>{
-        accounts.append(`<option value="${item._id}">${item.name+(item.disable?'(disable)':'')}</option>`);
+        accounts.append(`<option value="${item._id}">${item.name+(item.disable?'(disabled)':'')}</option>`);
       })
     })
   }

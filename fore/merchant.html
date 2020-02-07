@@ -259,6 +259,7 @@
       <div class="collapse" id="ui-snappay">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> <a class="nav-link" href="statementOfSnappay-base.html">SnapPay</a></li>
+          <li class="nav-item"> <a class="nav-link" href="settlementsHistory.html">出款记录</a></li>
           <li class="nav-item"> <a class="nav-link" href="accountsOfSnappay-base.html">SnapPay商户管理</a></li>
         </ul>
       </div>
@@ -461,7 +462,7 @@
               var ret='';
               for (var j=0; j<allp[i].params.length; j++) {
                 var p=allp[i].params[j];
-                ret+=`<div class="input-group"><div class="input-group-prepend"><span class="input-group-text">${p}</span></div><input class=" form-control" value="${(activedProvider && activedProvider[p])}" placeholder="必填" id="providers_${allp[i].id}_${p}"></div>`
+                ret+=`<div class="input-group"><div class="input-group-prepend"><span class="input-group-text">${p}</span></div><input class=" form-control" value="${(activedProvider && activedProvider[p])}" placeholder="必填" id="providers_${allp[i].name||allp[i].id}_${p}" data-key="providers.${allp[i].name||allp[i].id}.${p}" data-val="${(activedProvider && activedProvider[p])}"></div>`
               }
               return ret;
             })():''}
@@ -482,6 +483,12 @@
         }
         $('#providers_snappay-toll_accountNumber').mask('000-00000-000000000000', {placeholder:'bnk-trans-account'});
         $('#providers_snappay-toll_timezone').mask('s09:99', {placeholder:'[+/-]hh:mm', translation:{s:{pattern:/[\+\-]/}}});
+        var sban=$('#providers_snappay_base_accountNumber');
+        sban.mask('000-00000-000000000000', {placeholder:'bnk-trans-account'});
+        // if (sban.data('val')) sban.val(sban.masked(sban.data('val')));
+        var sbtz=$('#providers_snappay_base_timezone');
+        sbtz.mask('s09:99', {placeholder:'[+/-]hh:mm', translation:{s:{pattern:/[\+\-]/}}});
+        // if (sbtz.data('val')) sbtz.val(sbtz.masked(sbtz.data('val')));
       })
       // $('#fee').attr("placeholder", ''+((1-merchant.share)*100).toFixed(2)+'%');
       $('#fee').mask('0.09% 0.09% 0.09%', {placeholder:'snappay apay 垫付'});
@@ -493,7 +500,7 @@
     $('#adjustMerchant').off('click').click(function(e) {
       var params={};
       $('#editMerchant form input').each(function(idx, ele) {
-        var je=$(ele), jv=je.val(), id=ele.id.replace(/_/g, '.');
+        var je=$(ele), jv=je.val(), id=je.data('key')||ele.id.replace(/_/g, '.');
         if (jv=='') return;
         if (je.is(':radio')) return;
         if (id=='fee') {
@@ -510,7 +517,7 @@
           if (!timerange && jv) return alert('请这样输入 08:00-19:00');
           params.validfrom=new Date('1971-1-1 '+timerange[1]+' GMT+0800');
           params.validend=new Date('1971-1-1 '+timerange[2]+' GMT+0800');
-        } else if (id=='providers.snappay-toll.accountNumber') params[id]=je.cleanVal();
+        } else if (id=='providers.snappay-toll.accountNumber'||id=='providers.snappay_base.accountNumber') params[id]=je.cleanVal();
         else params[id]=jv;
       });
       $('#editMerchant form div[id]').each((idx, ele)=>{

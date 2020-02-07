@@ -550,20 +550,20 @@ function init(err, db) {
 			await session.endSession();
 		}
 	}))
-	router.all('/history', verifyAuth, verifyManager, httpf({callback:true}, async function(callback) {
-		callback(null, await fs.readdir(path.join(__dirname, '../fore/payments/')));
-	}))
-	router.all('/downloadHistory', verifyAuth, verifyManager, httpf({checkoutTime:'number', no_return:true}, async function(checkoutTime) {
-		var exists=await fs.pathExists(path.join(__dirname, '../fore/payments', checkoutTime));
-		if (!exists) return res.status(404).end();
-		var zip=new JSZip();
-		var files=await fs.readdir(path.join(__dirname, '../fore/payments/', checkoutTime));
-		files.forEach((name)=>{
-			zip.file(name, fs.readFileSync(path.join(__dirname, '../fore/payments/', checkoutTime, name)));
-		})
-		zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
-		.pipe(res)
-	}))
+	// router.all('/history', verifyAuth, verifyManager, httpf({callback:true}, async function(callback) {
+	// 	callback(null, await fs.readdir(path.join(__dirname, '../fore/payments/')));
+	// }))
+	// router.all('/downloadHistory', verifyAuth, verifyManager, httpf({checkoutTime:'number', no_return:true}, async function(checkoutTime) {
+	// 	var exists=await fs.pathExists(path.join(__dirname, '../fore/payments', checkoutTime));
+	// 	if (!exists) return res.status(404).end();
+	// 	var zip=new JSZip();
+	// 	var files=await fs.readdir(path.join(__dirname, '../fore/payments/', checkoutTime));
+	// 	files.forEach((name)=>{
+	// 		zip.file(name, fs.readFileSync(path.join(__dirname, '../fore/payments/', checkoutTime, name)));
+	// 	})
+	// 	zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
+	// 	.pipe(res)
+	// }))
 	router.all('/availbeAccounts', verifyAuth, verifyManager, httpf({belongs:'string', callback:true}, async function(belongs, callback) {
 		try {
 			return callback(null, {rows:await db.snappay_toll_accounts.find({belongs:{$in:[null, belongs]}}).toArray()});

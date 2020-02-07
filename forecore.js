@@ -14,6 +14,8 @@ const router=require('express').Router()
 , objPath=require('object-path')
 , stringify=require('csv-stringify/lib/sync')
 , argv=require('yargs').argv
+, fse =require('fs-extra')
+, JSZip =require('jszip')
 
 const allPayType=['ALIPAYH5', 'WECHATPAYH5', 'UNIONPAYH5', 'ALIPAYAPP', 'WECHATPAYAPP', 'ALIPAYMINI', 'WECHATPAYMINI', 'ALIPAYPC', 'WECHATPAYPC', 'UNIONPAYPC'];
 
@@ -218,9 +220,6 @@ function start(err, db) {
 			callback(e);
 		}
 	}));
-	router.all('/downloadBills', verifyMchSign, err_h, httpf({from:'?date', to:'?date', no_return:true}, function(from, to) {
-
-	}));
 	router.all('/admin/refund', verifyAuth, httpf({orderid:'string', callback:true}, async function(orderid, callback) {
 		try {
 			var cond={_id:ObjectId(orderid)};
@@ -247,11 +246,54 @@ function start(err, db) {
 			callback(null);
 		} catch(e) {callback(e)}
 	}));
+	router.all('/admin/settlements', verifyAuth, verifyManager, httpf({from:'?date', to:'?date', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, async function(from, to, sort, order, offset, limit, callback) {
+		try {
+			var content=await fse.readdir(path.join(__dirname, 'fore/payments'));
+			content=content.filter(num => !isNaN(num));
+			if (from) {
+				from=from.getTime();
+				content.splice(0, content.findIndex((ele)=>ele>=from));
+			}
+			if (to) {
+				to=to.getTime();
+				content.splice(content.findIndex((ele)=>ele>to));
+			}
+			var total=content.length;
+			if (order=='asc') {
+				content.sort((a, b)=>b-a);
+			}
+			if (offset) {
+				content.splice(0, offset);
+			}
+			if (limit) {
+				content.splice(limit);
+			}
+			callback(null, {total:total, rows:content});
+		} catch(e) {
+			callback(e);
+		}
+	}))
+	router.all('/admin/downloadSettle', verifyAuth, verifyManager, async function(req, res) {
+		var params=Object.assign(req.query, req.body);
+		if (!params.id) return res.render('error', {err:'必须指定id'});
+		var filenames=await fse.readdir(path.join(__dirname, 'fore/payments', params.id));
+		if (filenames.length==0) return res.render('error', {err:'没有相应的数据'});
+		var zip=new JSZip();
+		for (var i=0; i<filenames.length; i++) {
+			var fn=filenames[i];
+			zip.file(fn, await fse.readFile(path.join(__dirname, 'fore/payments', params.id, fn)));
+		}
+		res.attachment(params.id+'.zip');
+		zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
+		.pipe(res)
+		.on('finish', ()=>{
+			res.end();
+		});
+	})
 	router.all('/renderCC', function(req, res) {
 		res.render('cashcounter', {init_config:{init_config:1}, payData:{payData:1}, return_url:'dummyAddress'});
 	})
 }
-
 
 if (module==require.main) {
 	// debug
