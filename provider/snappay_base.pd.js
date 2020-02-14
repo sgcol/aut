@@ -732,13 +732,12 @@ function init(err, db) {
 			return {_id:'testAccount', mch_id:'224339062', supportedCurrency:'CAD'}
 		}
 		if (merchantData.debugMode) {
-			var [acc]= await db.snappay_base_accounts.find({name:'测试', supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
+			let [acc]= await db.snappay_base_accounts.find({name:'测试', supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
+			if (acc) return acc;
 		}
-		else {
-			var isBlocked=await db.forbidden.findOne({_id:openid});
-			if (isBlocked) throw '系统无法提供服务';
-			var [acc]= await db.snappay_base_accounts.find({disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
-		}
+		var isBlocked=await db.forbidden.findOne({_id:openid});
+		if (isBlocked) throw '系统无法提供服务';
+		let [acc]= await db.snappay_base_accounts.find({disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
 		return acc;
 	}
 	function retreiveClientIp(req) {
