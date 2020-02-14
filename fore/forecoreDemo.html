@@ -383,7 +383,7 @@ $(()=>{
     }
   })
   var acc_data;
-  $('#account').change((e)=>{
+  $('#account').change(function (e){
     var item=acc_data[this.value];
     if (item) {
       $('#currency').val(item.currency);
