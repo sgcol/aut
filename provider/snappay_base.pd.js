@@ -731,7 +731,8 @@ function init(err, db) {
 			if (currency!='CAD') return null;
 			return {_id:'testAccount', mch_id:'224339062', supportedCurrency:'CAD'}
 		}
-		if (merchantData.debugMode) {
+		let merchantData=await db.users.findOne({_id:merchantid});
+		if (merchantData && merchantData.debugMode) {
 			let [acc]= await db.snappay_base_accounts.find({name:'测试', supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
 			if (acc) return acc;
 		}
