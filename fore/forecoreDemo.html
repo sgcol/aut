@@ -382,12 +382,21 @@ $(()=>{
       $('#key').val('');
     }
   })
+  var acc_data;
+  $('#account').change((e)=>{
+    var item=acc_data[this.value];
+    if (item) {
+      $('#currency').val(item.currency);
+    } else $('#currency').val('CAD');
+  })
   function fillAccounts(belongs) {
     accIntf('pvd/snappay_base/availbeAccounts', {belongs:belongs}, (err, r)=>{
       if (err) return;
       var accounts=$('#account');
       accounts.empty().append('<option selected value="">自动选择</option');
+      acc_data={};
       r.rows.forEach((item)=>{
+        acc_data[item._id]=item;
         accounts.append(`<option value="${item._id}">${item.name+(item.disable?'(disabled)':'')}</option>`);
       })
     })
