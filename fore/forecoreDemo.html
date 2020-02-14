@@ -386,7 +386,7 @@ $(()=>{
   $('#account').change(function (e){
     var item=acc_data[this.value];
     if (item) {
-      $('#currency').val(item.currency);
+      $('#currency').val(item.supportedCurrency);
     } else $('#currency').val('CAD');
   })
   function fillAccounts(belongs) {
