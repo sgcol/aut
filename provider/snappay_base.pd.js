@@ -566,7 +566,7 @@ function init(err, db) {
 	// }))
 	router.all('/availbeAccounts', verifyAuth, verifyManager, httpf({belongs:'string', callback:true}, async function(belongs, callback) {
 		try {
-			return callback(null, {rows:await db.snappay_toll_accounts.find({belongs:{$in:[null, belongs]}}).toArray()});
+			return callback(null, {rows:await db.snappay_base_accounts.find({belongs:{$in:[null, belongs]}}).toArray()});
 		} catch(e) {return callback(e)}
 	}))
 
