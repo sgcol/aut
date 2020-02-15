@@ -503,7 +503,7 @@
     return res;
   }
   function showTotalAmount(data) {
-    return response?(response.total_amount+response.total_refund):'';
+    return response?(response.total_amount+response.total_refund).toFixed(2):'';
   }
   function showTotalProfit(data) {
     return response?response.total_profit:'';
