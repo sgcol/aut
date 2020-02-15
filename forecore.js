@@ -16,6 +16,7 @@ const router=require('express').Router()
 , argv=require('yargs').argv
 , fse =require('fs-extra')
 , JSZip =require('jszip')
+, XLSX =require('xlsx')
 
 const allPayType=['ALIPAYH5', 'WECHATPAYH5', 'UNIONPAYH5', 'ALIPAYAPP', 'WECHATPAYAPP', 'ALIPAYMINI', 'WECHATPAYMINI', 'ALIPAYPC', 'WECHATPAYPC', 'UNIONPAYPC'];
 
@@ -169,19 +170,17 @@ function start(err, db) {
 		try {
 			var {relative}=await db.settlements.findOne({_id:ObjectId(id)}, {projection:{relative:1}});
 			if (!relative) throw '没有数据';
-			res.setHeader('Content-Type', 'application/octet-stream');
-			res.setHeader('Content-Disposition', 'attachment; filename=\"' + 'download-' + Date.now() + '.csv\"');
-			res.setHeader('Cache-Control', 'no-cache');
-  			res.setHeader('Pragma', 'no-cache');
-			var content=stringify(relative, 
-				{
-					header:true
-					, columns:Object.keys(relative[0])
-				}
-			)
-			res.write(content);
-			res.end();
-		} catch(e) {
+
+			var ws=XLSX.utils.json_to_sheet(relative);
+			var wb=XLSX.utils.book_new();
+			XLSX.utils.book_append_sheet(wb, ws, "SheetJS");
+			res.set({
+				'Content-Type':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+				'Content-Disposition':`inline; filename="download-${Date.now()}.xlsx"`,
+				'Cache-Control': 'no-cache',
+				'Pragma': 'no-cache'
+			})
+			.send(XLSX.write(wb, {type:'buffer', bookType:'xlsx'}));		} catch(e) {
 			res.send({err:e})
 		}
 

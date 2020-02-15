@@ -29,6 +29,7 @@ const url = require('url')
 , fs =require('fs-extra')
 , path =require('path')
 , cookieParser = require('cookie-parser')
+, XLSX =require('xlsx')
 
 
 const _noop=function() {};
@@ -241,13 +242,16 @@ function transaction(arr, dates, setting, warning, c_record) {
 }
 
 function renameKeys(o, map) {
+	var ret={};
 	map.forEach((old_key, new_key)=>{
-		var v=objPath.get(o, old_key);
-		if (!v) return;
-		if (old_key !== new_key) {
-			o[new_key]=v;
+		var k=old_key.split('|'), v=null;
+		for (var i=0; i<k.length; i++) {
+			v=objPath.get(o, k[i]);
+			if (v) break;
 		}
+		ret[new_key]=v;
 	})
+	return ret;
 }
 function makeBTF(currency, arr, testMode, setting, warning) {
 	setting=Object.assign(defaultBankData, setting)
@@ -427,7 +431,7 @@ function init(err, db) {
 					['Created Time', 'time']
 					, ['Completed Time', 'lasttime']
 					, ['Trans No.', '_id']
-					, ['Original.Trans No.', '_id']
+					, ['Original.Trans No.', 'relative|_id']
 					, ['Merchant Order No.', 'merchantOrderId']
 					, ['Channel trans No.', 'wechat_result.transaction_id']
 					, ['Type', 'wechat_result.trade_type']
@@ -458,27 +462,28 @@ function init(err, db) {
 					, ['Payment Channel Fee', 'pc_fee']
 					, ['Custom Service Fee', 'blank']
 					, ['Currency', 'currency']
-					, ['Exchange Rate', 'exchange_rate']
+					, ['Exchange Rate', 'wechat_result.rate_value']
 					, ['Time Zone', 'blank']
 				])
-				rec.forEach((item)=>{
+				rec =rec.map((item)=>{
 					var snappay_result=item.snappay_result;
 					item.snappay_result=undefined;
 					Object.assign(item, snappay_result);
 					item._id=item._id.toHexString()
-					item.snappayFee=(snappayFee*100).toFixed(2);
+					item.snappayFee=''+(snappayFee*100).toFixed(2)+'%';
 					if (item.paidmoney>0) {
 						item.sp_fee=item.paidmoney*(item.sp_fee||snappayFee);
 						item.ap_fee=item.paidmoney*(item.ap_fee || 0.006);
 						item.net=item.paidmoney-item.sp_fee-item.ap_fee;
 						item.fee=Math.floor((item.paidmoney-item.net)*10000)/10000;
 						item.pc_fee=item.net*item.pc_fee;
+						objPath.set(item, 'wechat_result.rate_value', Number(objPath.get(item, 'wechat_result.rate_value', 0))/100000000)
 					} else {
 						item.sp_fee=item.ap_fee=item.fee='0.0';
 						item.net=item.paidmoney;
 						item.pc_fee=item.net*item.pc_fee;
 					}
-					renameKeys(item, mapper);
+					return renameKeys(item, mapper);
 				});
 				var BTFs=new Map();
 				stat.forEach((item)=>{
@@ -511,20 +516,24 @@ function init(err, db) {
 					zip.file('warning.txt', content);
 					files.push({name:'warning.txt', content:content})
 				}
-				content=stringify(rec, 
-					{
-						header:true
-						, cast:{
-							date:(v)=>{
-								var t=Math.floor(v.getTime()/1000);
-								return ((t+8*3600)/86400+70*365+19).toFixed(5);
-							}
-						}
-						, columns:Array.from(mapper.keys())
-					}
-				)
-				zip.file('orders.csv', content);
-				files.push({name:'orders.csv', content:content});
+				// content=stringify(rec, 
+				// 	{
+				// 		header:true
+				// 		, cast:{
+				// 			date:(v)=>{
+				// 				var t=Math.floor(v.getTime()/1000);
+				// 				return ((t+8*3600)/86400+70*365+19).toFixed(5);
+				// 			}
+				// 		}
+				// 		, columns:Array.from(mapper.keys())
+				// 	}
+				// )
+				var wb=XLSX.utils.book_new();
+				var ws=XLSX.utils.json_to_sheet(rec);
+				XLSX.utils.book_append_sheet(wb, ws, "SheetJS");
+				var content=XLSX.write(wb, {type:'buffer', bookType:'xlsx'})
+				zip.file('orders.xlsx', content);
+				files.push({name:'orders.xlsx', content:content});
 				var v =await zip.generateAsync({type : "nodebuffer"});
 				callback(null, {src:v.toString('base64')});
 
@@ -996,11 +1005,11 @@ function init(err, db) {
 				}
 				switch (ret.refund_status_0) {
 					case 'SUCCESS':
-						db.bills.updateOne({_id:order._id}, {$set:{status:'SUCCESS', lasttime:new Date()}})
+						db.bills.updateOne({_id:order._id}, {$set:{status:'SUCCESS', lasttime:new Date(), wechat_result:ret}})
 						db.bills.updateOne({_id:ObjectID(order.relative)}, {$set:{status:'refund', lasttime:new Date()}});
 						break;
 					case 'REFUNDCLOSE':
-						db.bills.updateOne({_id:order._id}, {$set:{status:'CLOSE'}});
+						db.bills.updateOne({_id:order._id}, {$set:{status:'CLOSE', lasttime: new Date(), wechat_result:ret}});
 						db.bills.updateOne({_id:ObjectID(order.relative)}, {$set:{status:'refundclosed'}})
 						// db.users.updateOne({_id:order.userid}, {$inc:{balance:-order.money}});
 						break;
