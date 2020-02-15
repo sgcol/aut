@@ -403,7 +403,7 @@ function init(err, db) {
 			await session.withTransaction(async ()=>{
 				// lock the transaction;
 				await db.bills.findOneAndUpdate({_id:'btf_lock'}, {$set:{time:checkoutTime, lock:new ObjectID()}}, {upsert:true});
-				var cond={time:{$lt:to}, provider:'snappay_base', status:{$in:['SUCCESS', 'refundclosed', 'refund', 'refunding', 'complete', '已支付', '通知商户', '通知失败']}, checkout:null};
+				var cond={time:{$lt:to}, provider:'snappay_base', status:{$in:['SUCCESS', 'refundclosed', 'refund', 'complete', '已支付', '通知商户', '通知失败']}, checkout:null};
 				var rec=await db.bills.find(cond).sort({time:1}).toArray();
 				if (!rec.length) return callback('没有记录');
 				// var rec=await dbBills.find({checkout:checkoutTime}).sort({time:1}).toArray();
@@ -594,7 +594,7 @@ function init(err, db) {
 		}
 		cond.provider='snappay_base';
 		//cond.used=true;cond.status={$ne:'refund'}
-		cond.status={$in:['SUCCESS', 'refund', 'refundclosed', 'complete', '通知商户', '通知失败']}
+		cond.status={$in:['SUCCESS', 'refundclosed', 'refund', 'complete', '已支付', '通知商户', '通知失败']}
 		var groupby={currency:'$currency', mchId:'$userid'}, 
 		af={
 			holding:{
