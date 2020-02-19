@@ -180,7 +180,8 @@ function start(err, db) {
 				'Cache-Control': 'no-cache',
 				'Pragma': 'no-cache'
 			})
-			.send(XLSX.write(wb, {type:'buffer', bookType:'xlsx'}));		} catch(e) {
+			.send(XLSX.write(wb, {type:'buffer', bookType:'xlsx'}));		
+		} catch(e) {
 			res.send({err:e})
 		}
 
