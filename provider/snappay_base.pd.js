@@ -234,8 +234,9 @@ function transaction(arr, dates, setting, warning, c_record) {
 			warning.push(`C${c_record+1}/${i+1} ${mchName} customNumber超过10byts`)
 		}
 		// var money=Math.floor(Math.random()*100000), accountNumber=randstring(12), customName=randstring(5), customNumber=randstring(19);
+		amount=Math.floor(amount*100);
 		total+=amount;
-		var trans=`${transactionCode}${amount.pad(10)}${dates}0${accountNumber.padEnd(20, ' ')}${''.padEnd(25, '0')}${clientName.padEnd(15, ' ')}${customName.padEnd(30, ' ')}${clientName.padEnd(30, ' ')}${clientNumber}${customNumber.padEnd(19, ' ')}${''.padEnd(9, '0')}${''.padEnd(12, ' ')}${'settlement'.padEnd(15, ' ')}${''.padEnd(35, ' ')}`;
+		var trans=`${transactionCode}${(''+amount).padStart(10, '0')}${dates}0${accountNumber.padEnd(20, ' ')}${''.padEnd(25, '0')}${clientName.padEnd(15, ' ')}${customName.padEnd(30, ' ')}${clientName.padEnd(30, ' ')}${clientNumber}${customNumber.padEnd(19, ' ')}${''.padEnd(9, '0')}${''.padEnd(12, ' ')}${'settlement'.padEnd(15, ' ')}${''.padEnd(35, ' ')}`;
 		ret+=trans;
 	}
 	return {str:ret.padEnd(1464-24, ' '), total:total};
@@ -277,7 +278,7 @@ function makeBTF(currency, arr, testMode, setting, warning) {
 		total+=ret.total;
 	}
 	// finally, Z record
-	out+=`Z${(++count).pad(9)}${clientNumber}${uniqueTag}${''.padEnd(22, '0')}${total.pad(14)}${arr.length.pad(8)}${''.padEnd(1396, '0')}`
+	out+=`Z${(++count).pad(9)}${clientNumber}${uniqueTag}${''.padEnd(22, '0')}${(''+total).padStart(14, '0')}${arr.length.pad(8)}${''.padEnd(1396, '0')}`
 	out+='\r\n';
 	return out;
 }
@@ -420,7 +421,7 @@ function init(err, db) {
 					}},
 					{$lookup:{
 						localField:'_id.mchId',
-						from:'users',
+						from:'ucondsers',
 						foreignField:'_id',
 						as:'userData'
 					}}
