@@ -414,10 +414,10 @@ function init(err, db) {
 				// var rec=await dbBills.find({checkout:checkoutTime}).sort({time:1}).toArray();
 				var stat=await db.bills.aggregate([
 					{$match:cond},
-					{$addFields:{holding:{$multiply:['$paidmoney', '$share']}}},
+					{$addFields:{holding:{$multiply:['$money', '$share']}}},
 					{$group:{
 						_id:{currency:'$currency', mchId:'$userid'}
-						, amount:{$sum:'$holding'}
+						, amount:{$sum:{$round:['$holding', 2]}}
 					}},
 					{$lookup:{
 						localField:'_id.mchId',
@@ -475,12 +475,16 @@ function init(err, db) {
 					if (item.paidmoney>0) {
 						item.sp_fee=item.paidmoney*(item.sp_fee||snappayFee);
 						item.ap_fee=item.paidmoney*(item.ap_fee || 0.006);
-						item.net=item.paidmoney-item.sp_fee-item.ap_fee;
-						item.fee=Math.floor((item.paidmoney-item.net)*10000)/10000;
+						item.net=Math.round((item.paidmoney-item.sp_fee-item.ap_fee)*100)/100;
+						item.fee=(item.paidmoney-item.net);
+						// adjust sp_fee & ap_fee;
+						var t=item.sp_fee+item.ap_fee;
+						item.sp_fee=item.fee*item.sp_fee/t;
+						item.ap_fee=item.fee*item.ap_fee/t;
 						item.pc_fee=item.net*item.pc_fee;
 						objPath.set(item, 'wechat_result.rate_value', Number(objPath.get(item, 'wechat_result.rate_value', 0))/100000000)
 					} else {
-						item.sp_fee=item.ap_fee=item.fee='0.0';
+						item.sp_fee=item.ap_fee=item.fee=0;
 						item.net=item.paidmoney;
 						item.pc_fee=item.net*item.pc_fee;
 					}
@@ -610,14 +614,14 @@ function init(err, db) {
 			holding:{
 				$cond:[
 					{$gte:['$money', 0]},					// if money>0
-					{$multiply:['$money', '$share', 100]},	// then money*share*100
+					{$multiply:['$money', '$share']},	// then money*share*100
 					0										// else 0
 				]
 			},
 			refund:{
 				$cond:[
 					{$lt:['$money', 0]},					// if money<0
-					{$multiply:['$money', 100]},				// then money*100
+					'$money',								// then money
 					0										// else 0
 				]
 			}
@@ -632,7 +636,7 @@ function init(err, db) {
 		var cursor =dbBills.aggregate([
 			{$match:cond},
 			{$addFields:af},
-			{$group:{_id:groupby, amount:{$sum:{$floor:'$holding'}}, net:{$sum: '$net'}, refund:{$sum:{$floor:'$refund'}}, count:{$sum:1}, profit:{$sum:'$profit'}}},
+			{$group:{_id:groupby, amount:{$sum:{$round:['$holding', 2]}}, net:{$sum: '$net'}, refund:{$sum:{$floor:'$refund'}}, count:{$sum:1}, profit:{$sum:'$profit'}}},
 			{$lookup:{
 				localField:'_id.mchId',
 				from:'users',
@@ -652,9 +656,9 @@ function init(err, db) {
 					currency:'$currency',
 					merchantName:'$userData.name',
 					share:'$userData.share',
-					amount:{$divide:['$amount', 100]},
-					profit:{$subtract:['$net', {$divide:['$amount', 100]}]},
-					refund:{$divide:['$refund', 100]},
+					amount:'$amount',
+					profit:{$subtract:['$net', '$amount']},
+					refund:'$refund',
 					count:'$count',
 					time:'$time',
 					succOrder:'$userData.succOrder', 
@@ -716,7 +720,7 @@ function init(err, db) {
 				if (acc.log.success) acc.log.success++;
 				else acc.log.success=1;
 				if (!acc.used) acc.used=1;
-				fee=Math.ceil(total_amount*(acc.fee||snappayFee)*100)/100;
+				fee=Math.round(total_amount*(acc.fee||snappayFee)*100)/100;
 				net=Number((total_amount-fee).toFixed(2));
 				succrate=acc.log.success/acc.used;
 			}
