@@ -614,17 +614,17 @@ function init(err, db) {
 			holding:{
 				$cond:[
 					{$gte:['$money', 0]},					// if money>0
-					{$multiply:['$money', '$share']},	// then money*share*100
+					{$multiply:['$paidmoney', '$share']},	// then money*share*100
 					0										// else 0
 				]
 			},
 			refund:{
 				$cond:[
 					{$lt:['$money', 0]},					// if money<0
-					'$money',								// then money
+					'$paidmoney',								// then money
 					0										// else 0
 				]
-			}
+			},
 		};
 		if(!cond.time) {
 			//不指定时间按照天统计
@@ -636,7 +636,16 @@ function init(err, db) {
 		var cursor =dbBills.aggregate([
 			{$match:cond},
 			{$addFields:af},
-			{$group:{_id:groupby, amount:{$sum:{$round:['$holding', 2]}}, net:{$sum: '$net'}, refund:{$sum:{$floor:'$refund'}}, count:{$sum:1}, profit:{$sum:'$profit'}}},
+			{$addFields:{
+				profit:{
+					$cond:[
+						{$gte:['$money', 0]},
+						{$subtract:['$paidmoney', '$holding']},
+						0
+					]
+				}
+			}},
+			{$group:{_id:groupby, amount:{$sum:{$round:['$holding', 2]}}, net:{$sum: '$paidmoney'}, refund:{$sum:{$floor:'$refund'}}, count:{$sum:1}, profit:{$sum:{$round:['$profit', 2]}}}},
 			{$lookup:{
 				localField:'_id.mchId',
 				from:'users',
@@ -657,7 +666,7 @@ function init(err, db) {
 					merchantName:'$userData.name',
 					share:'$userData.share',
 					amount:'$amount',
-					profit:{$subtract:['$net', '$amount']},
+					profit:'$profit',
 					refund:'$refund',
 					count:'$count',
 					time:'$time',
