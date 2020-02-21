@@ -770,7 +770,7 @@ function init(err, db) {
 		// if (risk.risky>10 && (new Date()-risk.lasttime)<30*60*1000) throw '暂时不提供服务，请30分钟后再试'; 
 		// return acc_list.find(acc=>acc._id==risk.accid);
 		let now=new Date(), user_risky=await db.risky.findOne({openid:openid});
-		if (user_risky.risky) {
+		if (user_risky && user_risky.risky) {
 			var cooldown_time=cooldown[user_risky.risky]||cooldown[cooldown.length-1];
 			if ((now-user_risky.lasttime)<cooldown_time) throw '暂时无法提供服务，请等待一段时间再试';
 		}
