@@ -771,7 +771,7 @@ function init(err, db) {
 		// return acc_list.find(acc=>acc._id==risk.accid);
 		let now=new Date(), user_risky=await db.risky.findOne({openid:openid});
 		if (user_risky && user_risky.risky) {
-			var cooldown_time=cooldown[user_risky.risky]||cooldown[cooldown.length-1];
+			var cooldown_time=(user_risky.risky>(cooldown.length-1))?cooldown[cooldown.length-1]:cooldown[user_risky.risky];
 			if ((now-user_risky.lasttime)<cooldown_time) throw '暂时无法提供服务，请等待一段时间再试';
 		}
 		let [acc] =await db.snappay_base_accounts.find({disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}).sort({risky:1}).limit(1).toArray();
