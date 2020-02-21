@@ -455,7 +455,7 @@
           providers.append(`
           <div class="form-check form-check">
             <label class="form-check-label">
-              <input type="checkbox" class="form-check-input" ${(activedProvider && !activedProvider.disabled)?'checked':''} id="providers.${allp[i].id}" for="provider">
+              <input type="checkbox" class="form-check-input" ${(activedProvider && !activedProvider.disabled)?'checked':''} id="providers.${allp[i].id}" for="provider" data-key="providers.${allp[i].name||allp[i].id}">
               ${allp[i].name||allp[i].id}
             <i class="input-helper"></i></label>
             ${allp[i].params?(()=>{
