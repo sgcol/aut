@@ -893,8 +893,7 @@ function init(err, db) {
 			res.render('cashcounter', ccdata);
 			// account的风险很大，付款不成功不算做用户的risky
 			var now=new Date();
-			var inc={};
-			if (account.risky<10) db.risky.updateOne({openid:openid}, {$inc:{'risky':1},  $set:{lasttime:now}}, {upsert:true});
+			if (!account.risky || account.risky<10) db.risky.updateOne({openid:openid}, {$inc:{'risky':1},  $set:{lasttime:now}}, {upsert:true});
 			db.snappay_base_accounts.updateOne({_id:account._id}, {$inc:{risky:1}, $set:{lasttime:now}});
 		}catch(e) {
 			debugout(e);
