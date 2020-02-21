@@ -149,7 +149,7 @@ function start(err, db) {
 	router.all('/settlements', verifyAuth, httpf({from:'?date', to:'?date', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, 
 	async function(from, to, sort, order, offset, limit, callback) {
 		var cond={};
-		if (this.req.auth.acl=='mrechant') cond.mchId=this.req.auth._id;
+		if (this.req.auth.acl=='merchant') cond.mchId=this.req.auth._id;
 		if (from) cond.time={$gte:from};
 		if (to) objPath.set(cond, 'time.$lte', to);
 		var cur=db.settlements.find(cond, {readPreference:'secondaryPreferred', projection:{relative:0}});
