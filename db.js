@@ -38,6 +38,7 @@ var q=async.queue(function (extern_callback, queue_callback) {
         {'settlements':{index:['time', 'mchId']}},
         {notify:{capped:true, size:100*1024, max:1000000, index:'read'}},
         'forbidden',
+        {risky:{index:[{openid:1, risky:1}]}},
         ]}, 
         function(err, db) {
           if (err) return cb(err);

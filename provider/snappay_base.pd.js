@@ -734,6 +734,8 @@ function init(err, db) {
 				succrate=acc.log.success/acc.used;
 			}
 			db.users.updateOne({_id:orderData.userid}, {$inc:{succOrder:1, balance:total_amount}});
+			db.risky.updateOne({openid:orderData.wechat_param.openid}, {$set:{risky:0}});
+			db.snappay_base_accounts.updateOne({_id:acc._id}, {$set:{risky:0}});
 			confirmOrder(orderid, total_amount, net, (err)=>{
 				if (!err) {
 					updateOrder(orderid, {wechat_result:data, providerOrderId:data.transaction_id});
@@ -749,6 +751,8 @@ function init(err, db) {
 		});
 	}
 
+	const cooldown=[0, 0, 0, 3600*1000, 2*3600*1000, 8*3600*1000, 24*3600*1000];
+
 	async function bestAccount(money, merchantid, userid, currency, openid) {
 		if (process.env.NODE_ENV=='debugmode') {
 			if (currency!='CAD') return null;
@@ -761,7 +765,16 @@ function init(err, db) {
 		}
 		var isBlocked=await db.forbidden.findOne({_id:openid});
 		if (isBlocked) throw '系统无法提供服务';
-		let [acc]= await db.snappay_base_accounts.find({disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
+		// let acc_list= await db.snappay_base_accounts.find({disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}).toArray();
+		// let [risk]=db.risky.find({openid:openid, accid:{$in:acc_list.map(a=>a._id)}}).sort({risky:1}).limit(1).toArray();
+		// if (risk.risky>10 && (new Date()-risk.lasttime)<30*60*1000) throw '暂时不提供服务，请30分钟后再试'; 
+		// return acc_list.find(acc=>acc._id==risk.accid);
+		let now=new Date(), user_risky=await db.risky.findOne({openid:openid});
+		if (user_risky.risky) {
+			var cooldown_time=cooldown[user_risky.risky]||cooldown[cooldown.length-1];
+			if ((now-user_risky.lasttime)<cooldown_time) throw '暂时无法提供服务，请等待一段时间再试';
+		}
+		let [acc] =await db.snappay_base_accounts.find({disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}).sort({risky:1}).limit(1).toArray();
 		return acc;
 	}
 	function retreiveClientIp(req) {
@@ -815,27 +828,17 @@ function init(err, db) {
 			if (err) throw err;
 			else return r
 		});
-		// if (params.providerSpec) {
-		// 	var spec=params.providerSpec;
-		// 	params.providerSpec=undefined
-		// 	params=Object.assign(spec, params);
-		// }
-		// var account =await bestAccount(params.money, params.merchant, params.userId, params.currency);
-		// if (!account) return callback('没有可用的收款账户');
+		var upd={status:'创建Url', lasttime:new Date()};
+		if (params.account) {
+			var acc=await db.snappay_base_accounts.findOne({_id:ObjectID(params.account)});
+			if (acc) upd.snappay_account=acc;
+		}
 		// build a wechat h5 page
-		updateOrder(params.orderId, {status:'创建Url', lasttime:new Date()});
-		// var jumpto=wx.oauth.generateOAuthUrl(argv.wxhost.substring(0, argv.wxhost.length-1), 'snsapi_base', params.orderId);
-		// var jumpto=wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, '/donothing'), 'snsapi_base', params.orderId);
+		updateOrder(params.orderId, upd);
 		callback(null, {
 			url:url.resolve(argv.wxhost, '/wechatpay/cc')+'?state='+params.orderId
 			,pay_type:params.type
 		})
-		// var jumpto=wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, 'cc'), 'snsapi_base', params.orderId);
-		// debugout(jumpto)
-		// return callback(null, {
-		// 	url:jumpto
-		// 	, pay_type:params.type
-		// });
 	}
 	router.all('/wechat/cc', cookieParser(), async (req, res)=>{
 		try {
@@ -854,13 +857,14 @@ function init(err, db) {
 				return res.redirect(wx.oauth.generateOAuthUrl(url.resolve(argv.wxhost, 'cc'), 'snsapi_base', params.state));
 			}
 			debugout('got openid', openid);
-			// preorder
-			// build a wechat h5 page
-
+			// get an account
 			var order=await db.bills.findOne({_id:ObjectID(params.state)});
-			var account =await bestAccount(order.money, order.userid, order.mer_userid, order.currency, openid);
+			var account;
+			if (order.snappay_account) account=order.snappay_account;
+			else account =await bestAccount(order.money, order.userid, order.mer_userid, order.currency, openid);
 			if (!account) throw '没有可用的收款账户';
 			debugout('use acc', account);
+			// preorder
 			var uo_data={
 				out_trade_no:params.state,
 				body:objPath.get(order, 'desc', 'Goods'),
@@ -876,7 +880,7 @@ function init(err, db) {
 			ret=ret.responseData;
 			if (ret.return_code!='SUCCESS') throw ret.return_msg;
 			if (ret.result_code!='SUCCESS') throw ret.err_code_des;
-			updateOrder(params.state, {status:'进入收银台', snappay_account:account, lasttime:new Date(), wechat_unifiedorder:ret});
+			updateOrder(params.state, {status:'进入收银台', snappay_account:account, lasttime:new Date(), wechat_param:uo_data, wechat_unifiedorder:ret});
 			// get signature
 			var payData=await wx.payment.generateChooseWXPayInfo(ret.prepay_id);
 			payData.timeStamp=payData.timestamp;
@@ -887,6 +891,11 @@ function init(err, db) {
 			}
 			debugout('pay params', ccdata)
 			res.render('cashcounter', ccdata);
+			// account的风险很大，付款不成功不算做用户的risky
+			var now=new Date();
+			var inc={};
+			if (account.risky<10) db.risky.updateOne({openid:openid}, {$inc:{'risky':1},  $set:{lasttime:now}}, {upsert:true});
+			db.snappay_base_accounts.updateOne({_id:account._id}, {$inc:{risky:1}, $set:{lasttime:now}});
 		}catch(e) {
 			debugout(e);
 			updateOrder(params.state, {status:'error', snappay_account:account, lasttime:new Date(), wechat_unifiedorder:ret, error:e});
