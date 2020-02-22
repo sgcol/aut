@@ -148,22 +148,70 @@ function start(err, db) {
 	}));
 	router.all('/settlements', verifyAuth, httpf({from:'?date', to:'?date', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, 
 	async function(from, to, sort, order, offset, limit, callback) {
-		var cond={};
-		if (this.req.auth.acl=='merchant') cond.mchId=this.req.auth._id;
-		if (from) cond.time={$gte:from};
-		if (to) objPath.set(cond, 'time.$lte', to);
-		var cur=db.settlements.find(cond, {readPreference:'secondaryPreferred', projection:{relative:0}});
-		var so={time:-1};
-		if (sort) {
-			var so={};
-			so[sort]=(order=='asc'?1:-1);
-		}
-		cur=cur.sort(so);
-		if (offset) cur=cur.skip(offset);
-		if (limit) cur=cur.limit(limit);
+		try {
+			var cond={};
+			if (this.req.auth.acl=='merchant') cond.mchId=this.req.auth._id;
+			if (from) cond.time={$gte:from};
+			if (to) objPath.set(cond, 'time.$lte', to);
+			var cur=db.settlements.find(cond, {readPreference:'secondaryPreferred', projection:{relative:0}});
+			var so={time:-1};
+			if (sort) {
+				var so={};
+				so[sort]=(order=='asc'?1:-1);
+			}
+			cur=cur.sort(so);
+			if (offset) cur=cur.skip(offset);
+			if (limit) cur=cur.limit(limit);
 
-		var [c, rows]=await Promise.all([cur.count(), cur.toArray()]);
-		return callback(null, {total:c, rows:rows});
+			var dbBills=db.db.collection('bills', {readPreference:'secondaryPreferred'});
+			var cond2={};
+			if (cond.mchId) cond2.userid=cond.mchId;
+			cond2.status={$in:['SUCCESS', 'refundclosed', 'refund', 'complete', '已支付', '通知商户', '通知失败']}
+			var [c, rows, unpaidset]=await Promise.all([
+				cur.count(), 
+				cur.toArray(), 
+				dbBills.aggregate([
+					{$match:cond2},
+					{$addFields:{
+						value:{
+							$round:[
+								{
+									$multiply:[
+										{$round:[{$multiply:['$paidmoney', '$share']}, 2]}, 
+										{$subtract:[1, {$ifNull:['$pc_fee', 0.015]}]}
+									]
+								},
+								2
+							]
+						}
+					}},
+					{$project:{
+						settlement:{
+							$cond:[
+								{$ne:[{$ifNull:['$checkout', null]}, null]},
+								'$value',
+								0
+							]
+						},
+						unpaid:{
+							$cond:[
+								{$eq:[{$ifNull:['$checkout', null]}, null]},
+								'$value',
+								0
+							]
+						}
+					}},
+					{$group:{
+						_id:1,
+						settlement:{$sum:'$settlement'},
+						unpaid:{$sum:'$unpaid'}
+					}}
+				]).toArray()
+			]);
+			return callback(null, dedecimal({total:c, settlements:objPath.get(unpaidset, [0, 'settlement'], 0), unpaid:objPath.get(unpaidset, [0, 'unpaid'], 0), rows:rows}));
+		} catch(e) {
+			callback(e);
+		}
 	}))
 	router.all('/downloadOrdersInSettlement', verifyAuth, httpf({id:'string', no_return:true}, async function(id) {
 		var res=this.res;

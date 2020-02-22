@@ -548,7 +548,7 @@ function init(err, db) {
 						db.settlements.insertMany(arr.map(v=>Object.assign({time:checkoutTime}, v, 
 						{
 							relative:rec.map((item)=>{
-							return {outOrderId:item.merchantOrderId||item.relative, orderId:item._id, type:item.money>0?'charge':'refund', orderMoney:item.money, recieved:item.paidmoney, settlement:(item.paidmoney-item.sp_fee-item.ap_fee-item.pc_fee).toFixed(5), time:item.time}
+							return {outOrderId:item.merchantOrderId||item.relative, orderId:item._id, type:item.money>0?'charge':'refund', orderMoney:item.money, recieved:item.paidmoney, settlement:(item.paidmoney-item.sp_fee-item.ap_fee-item.pc_fee).toFixed(2), time:item.time}
 						})})));
 					})
 					files.forEach((fi)=>{
@@ -611,20 +611,7 @@ function init(err, db) {
 		cond.status={$in:['SUCCESS', 'refundclosed', 'refund', 'complete', '已支付', '通知商户', '通知失败']}
 		var groupby={currency:'$currency', mchId:'$userid'}, 
 		af={
-			holding:{
-				$cond:[
-					{$gte:['$money', 0]},					// if money>0
-					{$multiply:['$paidmoney', '$share']},	// then money*share*100
-					0										// else 0
-				]
-			},
-			refund:{
-				$cond:[
-					{$lt:['$money', 0]},					// if money<0
-					'$paidmoney',								// then money
-					0										// else 0
-				]
-			},
+			value:{$round:[{$multiply:['$paidmoney', '$share']}, 2]}
 		};
 		if(!cond.time) {
 			//不指定时间按照天统计
@@ -637,15 +624,52 @@ function init(err, db) {
 			{$match:cond},
 			{$addFields:af},
 			{$addFields:{
+				holding:{
+					$cond:[
+						{$gte:['$money', 0]},					// if money>0
+						'$value',								// then money*share
+						0										// else 0
+					]
+				},
+				refund:{
+					$cond:[
+						{$lt:['$money', 0]},					// if money<0
+						'$value',								// then money
+						0										// else 0
+					]
+				},
 				profit:{
 					$cond:[
 						{$gte:['$money', 0]},
-						{$subtract:['$paidmoney', '$holding']},
+						{$subtract:['$paidmoney', '$value']},
+						0
+					]
+				},
+				settlement:{
+					$cond:[
+						{$ne:[{$ifNull:['$checkout', null]}, null]},
+						'$value',
+						0
+					]
+				},
+				unpaid:{
+					$cond:[
+						{$eq:[{$ifNull:['$checkout', null]}, null]},
+						'$value',
 						0
 					]
 				}
 			}},
-			{$group:{_id:groupby, amount:{$sum:{$round:['$holding', 2]}}, net:{$sum: '$paidmoney'}, refund:{$sum:{$floor:'$refund'}}, count:{$sum:1}, profit:{$sum:{$round:['$profit', 2]}}}},
+			{$group:{
+				_id:groupby, 
+				amount:{$sum:'$holding'}, 
+				net:{$sum: '$paidmoney'}, 
+				refund:{$sum:'$refund'}, 
+				count:{$sum:1}, 
+				profit:{$sum:'$profit'},
+				settlements:{$sum:'$settlement'},
+				unpaid:{$sum:'$unpaid'}
+			}},
 			{$lookup:{
 				localField:'_id.mchId',
 				from:'users',
@@ -671,10 +695,22 @@ function init(err, db) {
 					count:'$count',
 					time:'$time',
 					succOrder:'$userData.succOrder', 
-					orderCount: '$userData.orderCount'
+					orderCount: '$userData.orderCount',
+					settlements:'$settlements',
+					unpaid:'$unpaid'
 				}
 			}},
-			{$group:{_id:null, total:{$sum:1}, total_count:{$sum:'$doc.count'}, total_amount:{$sum:'$doc.amount'}, total_refund:{$sum:'$doc.refund'}, total_profit:{$sum:'$doc.profit'}, rows:{$push:'$doc'}}},
+			{$group:{
+				_id:null, 
+				total:{$sum:1}, 
+				total_count:{$sum:'$doc.count'}, 
+				total_amount:{$sum:'$doc.amount'}, 
+				total_refund:{$sum:'$doc.refund'}, 
+				total_profit:{$sum:'$doc.profit'},
+				settlements:{$sum:'$doc.settlements'},
+				unpaid:{$sum:'$doc.unpaid'}, 
+				rows:{$push:'$doc'}
+			}},
 		]);
 		if (sort) {
 			var so={};

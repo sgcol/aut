@@ -499,11 +499,15 @@
     res.total_amount=Number((res.total_amount||0).toFixed(2));
     res.total_profit=Number((res.total_profit||0).toFixed(2));
     res.total_refund=Number((res.total_refund||0).toFixed(2));
+    res.settlements=Number((res.settlements||0).toFixed(2));
+    res.unpaid=Number((res.unpaid||0).toFixed(2));
     response=res;
     return res;
   }
   function showTotalAmount(data) {
-    return response?(response.total_amount+response.total_refund).toFixed(2):'';
+    return response?
+      (response.total_amount+response.total_refund).toFixed(2)+'(未结算 '+response.unpaid+')'
+      :'';
   }
   function showTotalProfit(data) {
     return response?response.total_profit:'';

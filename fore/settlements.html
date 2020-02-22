@@ -218,9 +218,11 @@
                         data-buttons-class=" btn-sm btn-secondary"
                         data-url="forecore/settlements"
                         data-toolbar=".buttons-toolbar"
+                        data-show-footer="true"
+                        data-response-handler="formatRes"
                        >
                         <thead>
-                            <th data-field="time" data-formatter="timestring" data-sortable="true" data-sort-order="desc">
+                            <th data-field="time" data-formatter="timestring" data-sortable="true" data-sort-order="desc" data-footer-formatter="showMoney">
                               结算时间
                             </th>
                             <th data-field="mchName" data-visible="true">
@@ -297,6 +299,17 @@
     });
     $('#list').bootstrapTable('refresh', {query:querys});
   }
+  var response;
+  function formatRes(res) {
+    if (res.err) {
+      alert(res.err);
+      response=null;
+      return {}
+    }
+    response=res;
+    return res;
+  }
+
   function showop(value, record, rowIndex) {
     return `<button type="button" style="display:inline" class="btn btn-icon-sm btn-outline-primary" data-toggle="modal" data-target="#editSnapPayAccount" data-id="${rowIndex}"><i class="mdi mdi-key-change"></i></button>
           `
@@ -304,8 +317,13 @@
   function showDownloadBtn(v, r, idx) {
     return `<a type="button" style="padding-top:5.5px; text-align:center" class="btn btn-icon-sm btn-outline-primary" href="forecore/downloadOrdersInSettlement?id=${r._id}"><i class="mdi mdi-download"></i></a>`
   }
+  
   function showSettlement(v, r) {
-    return (v*(1-(r.pc_fee||0.015))).toFixed(5);
+    return (v*(1-(r.pc_fee||0.015))).toFixed(2);
+  }
+  function showMoney(v, r) {
+    if (!response) return '--'
+    return '已结算 '+(response.settlements||0)+'/未结算 '+(response.unpaid||0)
   }
 </script>
 </html>
