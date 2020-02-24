@@ -392,7 +392,7 @@ function start(err, db) {
 							then : '$paidmoney',
 							else :0
 						}
-					}
+					},
 					payOrder:'$payOrder',
 					succ:'$succ',
 					holding:{
