@@ -386,12 +386,18 @@ function start(err, db) {
 				}},
 				{$project:{
 					dot:'$dot',
-					paidmoney:'$paidmoney',
+					paidmoney:{
+						$cond:{
+							if : {$eq:['succ', 1]},
+							then : '$paidmoney',
+							else :0
+						}
+					}
 					payOrder:'$payOrder',
 					succ:'$succ',
 					holding:{
 						$cond:{
-							if: {$gte:['$money', 0]},
+							if: {$eq:['$payOrder', 1]},
 							then : {$round:[
 								{$multiply:['$value',{$subtract:[1, {$ifNull:['$pc_fee', 0.015]}]}]},
 								2
@@ -401,8 +407,8 @@ function start(err, db) {
 					},
 					refund:{
 						$cond:{
-							if: {$lt:['$money', 0]},
-							then :'$value',
+							if: {$eq:['$payOrder', 0]},
+							then :'$money',
 							else :0
 						}
 					},
