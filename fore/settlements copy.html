@@ -9,22 +9,18 @@
 <link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
 <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
 <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
 
 <!-- endinject -->
 <!-- inject:css -->
 <link rel="stylesheet" href="css/style.css">
 <!-- endinject -->
 <link rel="shortcut icon" href="images/favicon.png" />
-<style>
-  .wrong {
-    border-bottom-color: red;
-  }
-</style>
 </head>
 <body>
-  <!-- dialog  -->
-    
+  <!-- dialogs  -->
   <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
     <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
@@ -166,12 +162,6 @@
       </a>
     </li> 
     <li class="nav-item">
-      <a class="nav-link" href="merchant_daily_report.html">
-        <span class="menu-title">每日流水</span>
-        <i class="mdi mdi-view-list menu-icon"></i>
-      </a>
-    </li> 
-    <li class="nav-item">
       <a class="nav-link" href="settlements.html">
         <span class="menu-title">结算清单</span>
         <i class="mdi mdi-playlist-check menu-icon"></i>
@@ -192,34 +182,73 @@
         <div class="content-wrapper">
           <div class="page-header">
             <h3 class="page-title">
-              修改密码
+              <span class="page-title-icon bg-gradient-primary text-white mr-2">
+                <i class="fab fa-alipay"></i>
+              </span>
+              结算
             </h3>
             <nav aria-label="breadcrumb">
-              <ul class="breadcrumb">
-                <li class="breadcrumb-item active" aria-current="page">
-                  <span></span>Password
-                  <i class="mdi mdi-alert-octagon icon-sm text-primary align-middle"></i>
-                </li>
-              </ul>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item active" aria-current="page">结算</li>
+              </ol>
             </nav>
           </div>
           <div class="row">
-            <div class="col-12 grid-margin">
-              <div class="card">
-                <div class="card-body">
-                    <div class="form-group">
-                      <label for="oldpassword">旧密码</label>
-                      <input type="password" class="form-control" id="oldpass" placeholder="旧密码">
-                      <label for="password">新密码</label>
-                      <input type="password" class="form-control" id="password" placeholder="新密码">
-                      <label for="password">重复新密码</label>
-                      <input type="password" class="form-control" id="verifypassword" placeholder="">
+              <div class="col-lg-12 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="buttons-toolbar">
+                        <!-- <form class="form-inline" id="params">
+                          <div class="input-group input-group-sm">
+                          </div>
+                          <div class="form-group">
+                            <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:getlist();"><i class="mdi mdi-magnify"></i></a>
+                          </div>
+                        </form>      -->
+                      </div>
+                      <div class="table-responsive">
+                      <table class="table table-hover" id="list"
+                        data-classes="table-no-bordered table-hover"
+                        data-toggle="table"
+                        data-side-pagination="server"
+                        data-pagination="true"
+                        data-show-refresh="true"
+                        data-show-columns="true"
+                        data-show-pagination-switch="true"
+                        data-buttons-class=" btn-sm btn-secondary"
+                        data-url="forecore/settlements"
+                        data-toolbar=".buttons-toolbar"
+                        data-show-footer="true"
+                        data-response-handler="formatRes"
+                       >
+                        <thead>
+                            <th data-field="time" data-formatter="timestring" data-sortable="true" data-sort-order="desc" data-footer-formatter="showMoney">
+                              结算时间
+                            </th>
+                            <th data-field="mchName" data-visible="true">
+                              合作商
+                            </th>  
+                            <th data-field="amount" data-formatter="showSettlement" data-sortable="true" data-visible="true">
+                              结算金额
+                            </th>
+                            <th data-field="currency" data-sortable="true">
+                              currency
+                            </th>    
+                            <th data-field="relative" data-sortable="false" data-formatter="showDownloadBtn"> 
+                              详单
+                            </th>
+                        </thead>
+                        <tbody id="list">
+                        </tbody>
+                      </table>
                     </div>
-                    <button type="button" id="adjustMerchant" class="btn btn-gradient-primary mr-2" onclick="changePass()">Submit</button>
-                    <button type="button" class="btn btn-light">Cancel</button>      
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+          </div>
+          <div class="row">
+          </div>
+          <div class="row">
           </div>
         <!-- content-wrapper ends -->
         <!-- partial:partials/_footer.html -->
@@ -248,31 +277,53 @@
   <script src="js/misc.js"></script>
   <!-- endinject -->
   <!-- Custom js for this page-->
-  <script src="js/md5.js"></script>
   <script src="js/base.js"></script>
-  <!-- End custom js for this page-->
+  <script src="js/ejs.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <script src="js/FileSaver.min.js"></script>
+
   <!-- End custom js for this page-->
 </body>
 <script>
-  function changePass() {
-    if ($('#password').val()!=$('#verifypassword').val()) {
-      alert('两次输入不一致');
-      $('#password').val('');
-      $('#verifypassword').val('');
-      return;
+  function getlist() {
+    var allclear=true, querys={};
+    $('#params input').each(function(idx, ele) {
+      var je=$(ele), jv=je.val();
+      if (ele.name=='dates') {
+        var drp=$('input[name="dates"]').data('daterangepicker');
+        querys.from=drp.startDate._d;
+        querys.to=drp.endDate._d;
+      }
+      else querys[ele.name]=jv.trim();
+    });
+    $('#list').bootstrapTable('refresh', {query:querys});
+  }
+  var response;
+  function formatRes(res) {
+    if (res.err) {
+      alert(res.err);
+      response=null;
+      return {}
     }
-    accIntf('/admin/getSalt', {u:me._id}, function(err, ret) {
-      var op=md5(ret.message+$('#oldpass').val());
-      accIntf('/merchant/changePass', {op:op, np:$('#password').val()}, (err, r)=>{
-        if (err) return alert(err);
-        alert('修改成功');
-      })
-    })
+    response=res;
+    return res;
   }
 
-  $('.btn-light').click(()=>{
-    $('.form-group input').val('');
-  })
-
+  function showop(value, record, rowIndex) {
+    return `<button type="button" style="display:inline" class="btn btn-icon-sm btn-outline-primary" data-toggle="modal" data-target="#editSnapPayAccount" data-id="${rowIndex}"><i class="mdi mdi-key-change"></i></button>
+          `
+  }
+  function showDownloadBtn(v, r, idx) {
+    return `<a type="button" style="padding-top:5.5px; text-align:center" class="btn btn-icon-sm btn-outline-primary" href="forecore/downloadOrdersInSettlement?id=${r._id}"><i class="mdi mdi-download"></i></a>`
+  }
+  
+  function showSettlement(v, r) {
+    return (v*(1-(r.pc_fee||0.015))).toFixed(2);
+  }
+  function showMoney(v, r) {
+    if (!response) return '--'
+    return '已结算 '+(response.settlements||0)+'/未结算 '+(response.unpaid||0)
+  }
 </script>
 </html>

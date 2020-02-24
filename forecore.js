@@ -174,15 +174,21 @@ function start(err, db) {
 					{$match:cond2},
 					{$addFields:{
 						value:{
-							$round:[
-								{
-									$multiply:[
-										{$round:[{$multiply:['$paidmoney', '$share']}, 2]}, 
-										{$subtract:[1, {$ifNull:['$pc_fee', 0.015]}]}
+							$cond:{
+								if: {$gt:['$money', 0]},
+								then : {
+									$round:[
+										{
+											$multiply:[
+												{$round:[{$multiply:['$paidmoney', '$share']}, 2]}, 
+												{$subtract:[1, {$ifNull:['$pc_fee', 0.015]}]}
+											]
+										},
+										2
 									]
 								},
-								2
-							]
+								else :'$money'
+							}
 						}
 					}},
 					{$project:{
@@ -341,6 +347,94 @@ function start(err, db) {
 	router.all('/renderCC', function(req, res) {
 		res.render('cashcounter', {init_config:{init_config:1}, payData:{payData:1}, return_url:'dummyAddress'});
 	})
+	router.all('/dailyreport', verifyAuth, httpf({partnerId:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, async function(partnerId, from, to, sort, order, offset, limit, callback) {
+		try {
+			var cond={};
+			if (this.req.auth.acl=='merchant') cond.userid=this.req.auth._id;
+			else if (partnerId) cond.userid=partnerId;
+			if (from) cond.time={$gte:from};
+			if (to) objPath.set(cond, 'time.$lte', to);
+			// cond.status={$in:['SUCCESS', 'refundclosed', 'refund', 'complete', '已支付', '通知商户', '通知失败']}
+			var dbBills=db.db.collection('bills', {readPreference:'secondaryPreferred', readConcern:{level:'majority'}});
+			var cur=dbBills.aggregate([
+				{$match:cond},
+				{$addFields:{
+					payOrder: {
+						$cond:{
+							if : {$ne:['$type', 'refund']},
+							then : 1,
+							else : 0
+						}
+					},
+					succ:{
+						$cond:{
+							if:{$and:[{$eq:['$used', true]}, {$ne:['$type', 'refund']}]},
+							then :1,
+							else :0
+						}
+					}
+				}},
+				{$addFields:{
+					value:{
+						$cond:{
+							if: {$eq:['$succ', 1]},
+							then :  {$round:[{$multiply:['$paidmoney', '$share']}, 2]},
+							else :0
+						}
+					},
+					dot:{$dateToString:{date:'$time', format:'%Y%m%d'}}
+				}},
+				{$project:{
+					dot:'$dot',
+					paidmoney:'$paidmoney',
+					payOrder:'$payOrder',
+					succ:'$succ',
+					holding:{
+						$cond:{
+							if: {$gte:['$money', 0]},
+							then : {$round:[
+								{$multiply:['$value',{$subtract:[1, {$ifNull:['$pc_fee', 0.015]}]}]},
+								2
+							]},
+							else : 0
+						}
+					},
+					refund:{
+						$cond:{
+							if: {$lt:['$money', 0]},
+							then :'$value',
+							else :0
+						}
+					},
+				}},
+				{$group:{
+					_id:'$dot',
+					paidmoney:{$sum:'$paidmoney'},
+					holding:{$sum:'$holding'},
+					refund:{$sum:'refund'},
+					succ:{$sum:'$succ'},
+					orderCount:{$sum:'$payOrder'},
+				}},
+				{$sort:{_id:-1}},
+				{$group:{
+					_id:null, 
+					total: {$sum:1},
+					rows:{$push:{dot:'$_id', paidmoney:'$paidmoney', holding:'$holding', refund:'$refund', succ:'$succ', orderCount:'$orderCount'}}
+				}}
+			]);
+			if (sort) {
+				var so={};
+				so[sort]=(order=='asc'?1:-1);
+				cur=cur.sort(so);
+			}
+			if (offset) cur=cur.skip(offset);
+			if (limit) cur=cur.limit(limit);
+			var [set]=await cur.toArray();
+			return callback(null, dedecimal(set));		
+		} catch(e) {
+			callback(e);
+		}
+	}))
 }
 
 if (module==require.main) {

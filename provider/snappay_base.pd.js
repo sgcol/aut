@@ -870,7 +870,7 @@ function init(err, db) {
 			if (acc) upd.snappay_account=acc;
 		}
 		// build a wechat h5 page
-		updateOrder(params.orderId, upd);
+		// updateOrder(params.orderId, upd); // any update will be overwritten by forecore.order
 		callback(null, {
 			url:url.resolve(argv.wxhost, '/wechatpay/cc')+'?state='+params.orderId
 			,pay_type:params.type
