@@ -353,6 +353,7 @@
                             <th data-field="daily" data-sortable="true" data-formatter="showincoming">净收入(日/总)</th>
                             <th data-field="gross.daily" data-sortable="true" data-formatter="showGrossIncoming">毛收入(日/总)</th>
                             <th data-field="succrate" data-sortable="true">成功率</th>
+                            <th data-field="risky" data-sortable="true">风险</th>
                             <th data-field="" data-formatter="showop">
                               操作
                             </th>
@@ -539,6 +540,7 @@
   }
   function handleDisable(row, idx) {
     if (row.disable) return {css:{color:'grey', 'text-decoration':'line-through'}}
+    if (row.risky>=10) return {css:{color:'red'}};
     return {};
   }
   $('#accounts').on('refresh.bs.table', ()=>{
