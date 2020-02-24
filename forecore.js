@@ -388,7 +388,7 @@ function start(err, db) {
 					dot:'$dot',
 					paidmoney:{
 						$cond:{
-							if : {$eq:['succ', 1]},
+							if : {$eq:['$succ', 1]},
 							then : '$paidmoney',
 							else :0
 						}
