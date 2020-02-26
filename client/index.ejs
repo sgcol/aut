@@ -40,31 +40,16 @@
     <script src="js/base.js"></script>
 </body>
 <script>
-	(async function init() {
-		var [,me]=await Promise.all([
-			new Promise((r)=>{
-				setTimeout(r, 500);
-			}),
-			new Promise((r, e)=>{
-				accIntf('/account/me', (err, me)=>{
-					if (err) return e(err);
-					r(me);
-				})
-			})
-		]);
-		if (me.perfer=='forecore') location.href='/statementOfSnappay-base.html';
-		else location.href='/dashboard.html';
-	})();
-    // $(function() {
-    //     setTimeout(accIntf.bind(null, '/account/me', function(err) {
-	// 		if (err) return alert(err);
-	// 		<% if (!forecoreOnly) { %>
-	// 		location.href='/dashboard.html';
-	// 		<% } else { %>
-	// 		location.href='/statementOfSnappay-base.html';
-	// 		<% } %>
-    //     }), 500);
-    // });
+    $(function() {
+        setTimeout(accIntf.bind(null, '/account/me', function(err) {
+			if (err) return alert(err);
+			<% if (!forecoreOnly) { %>
+			location.href='/dashboard.html';
+			<% } else { %>
+			location.href='/statementOfSnappay-base.html';
+			<% } %>
+        }), 500);
+    });
 </script>
 
 </html>
