@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<link href="https://unpkg.com/bootstrap-table@1.15.5/dist/extensions/group-by-v2/bootstrap-table-group-by.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+<style>
+  .wrong {
+    border-bottom-color: red;
+  }
+</style>
+</head>
+<body>
+  <!-- dialogs  -->  
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <%- include partials/_navbar.html %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <%- include partials/_sidebar.html %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              <span class="page-title-icon bg-gradient-primary text-white mr-2">
+                <i class="fab fa-alipay"></i>
+              </span>
+              出款记录
+            </h3>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">Settlements</a></li>
+              </ol>
+            </nav>
+          </div>
+          <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="buttons-toolbar form-inline">
+                      </div>
+                      <div class="table-responsive">
+                      <table class="table table-hover" id="statement"
+                        data-toggle="table"
+                        data-classes="table-no-bordered table-hover"
+                        data-side-pagination="server"
+                        data-pagination="true"
+                        data-show-refresh="true"
+                        data-show-columns="true"
+                        data-show-pagination-switch="true"
+                        data-buttons-class=" btn-sm btn-secondary"
+                        data-url="forecore/admin/settlements"
+                        data-query-params="queryParams"
+                        data-toolbar=".buttons-toolbar"
+                        data-response-handler="handleResponse"
+                        data-show-footer="true">
+                        <thead>
+                          <th data-field="_" data-sortable="true" data-formatter="showTime" data-footer-formatter="Total">时间</th>
+                          <th data-field="_" data-formatter="showDownLink" data-footer-formatter="showTotalCount">下载</th>
+                        </thead>
+                        <tbody id="list">
+                        </tbody>
+                      </table>
+                    </div>
+                    </div>
+                  </div>
+                </div>
+          </div>
+          <div class="row">
+          </div>
+          <div class="row">
+          </div>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <%- include partials/_footer.html %>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/base.js"></script>
+  <script src="js/ejs.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.15.5/dist/extensions/group-by-v2/bootstrap-table-group-by.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+  <script src="js/FileSaver.min.js"></script>
+  <!-- End custom js for this page-->
+</body>
+<script>
+  function queryParams(params) {
+    return params;
+  }
+  function getlist() {
+    $('#statement').bootstrapTable('refresh');
+  }
+  function showTime(value, record) {
+    return timestring(Number(record));
+  }
+  function showDownLink(value, record) {
+    return `<a href="forecore/admin/downloadSettle?id=${record}">下载</a>`
+  }
+  var response;
+  function handleResponse(res) {
+      response=res;
+      return res;
+  }
+  function showTotalCount(data) {
+    return response?response.total:'';
+  }
+</script>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+</head>
+<body>
+  <!-- dialogs  -->
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <%- include partials/_navbar.html %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <%- include partials/_sidebar2.html %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              <span class="page-title-icon bg-gradient-primary text-white mr-2">
+                <i class="fab fa-alipay"></i>
+              </span>
+              结算
+            </h3>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item active" aria-current="page">结算</li>
+              </ol>
+            </nav>
+          </div>
+          <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="buttons-toolbar">
+                        <!-- <form class="form-inline" id="params">
+                          <div class="input-group input-group-sm">
+                          </div>
+                          <div class="form-group">
+                            <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:getlist();"><i class="mdi mdi-magnify"></i></a>
+                          </div>
+                        </form>      -->
+                      </div>
+                      <div class="table-responsive">
+                      <table class="table table-hover" id="list"
+                        data-classes="table-no-bordered table-hover"
+                        data-toggle="table"
+                        data-side-pagination="server"
+                        data-pagination="true"
+                        data-show-refresh="true"
+                        data-show-columns="true"
+                        data-show-pagination-switch="true"
+                        data-buttons-class=" btn-sm btn-secondary"
+                        data-url="forecore/settlements"
+                        data-toolbar=".buttons-toolbar"
+                        data-show-footer="true"
+                        data-response-handler="formatRes"
+                       >
+                        <thead>
+                            <th data-field="time" data-formatter="timestring" data-sortable="true" data-sort-order="desc" data-footer-formatter="showMoney">
+                              结算时间
+                            </th>
+                            <th data-field="mchName" data-visible="true">
+                              合作商
+                            </th>  
+                            <th data-field="amount" data-formatter="showSettlement" data-sortable="true" data-visible="true">
+                              结算金额
+                            </th>
+                            <th data-field="currency" data-sortable="true">
+                              currency
+                            </th>    
+                            <th data-field="relative" data-sortable="false" data-formatter="showDownloadBtn"> 
+                              详单
+                            </th>
+                        </thead>
+                        <tbody id="list">
+                        </tbody>
+                      </table>
+                    </div>
+                    </div>
+                  </div>
+                </div>
+          </div>
+          <div class="row">
+          </div>
+          <div class="row">
+          </div>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <%- include partials/_footer.html %>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/base.js"></script>
+  <script src="js/ejs.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <script src="js/FileSaver.min.js"></script>
+
+  <!-- End custom js for this page-->
+</body>
+<script>
+  function getlist() {
+    var allclear=true, querys={};
+    $('#params input').each(function(idx, ele) {
+      var je=$(ele), jv=je.val();
+      if (ele.name=='dates') {
+        var drp=$('input[name="dates"]').data('daterangepicker');
+        querys.from=drp.startDate._d;
+        querys.to=drp.endDate._d;
+      }
+      else querys[ele.name]=jv.trim();
+    });
+    $('#list').bootstrapTable('refresh', {query:querys});
+  }
+  var response;
+  function formatRes(res) {
+    if (res.err) {
+      alert(res.err);
+      response=null;
+      return {}
+    }
+    response=res;
+    return res;
+  }
+
+  function showop(value, record, rowIndex) {
+    return `<button type="button" style="display:inline" class="btn btn-icon-sm btn-outline-primary" data-toggle="modal" data-target="#editSnapPayAccount" data-id="${rowIndex}"><i class="mdi mdi-key-change"></i></button>
+          `
+  }
+  function showDownloadBtn(v, r, idx) {
+    return `<a type="button" style="padding-top:5.5px; text-align:center" class="btn btn-icon-sm btn-outline-primary" href="forecore/downloadOrdersInSettlement?id=${r._id}"><i class="mdi mdi-download"></i></a>`
+  }
+  
+  function showSettlement(v, r) {
+    return (v*(1-(r.pc_fee||0.015))).toFixed(2);
+  }
+  function showMoney(v, r) {
+    if (!response) return '--'
+    return '已结算 '+(response.settlements||0)+'/未结算 '+(response.unpaid||0)
+  }
+</script>
+</html>

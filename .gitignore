@@ -2,7 +2,6 @@ node_modules/
 .vscode/
 .logs/
 spin/
-client/
 fore/payments
 
 otc/.env

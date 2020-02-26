@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+</head>
+<body>
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <%- include partials/_navbar.html %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <%- include partials/_sidebar2.html %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+                <span class="page-title-icon bg-gradient-primary text-white mr-2">
+                <i class="mdi mdi-contact-mail"></i>                 
+                </span>
+                对接
+            </h3>
+            <nav aria-label="breadcrumb">
+                <ul class="breadcrumb">
+                <li class="breadcrumb-item active" aria-current="page">
+                    <span>get things done</span>
+                    <i class="mdi mdi-clock icon-sm text-primary align-middle"></i>
+                </li>
+                </ul>
+            </nav>
+          </div>
+          <div class="row">
+            <div class="col-md-12 grid-margin stretch-card">
+              <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">基本信息</h4>
+                    <form class="forms-adapter-baseinfo">
+                      <div class="form-group">
+                        <label for="merchantid">merchantid</label>
+                        <input type="text" class="form-control" readonly="true" id="merchantid">
+                      </div>
+                      <div class="form-group">
+                        <label for="key">key</label>
+                        <input type="text" class="form-control" readonly="true" id="key">
+                      </div>
+                    </form>
+                  </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 grid-margin stretch-card">
+              <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">演示</h4>
+                    <form class="forms-sample">
+                      <div class="form-group">
+                        <label for="key">玩家id</label>
+                        <input type="text" class="form-control" id="userid" placeholder="userid">
+                      </div>      
+                      <div class="form-group">
+                        <label for="money">充值钱数</label>
+                        <input type="number" class="form-control" id="money" placeholder="">
+                      </div>
+                      <button type="submit" class="btn btn-gradient-primary mr-2">Submit</button>
+                    </form>
+                  </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 grid-margin stretch-card">
+              <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">对接文档</h4>
+                    <p class="card-description"><a href="接口文档.pdf">在此处下载</a></p>
+                  </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">签名计算工具</h4>
+                  <p class="card-description">输入参数，比如{a:1, x:2, s:'hi, baby'}, 看看如何计算签名</p>
+                  <div class="form-group">
+                    <textarea class="form-control" style="resize:vertical" id="params">{a:1, x:2, s:'hi, baby'}</textarea>
+                    <button class="btn btn-gradient-primary mr-2" onclick="createMD5Demo();">生成</button>
+                  </div>
+                  <ol>
+                    <li>升序排序，sortObj(<span class="the-object"></span>)<i class="mdi mdi-arrow-right-bold"></i><span class="the-first-result"></span></li>
+                    <li>转换成url参数的格式，querystring.stringify(<span class="the-first-result"></span>)<i class="mdi mdi-arrow-right-bold"></i>"<span class="the-second-result"></span>"</li>
+                    <li>md5("<span class="the-key"></span>"+"<span class="the-second-result"></span>")</li>
+                    <li>结果<span class="the-sign"></span></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">测试充值接口</h4>
+                  <p class="card-description call-pay-interface"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">测试回调接口</h4>
+                  <p class="card-description">填写你的回调接口并测试之</p>
+                  <form class="forms-dryrun">
+                    <div class="form-group">
+                      <label for="cb_url">接口地址</label>
+                      <input class="form-control" id="cb_url" placeholder="http://"></input>
+                    </div>
+                    <div class="form-group">
+                      <label for="orderid">你方平台充值单号orderid</label>
+                      <input class="form-control" id="orderid"></input>
+                    </div>
+                    <div class="form-group">
+                      <label for="orderid">充值金额</label>
+                      <input class="form-control" type="number" id="money" value="1"></input>
+                      <button class="btn btn-gradient-primary mr-2">测试</button>
+                    </div>
+                  </form>
+                  <p class="card-description" id="response"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">完成</h4>
+                  <p class="card-description">请确认一切接口正常，点击 完成 之后测试功能将停用</p>
+                  <button class="btn btn-gradient-primary mr-8 btn-lg getdone" onclick="getdone();">完成</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <%- include partials/_footer.html %>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/md5.js"></script>
+  <script src="js/qs.js"></script>
+  <script src="js/base.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <script src="js/adapter.js"></script>
+  <!-- End custom js for this page-->
+</body>
+<script>
+$('.call-pay-interface').html(`在你的程序中调用${location.origin+'/order'}，参数表如下
+  <ul class="list-arrow">
+    <li>cb_url, string, 充值结果回调地址
+    <li>return_url, string, 充值结束后的返回地址，可不填
+    <li>merchantid, string, 分配给你的merchantid
+    <li>money, number, 充值数量，元作为单位，支持两位小数，如 100.25
+    <li>userid, string, 你方平台中玩家的id
+    <li>orderid, string, 你方平台充值单号
+    <li>time, datetime|number, 订单生成时间，可以是 “2019-6-1 12:00”或者1559361600000
+    <li>sign, string, 计算出的签名，千万不要传送key，那是计算用的
+  </ul>
+  注意
+  <ul class="list-ticked">
+    <li>不论是post或者get都是可以的
+    <li>如果没有错误，会跳到支付宝页面
+    <li>否则返回页面会告诉你哪里错了
+    <li>一般错误都是sign计算错误，请使用上面的签名计算工具验算
+  </ul>`);
+
+function refreshState() {
+  $('.forms-adapter-baseinfo [id]').each((idx, ele)=>{
+        var v=extern.objectPath.get(me, ele.id);
+        if (v) $(ele).val(v);
+        else if (ele.id=='key') {
+          $(ele).val('非测试模式不会显示')
+        }
+    })
+    createMD5Demo();
+    $('.getdone').attr('disabled', !me.debugMode);
+}
+window.initpage=refreshState;
+
+$('#apply').click(function(e) {
+    e.preventDefault();
+    var params={};
+    $('.forms-extra [id]').each(function(idx, ele) {
+        if ($(ele).val()) params[ele.id]=$(ele).val();
+    });
+    if (Object.keys(params).length) accIntf('user/setextradata', params);
+});
+
+function createMD5Demo(e) {
+  // e.preventDefault();
+  var originInput=$('#params').val();
+  try {
+    var o=(new Function('return '+originInput))();
+    if (typeof o!='object') throw '不是一个对象'
+  }catch(err) {
+    alert(err.message);
+  }
+  var sorted=extern.sortObj(o, {sort:(a, b)=>{return a>b?1:-1}});
+  $('.the-object').text(JSON.stringify(o));
+  $('.the-first-result').text(JSON.stringify(sorted));
+  $('.the-key').text(me.key);
+  $('.the-second-result').text(extern.querystring(sorted));
+  $('.the-sign').text(extern.md5(me.key+extern.querystring(sorted)));
+}
+$('.forms-dryrun button').click((e)=>{
+  e.preventDefault();
+  dryRunCallback();
+})
+function dryRunCallback(e) {
+  $('#response').text('Waiting...');
+  var params={};
+  $('.forms-dryrun [id]').each((idx, ele)=>{
+    params[ele.id]=$(ele).val();
+  });
+  if (!params.cb_url) return alert('必须填写接口地址');
+  accIntf('/merchant/debug/callback', params, (err, r)=>{
+    if (err) return $('#response').text('出错啦 '+err);
+    $('#response').text('成功');
+  })
+}
+function getdone() {
+  accIntf('/merchant/debug/stopDebug', (err, r)=>{
+    if (err) return alert(err);
+    location.reload();
+  })
+}
+
+$('.forms-sample').submit((e)=>{
+    e.preventDefault();
+    var now=new Date();
+    var params={
+        cb_url:location.origin+'/demo/result',
+        merchantid:$('#merchantid').val(),
+        money:Number($('#money').val()),
+        orderid:'TESTORDER'+now.getTime(),
+        return_url:location.href,
+        time:now.getTime(),
+        userid:$('#userid').val(),
+    };
+    if (!params.userid || !params.money) return alert('请正确填写参数');
+    var key=$('#key').val();
+    params.sign=md5(key+Qs.stringify(params));
+    location.href='/order?'+Qs.stringify(params);
+  });
+
+</script>
+</html>

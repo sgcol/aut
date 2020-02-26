@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+</head>
+<body>
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <%- include partials/_navbar.html %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <%- include partials/_sidebar2.html %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="page-header">
+            <h3 class="page-title">
+                <span class="page-title-icon bg-gradient-primary text-white mr-2">
+                <i class="mdi mdi-bank"></i>                 
+                </span>
+                提款
+            </h3>
+            <nav aria-label="breadcrumb">
+                <ul class="breadcrumb">
+                <li class="breadcrumb-item active" aria-current="page">
+                    <span>余额 </span>
+                    <i class="mdi mdi-coin icon-sm text-primary align-middle"></i>
+                </li>
+                </ul>
+            </nav>
+            </div>
+            <div class="row">
+                <div class="col-12 grid-margin stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                        <form class="forms-take">
+                            <div class="form-group">
+                            <label>提取</label>
+                            <input type="file" name="take" class="file-upload-default">
+                            <div class="input-group col-xs-12">
+                                <input type="text" class="form-control" id="take" placeholder="全部">
+                                <span class="input-group-append">
+                                <button class="btn btn-gradient-primary apply" type="button">Submit</button>
+                                </span>
+                            </div>
+                            </div>
+                        </form>
+                        </div>
+                    </div>
+                </div>
+            <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                    <h4 class="card-title">银行卡</h4>
+                    <p class="card-description">
+                        优先使用银行卡信息
+                    </p>
+                    <form class="forms-extra">
+                        <div class="form-group">
+                        <label for="bankbenefit">户名</label>
+                        <input type="text" class="form-control" id="bank_account" placeholder="收款人户名">
+                        </div>
+                        <div class="form-group">
+                        <label for="bankaccount">账号</label>
+                        <input type="text" class="form-control" id="bank_no" placeholder="收款人账号">
+                        </div>
+                        <div class="form-group">
+                        <label for="bank">银行</label>
+                        <input type="text" class="form-control" id="bank_name" placeholder="选择银行">
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                    <h4 class="card-title">支付宝</h4>
+                    <p class="card-description">
+                        暂不支持支付宝账号
+                    </p>
+                    <form class="forms-extra">
+                        <div class="form-group">
+                        <label for="alipayAccount">收款账户</label>
+                        <input type="text" class="form-control" id="alipay_account" placeholder="支付宝账户/手机号码" readonly>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-gradient-primary mr-2 apply">Submit</button>
+                <button class="btn btn-light">Cancel</button>        
+            </div>
+        </div>
+        </div>
+  
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <%- include partials/_footer.html %>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/base.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <!-- End custom js for this page-->
+</body>
+<script>
+var availble;
+window.initpage=()=>{
+    availble=fix2(me.profit);
+    $('#take').val(availble);
+    $('.breadcrumb-item span').text('余额'+availble);
+
+    if (me.bank) {
+        $('#bank_account').attr('placeholder',me.bank.account);
+        $('#bank_no').attr('placeholder', me.bank.no);
+        $('#bank_name').attr('placeholder', me.bank.name);
+    }
+    if (me.alipay) {
+        $('#alipay_account').attr('placeholder', me.alipay.account);
+    }    
+};
+
+function setparam(o, path, v) {
+    var n=o;
+    for (var i=0; i<path.length-1; i++) {
+        var d=path[i];
+        if (!n[d]) n[d]={};
+        n=n[d];
+    }
+    n[path[path.length-1]]=v;
+    return o;
+}
+$('.apply').click(function() {
+    var params={};
+    $('.forms-extra [id]').each(function(idx, ele) {
+        if ($(ele).val()) params[ele.id.split('_').join('.')]=$(ele).val();
+    });
+    if (Object.keys(params).length) accIntf('user/setextradata', params);
+    var take=$('#take').val();
+    if (take && take!="0") accIntf('user/take', {take:take}, (err)=>{
+        if (err) return alert(err);
+        queryMe(window.initpage);
+        alert('提交成功，一般在第二天会到账')
+    });
+});
+</script>
+</html>
