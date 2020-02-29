@@ -347,13 +347,15 @@ function start(err, db) {
 	router.all('/renderCC', function(req, res) {
 		res.render('cashcounter', {init_config:{init_config:1}, payData:{payData:1}, return_url:'dummyAddress'});
 	})
-	router.all('/dailyreport', verifyAuth, httpf({partnerId:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, async function(partnerId, from, to, sort, order, offset, limit, callback) {
+	router.all('/dailyreport', verifyAuth, httpf({partnerId:'?string', from:'?date', to:'?date', timezone:'?string', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, async function(partnerId, from, to, timezone, sort, order, offset, limit, callback) {
 		try {
 			var cond={};
 			if (this.req.auth.acl=='merchant') cond.userid=this.req.auth._id;
 			else if (partnerId) cond.userid=partnerId;
 			if (from) cond.time={$gte:from};
 			if (to) objPath.set(cond, 'time.$lte', to);
+			var dot={$dateToString:{date:'$time', format:'%Y%m%d'}};
+			if (timezone) dot.$dateToString.timezone=timezone;
 			// cond.status={$in:['SUCCESS', 'refundclosed', 'refund', 'complete', '已支付', '通知商户', '通知失败']}
 			var dbBills=db.db.collection('bills', {readPreference:'secondaryPreferred', readConcern:{level:'majority'}});
 			var cur=dbBills.aggregate([
@@ -382,7 +384,7 @@ function start(err, db) {
 							else :0
 						}
 					},
-					dot:{$dateToString:{date:'$time', format:'%Y%m%d'}}
+					dot:dot
 				}},
 				{$project:{
 					dot:'$dot',
@@ -425,6 +427,9 @@ function start(err, db) {
 				{$group:{
 					_id:null, 
 					total: {$sum:1},
+					total_recieved: {$sum:'$paidmoney'},
+					total_holding:{$sum:'$holding'},
+					total_refund:{$sum:'$refund'},
 					rows:{$push:{dot:'$_id', paidmoney:'$paidmoney', holding:'$holding', refund:'$refund', succ:'$succ', orderCount:'$orderCount'}}
 				}}
 			]);

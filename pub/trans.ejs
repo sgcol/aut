@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+<style>
+  .wrong {
+    border-bottom-color: red;
+  }
+</style>
+</head>
+<body>
+  <!-- dialog  -->
+  <div class="modal fade" id="editMerchant" tabindex="-1" role="dialog" data-backdrop="static"  aria-labelledby="editMerchant" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
+        <div class="modal-header">
+          <h5 class="card-title" id="exampleModalLabel">设置</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form>
+          <div class="card-body">
+            <div class="form-group">
+              <label for="setpass">重设密码</label>
+              <input type="text" class="form-control" id="setpass" placeholder="新密码">
+            </div>
+            <button type="button" class="btn btn-gradient-primary mr-2">Submit</button>
+            <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+    
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <%- include partials/_navbar.html %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <%- include partials/_sidebar.html %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              USDT转账
+            </h3>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">USDT</a></li>
+                <li class="breadcrumb-item active" aria-current="page">USDT转账</li>
+              </ol>
+            </nav>
+          </div>
+          <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">未成功的转账</h4>
+                  <p class="card-description">
+                    <span  id="manualadjust"></span>
+                    <a href="#" onclick="tryagain();">立刻重试</a>
+                  </p>
+                  <div class="table-responsive">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>
+                          执行
+                        </th>
+                        <th>
+                          错误
+                        </th>
+                        <th>
+                          账号
+                        </th>
+                        <th>
+                          数量
+                        </th>
+                        <th>
+                          时间
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody id="list">
+                    </tbody>
+                  </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+          </div>
+          <div class="row">
+          </div>
+        <%- include partials/_footer.html %>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/base.js"></script>
+  <script src="js/ejs.js"></script>
+  <script src="js/admin.js"></script>
+  <!-- End custom js for this page-->
+</body>
+<script>
+  function showAddacc() {
+    var f=$('#addacc input');
+    for (var i=0; i<f.length; i++) {
+      var item=f[i];
+      if (item.type!='hidden') item.value='';
+      $(item).removeClass('wrong');
+    }
+    if ($('#addUser').hasClass('show')) $('#addUser').removeClass('show');
+    else $('#addUser').addClass('show');
+    $('#addUser').toggle();
+  }
+</script>
+</html>

@@ -41,13 +41,21 @@
 </body>
 <script>
     $(function() {
-        setTimeout(accIntf.bind(null, '/account/me', function(err) {
+        setTimeout(accIntf.bind(null, '/account/me', function(err, me) {
 			if (err) return alert(err);
-			<% if (!forecoreOnly) { %>
-			location.href='/dashboard.html';
-			<% } else { %>
-			location.href='/statementOfSnappay-base.html';
-			<% } %>
+			if (me.acl=="merchant") {
+				<% if (!forecoreOnly) { %>
+					location.href="/merentry.html";
+				<% } else { %>
+					location.href="/fromuserlist.ae";
+				<% } %>
+			} else { 
+				<% if (!forecoreOnly) { %>
+					location.href='/dashboard.html';
+				<% } else { %>
+					location.href='/statementOfSnappay-base.html';
+				<% } %>
+			}
         }), 500);
     });
 </script>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<link href="css/bootstrap-editable.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+<style>
+  .wrong {
+    border-bottom-color: red;
+  }
+</style>
+</head>
+<body>
+  <!-- dialog  -->
+  <div class="modal fade" id="editMerchant" tabindex="-1" role="dialog" data-backdrop="static"  aria-labelledby="editMerchant" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
+        <div class="modal-header">
+          <h5 class="card-title" id="exampleModalLabel">设置</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form>
+          <div class="card-body">
+            <p class="card-description">
+              以下所有内容不填不作修改
+            </p>
+            <div class="form-group">
+              <label for="name">显示名</label>
+              <input type="text" class="form-control" id="name" placeholder="新名字">
+              <label for="password">重设密码</label>
+              <input type="text" class="form-control" id="password" placeholder="新密码">
+              <label for="key">重设key</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="key" placeholder="点按后面的按钮生成新key">
+                <span for="key" class="input-group-append">
+                  <button class="btn btn-gradient-primary" type="button" onclick="javascript:$('#key').val(randstring(24))">生成</button>
+                </span>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="input-group">
+                <!-- <div class="input-group-prepend"><span for="sp_fee" class="input-group-text bg-gradient-info text-white">Snappay手续费</span></div>
+                <input type="text" class="form-control" id="sp_fee" placeholder="1.2%">
+                <div class="input-group-prepend"><span for="ap_fee" class="input-group-text bg-gradient-info text-white">APay手续费</span></div>
+                <input type="text" class="form-control" id="ap_fee" placeholder="0.6%">
+                <div class="input-group-prepend"><span for="pc_fee" class="input-group-text bg-gradient-info text-white">垫付手续费</span></div>
+                <input type="text" class="form-control" id="pc_fee" placeholder="1.5%"> -->
+                <div class="input-group-prepend"><span for="fee" class="input-group-text bg-gradient-info text-white">手续费</span></div>
+                <input type="text" class="form-control" id="fee">
+              </div>
+              <br>
+              <div class="input-group">
+                <div class="input-group-prepend"><span for="parent" class="input-group-text bg-gradient-info text-white">上级</span></div>
+                <input type="text" class="form-control" id="parent" placeholder="上级代理id">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="limitation">每日限额</label>
+              <input type="text" class="form-control" id="limitation" placeholder="200w">
+              <label for="valid">每日限时</label>
+              <input type="text" class="form-control" id="valid" placeholder="08:00-21:00">
+            </div>  
+            <div class="form-group">
+              <p class="card-description">提供商(otc平台)</p>
+              <div class="form-group" id="providers">
+              </div>
+              <button type="button" id="adjustMerchant" class="btn btn-gradient-primary mr-2" data-dismiss="modal">Submit</button>
+              <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+    
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <%- include partials/_navbar.html %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <%- include partials/_sidebar.html %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              商户
+            </h3>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">账号</a></li>
+                <li class="breadcrumb-item active" aria-current="page">商户账号</li>
+              </ol>
+            </nav>
+          </div>
+          <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="card-body">
+                      <h4 class="card-title">商户</h4>
+                      <div class="col-12 grid-margin" style="display:none" id="addUser">
+                          <div class="card">
+                            <div class="card-body">
+                              <form class="form-inline" id="addacc" action="#">
+                                <label class="sr-only" for="inlineFormInputName1">Name</label>
+                                <input type="text" class="form-control mb-2 mr-sm-2" id="inlineFormInputName1" name="name" placeholder="姓名">
+                                <label class="sr-only" for="inlineFormInputGroupUsername2">账号</label>
+                                <div class="input-group mb-2 mr-sm-2">
+                                  <div class="input-group-prepend">
+                                    <div class="input-group-text"><i class="mdi mdi-account-plus mdi-lg"></i></div>
+                                  </div>
+                                  <input type="text" class="form-control" id="inlineFormInputGroupUsername2" name="account" placeholder="账号">
+                                </div>
+                                <label class="sr-only" for="inlineFormInputName2">Password</label>
+                                <input type="text" class="form-control mb-2 mr-sm-2" id="inlineFormInputName2" name="password" placeholder="密码">
+                                <input type="hidden" name="identity" value="merchant">
+                                <button class="btn btn-gradient-primary mb-2" type="submit">Submit</button>
+                                <button type="button" class="btn btn-light mb-2" style="margin-left:10px" onclick="javascript:$('#addUser').hide()">Cancel</button>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="buttons-toolbar">
+                          <button class="btn btn-sm btn-secondary" onclick="showAddacc()"><i class="mdi mdi-account-plus"></i></button>
+                        </div>    
+                        <div class="table-responsive">
+                          <table id="accounts"
+                            class="table table-hover"
+                            data-classes="table-no-bordered table-hover"
+                            data-pagination="true"
+                            data-side-pagination="server"
+                            data-pagination="true"
+                            data-show-refresh="true"
+                            data-show-columns="true"
+                            data-show-pagination-switch="true"
+                            data-page-size="25"
+                            data-buttons-class=" btn-sm btn-secondary"
+                            data-ajax="queryAccounts"
+                            data-toolbar=".buttons-toolbar">
+                        <thead>
+                          <tr>
+                          <th data-field="name" data-sortable="true">
+                              显示名
+                            </th>
+                            <th data-field="_id" data-sortable="true" data-editable="true">
+                              登录名
+                            </th>
+                            <th data-field="createTime" data-formatter="timestring" data-sortable="true">
+                              创建时间
+                            </th>
+                            <th data-field="acl" data-formatter="showAcl" data-visible="false">
+                              权限
+                            </th>
+                            <th data-field="key" data-visible="false">key</th>
+                            <th data-field="merchantid" data-visible="false">merchantid</th>
+                            <th data-field="debugMode" data-formatter="showDebugging" data-visible="false">调试</th>
+                            <th data-field="daily" data-formatter="addAllFields">当日收入</th>
+                            <th data-field="in" data-formatter="addAllFields">收入</th>
+                            <th data-field="out" data-formatter="addAllFields" data-visible="false">提现</th>
+                            <th data-formatter="showOp">
+                              操作
+                            </th>
+                            </tr>
+                        </thead>
+                        <tbody id="list">
+                        </tbody>
+                      </table>
+                    </div>
+                    </div>
+                  </div>
+                </div>
+          </div>
+          <div class="row">
+          </div>
+          <div class="row">
+          </div>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <%- include partials/_footer.html %>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/base.js"></script>
+  <script src="js/ejs.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+  <script type="text/javascript" src="js/jquery.mask.min.js"></script>
+  <!-- End custom js for this page-->
+</body>
+<script>
+  function randstring(len) {
+    var s='', len=len||7;
+    while (s.length<len) {
+      s+=Math.random().toString(36).substring(2)
+    }
+    return s.substring(0, len);
+  }
+  function showAddacc() {
+    var f=$('#addacc input');
+    for (var i=0; i<f.length; i++) {
+      var item=f[i];
+      if (item.type!='hidden') item.value='';
+      $(item).removeClass('wrong');
+    }
+    $('#addUser').toggle();
+  }
+  function formattime(t, changeZeroTo24) {
+    if (typeof t=='string') t=new Date(t);
+    var m=('0'+t.getMinutes()).slice(-2);
+    var h=(t.getUTCHours()+8)%24;
+    if (h==0 && changeZeroTo24) h=24;
+    h=('0'+h).slice(-2);
+    return h+':'+m;
+  }
+
+  var providers=$('#providers');
+  
+  $('#editMerchant').on('shown.bs.modal', function (e) {
+    $('#editMerchant form input').val('');
+    var idx=$(e.relatedTarget).data('id');
+    var merchant=$('#accounts').bootstrapTable('getData', {useCurrentPage:true})[idx];
+    if (merchant) {
+      providers && accIntf('/admin/providers', (err, ret) =>{
+        if (err) return showerr(err);
+        providers.empty();
+        var allp=ret.message;
+        merchant.providers=merchant.providers||{};
+        for (var i=0; i<allp.length; i++) {
+          var activedProvider=merchant.providers[allp[i].id]||{disabled:false};
+          providers.append(`
+          <div class="form-check form-check">
+            <label class="form-check-label">
+              <input type="checkbox" class="form-check-input" ${(activedProvider && !activedProvider.disabled)?'checked':''} id="providers.${allp[i].id}" for="provider" data-key="providers.${allp[i].name||allp[i].id}">
+              ${allp[i].name||allp[i].id}
+            <i class="input-helper"></i></label>
+            ${allp[i].params?(()=>{
+              var ret='';
+              for (var j=0; j<allp[i].params.length; j++) {
+                var p=allp[i].params[j];
+                ret+=`<div class="input-group"><div class="input-group-prepend"><span class="input-group-text">${p}</span></div><input class=" form-control" value="${(activedProvider && activedProvider[p])}" placeholder="必填" id="providers_${allp[i].name||allp[i].id}_${p}" data-key="providers.${allp[i].name||allp[i].id}.${p}" data-val="${(activedProvider && activedProvider[p])}"></div>`
+              }
+              return ret;
+            })():''}
+            ${allp[i].options?(()=>{
+              var ret='';
+              for (var j=0; j<allp[i].options.length; j++) {
+                var opt=allp[i].options[j];
+                ret+=`<div class="form-group" id="providers.${allp[i].id}.${opt.name}" for="${allp[i].id}.${opt.name}">`;
+                for (var z=0; z<opt.values.length; z++) {
+                  ret+=`<div class="form-check form-check-primary"><label class="form-check-label"><input type="radio" class="form-check-input" name="${allp[i].id}.${opt.name}" `+((activedProvider[opt.name]==opt.values[z])?'checked':'')+' value="'+opt.values[z]+'">'+opt.values[z]+`<i class="input-helper"></i></label></div>`
+                }
+                ret+='</div>'
+              }
+              return ret;
+            })():''}
+          </div>
+          `)
+        }
+        $('#providers_snappay-toll_accountNumber').mask('000-00000-000000000000', {placeholder:'bnk-trans-account'});
+        $('#providers_snappay-toll_timezone').mask('s09:99', {placeholder:'[+/-]hh:mm', translation:{s:{pattern:/[\+\-]/}}});
+        var sban=$('#providers_snappay_base_accountNumber');
+        sban.mask('000-00000-000000000000', {placeholder:'bnk-trans-account'});
+        // if (sban.data('val')) sban.val(sban.masked(sban.data('val')));
+        var sbtz=$('#providers_snappay_base_timezone');
+        sbtz.mask('s09:99', {placeholder:'[+/-]hh:mm', translation:{s:{pattern:/[\+\-]/}}});
+        // if (sbtz.data('val')) sbtz.val(sbtz.masked(sbtz.data('val')));
+      })
+      // $('#fee').attr("placeholder", ''+((1-merchant.share)*100).toFixed(2)+'%');
+      $('#fee').mask('0.09% 0.09% 0.09%', {placeholder:'snappay apay 垫付'});
+      $('#fee').val(`${merchant.sp_fee*100}% ${merchant.ap_fee*100}% ${merchant.pc_fee*100}%`);
+      $('#parent').attr('placeholder', merchant.parent);
+      $('#valid').attr('placeholder', formattime(merchant.validfrom||'1971 1-1 0:00 GMT+0800')+'-'+formattime(merchant.validend||'1971-1-2 00:00 GMT+0800', true));
+      $('#limitation').attr('placeholder', merchant.limitation);
+    }
+    $('#adjustMerchant').off('click').click(function(e) {
+      var params={};
+      $('#editMerchant form input').each(function(idx, ele) {
+        var je=$(ele), jv=je.val(), id=je.data('key')||ele.id.replace(/_/g, '.');
+        if (jv=='') return;
+        if (je.is(':radio')) return;
+        if (id=='fee') {
+          var s=jv.trim(), fees=s.split(' ');
+          if (fees.length<3) return alert('手续费要填写3个');
+          params.sp_fee=parseFloat(fees[0])/100;
+          params.ap_fee=parseFloat(fees[1])/100;
+          params.pc_fee=parseFloat(fees[2])/100;
+          params.share=Number((1-(params.sp_fee+params.ap_fee)).toFixed(5));
+        } else if (je.attr('for')=='provider') {
+          params[id+'.disabled']=!ele.checked;
+        } else if (id=='valid') {
+          var timerange=jv.match(/((?:\d){2}(?:\:(?:\d){2}){1,2})\s*[-~]\s*((?:\d){2}(?:\:(?:\d){2}){1,2})/);
+          if (!timerange && jv) return alert('请这样输入 08:00-19:00');
+          params.validfrom=new Date('1971-1-1 '+timerange[1]+' GMT+0800');
+          params.validend=new Date('1971-1-1 '+timerange[2]+' GMT+0800');
+        } else if (id=='providers.snappay-toll.accountNumber'||id=='providers.snappay_base.accountNumber') params[id]=je.cleanVal();
+        else params[id]=jv;
+      });
+      $('#editMerchant form div[id]').each((idx, ele)=>{
+        var je=$(ele), id=ele.id.replace(/_/g, '.');
+        params[id]=$(`input[name='${je.attr('for')}']:checked`). val();
+      });
+      params.id=merchant._id;
+      accIntf('/admin/updateAccount', params, err=>{
+        if (err) return showerr(err);
+        getlist();
+      });
+    })
+});
+window.initpage=()=>{
+  var list=$('#accounts');
+  list.bootstrapTable();
+  list.on('load-success.bs.table column-switch.bs.table', function (e, name, args) {
+    $('#accounts :checkbox').off('click').click(function() {
+      accIntf('admin/updateAccount',{id:$(this).data('id'), debugMode:$(this).prop('checked')})
+    });
+  })
+}
+</script>
+</html>

@@ -36,11 +36,11 @@
               <span class="page-title-icon bg-gradient-primary text-white mr-2">
                 <i class="fab fa-alipay"></i>
               </span>
-              日报
+              结算
             </h3>
             <nav aria-label="breadcrumb">
               <ol class="breadcrumb">
-                <li class="breadcrumb-item active" aria-current="page">日报</li>
+                <li class="breadcrumb-item active" aria-current="page">结算</li>
               </ol>
             </nav>
           </div>
@@ -67,25 +67,27 @@
                         data-show-columns="true"
                         data-show-pagination-switch="true"
                         data-buttons-class=" btn-sm btn-secondary"
-                        data-url="forecore/dailyreport"
+                        data-url="forecore/settlements"
                         data-toolbar=".buttons-toolbar"
-                        data-response-handler="formatRes"
                         data-show-footer="true"
-                        data-query-params="queryParams"
+                        data-response-handler="formatRes"
                        >
                         <thead>
-                          <th data-field="dot" data-footer-formatter="Total">日期</th>
-                          <th data-field="orderCount" data-visible="true">
-                            订单数
-                          </th>
-                          <th data-field="succ" data-visible="true">
-                            成功数
-                          </th>
-                          <th data-field="paidmoney"  data-formatter="showDailyIn" data-footer-formatter="showTotalRevieved">下单金额</th>
-                          <th data-field="holding" data-footer-formatter="showTotalHolding">分成</th>
-                          <th data-field="currency" >
-                            currency
-                          </th>    
+                            <th data-field="time" data-formatter="timestring" data-sortable="true" data-sort-order="desc" data-footer-formatter="showMoney">
+                              结算时间
+                            </th>
+                            <th data-field="mchName" data-visible="true">
+                              合作商
+                            </th>  
+                            <th data-field="amount" data-formatter="showSettlement" data-sortable="true" data-visible="true">
+                              结算金额
+                            </th>
+                            <th data-field="currency" data-sortable="true">
+                              currency
+                            </th>    
+                            <th data-field="relative" data-sortable="false" data-formatter="showDownloadBtn"> 
+                              详单
+                            </th>
                         </thead>
                         <tbody id="list">
                         </tbody>
@@ -130,42 +132,44 @@
   <!-- End custom js for this page-->
 </body>
 <script>
-  function currentTimezone() {
-    var tz=new Date().getTimezoneOffset(), hh=Math.floor(tz/60), mm=tz-hh*60;
-    if (hh>=0) return '-'+('00'+hh).slice(-2)+':'+('00'+mm).slice(-2);
-    else return '+'+('00'+(-hh)).slice(-2)+':'+('00'+mm).slice(-2);
+  function getlist() {
+    var allclear=true, querys={};
+    $('#params input').each(function(idx, ele) {
+      var je=$(ele), jv=je.val();
+      if (ele.name=='dates') {
+        var drp=$('input[name="dates"]').data('daterangepicker');
+        querys.from=drp.startDate._d;
+        querys.to=drp.endDate._d;
+      }
+      else querys[ele.name]=jv.trim();
+    });
+    $('#list').bootstrapTable('refresh', {query:querys});
   }
-  function queryParams(params) {
-    params.timezone=currentTimezone();
-    return params;
-  }
-  function showDailyIn(value, record) {
-    if (record.paidmoney && record.refund) return (record.paidmoney+record.refund).toFixed(2)+'(收 '+record.paidmoney+'退 '+(-record.refund)+')';
-    if (record.refund) return record.refund;
-    if (record.paidmoney) return record.paidmoney;
-    return 0;
-  }
-  var response={};
+  var response;
   function formatRes(res) {
     if (res.err) {
       alert(res.err);
+      response=null;
       return {}
     }
-    res.rows && res.rows.forEach((record)=>{
-      record.dot=record.dot||'选中区间';
-    })
     response=res;
     return res;
   }
-  function num(x) {
-    if (isNaN(x)) return 0;
-    return Number(x);
+
+  function showop(value, record, rowIndex) {
+    return `<button type="button" style="display:inline" class="btn btn-icon-sm btn-outline-primary" data-toggle="modal" data-target="#editSnapPayAccount" data-id="${rowIndex}"><i class="mdi mdi-key-change"></i></button>
+          `
   }
-  function showTotalRevieved() {
-    return num(response.total_recieved).toFixed(2);
+  function showDownloadBtn(v, r, idx) {
+    return `<a type="button" style="padding-top:5.5px; text-align:center" class="btn btn-icon-sm btn-outline-primary" href="forecore/downloadOrdersInSettlement?id=${r._id}"><i class="mdi mdi-download"></i></a>`
   }
-  function showTotalHolding() {
-    return (num(response.total_holding)+num(response.total_refund)).toFixed(2);
+  
+  function showSettlement(v, r) {
+    return (v*(1-(r.pc_fee||0.015))).toFixed(2);
+  }
+  function showMoney(v, r) {
+    if (!response) return '--'
+    return '已结算 '+(response.settlements||0)+'/未结算 '+(response.unpaid||0)
   }
 </script>
 </html>

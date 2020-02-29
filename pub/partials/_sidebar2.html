@@ -13,6 +13,7 @@
         <i class="mdi mdi-bookmark-check text-success nav-profile-badge"></i>
       </a>
     </li>
+    <% if (!forecoreOnly) { %>
     <li class="nav-item">
       <a class="nav-link" href="merentry.html">
         <span class="menu-title">总览</span>
@@ -25,12 +26,14 @@
         <i class="mdi mdi-cash menu-icon"></i>
       </a>
     </li>
+    <% } %>
     <li class="nav-item">
       <a class="nav-link" href="extrainfo.html">
         <span class="menu-title">联系人</span>
         <i class="mdi mdi-contact-mail menu-icon"></i>
       </a>
     </li>
+    <% if (!forecoreOnly) { %>
     <li class="nav-item">
       <a class="nav-link" data-toggle="collapse" href="#ui-details" aria-expanded="false" aria-controls="ui-details">
         <span class="menu-title">明细</span>
@@ -50,7 +53,27 @@
         <span class="menu-title">对接</span>
         <i class="mdi mdi-human-greeting menu-icon"></i>
       </a>
+    </li>   
+    <% } else {%>
+    <li class="nav-item">
+      <a class="nav-link" href="fromuserlist.ae">
+        <span class="menu-title">充值详单</span>
+        <i class="mdi mdi-view-list menu-icon"></i>
+      </a>
     </li> 
+    <li class="nav-item">
+      <a class="nav-link" href="merchant_daily_report.html">
+        <span class="menu-title">每日流水</span>
+        <i class="mdi mdi-view-list menu-icon"></i>
+      </a>
+    </li> 
+    <li class="nav-item">
+      <a class="nav-link" href="settlements.html">
+        <span class="menu-title">结算清单</span>
+        <i class="mdi mdi-playlist-check menu-icon"></i>
+      </a>
+    </li> 
+    <% } %>
     <li class="nav-item">
       <a class="nav-link" href="changepassword.html">
         <span class="menu-title">修改密码</span>

@@ -9,25 +9,31 @@
 <link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
 <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
 <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
-<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.15.5/dist/extensions/group-by-v2/bootstrap-table-group-by.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.css" rel="stylesheet">
 <link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
 <!-- endinject -->
 <!-- inject:css -->
 <link rel="stylesheet" href="css/style.css">
 <!-- endinject -->
 <link rel="shortcut icon" href="images/favicon.png" />
+<style>
+  .wrong {
+    border-bottom-color: red;
+  }
+</style>
 </head>
 <body>
-  <!-- dialogs  -->
+  <!-- dialogs  -->  
   <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
     <%- include partials/_navbar.html %>
     <!-- partial -->
     <div class="container-fluid page-body-wrapper">
       <!-- partial:partials/_sidebar.html -->
-      <%- include partials/_sidebar2.html %>
+      <%- include partials/_sidebar.html %>
       <!-- partial -->
       <div class="main-panel">
         <div class="content-wrapper">
@@ -36,11 +42,11 @@
               <span class="page-title-icon bg-gradient-primary text-white mr-2">
                 <i class="fab fa-alipay"></i>
               </span>
-              日报
+              出款记录
             </h3>
             <nav aria-label="breadcrumb">
               <ol class="breadcrumb">
-                <li class="breadcrumb-item active" aria-current="page">日报</li>
+                <li class="breadcrumb-item"><a href="#">Settlements</a></li>
               </ol>
             </nav>
           </div>
@@ -48,44 +54,26 @@
               <div class="col-lg-12 grid-margin stretch-card">
                   <div class="card">
                     <div class="card-body">
-                      <div class="buttons-toolbar">
-                        <!-- <form class="form-inline" id="params">
-                          <div class="input-group input-group-sm">
-                          </div>
-                          <div class="form-group">
-                            <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:getlist();"><i class="mdi mdi-magnify"></i></a>
-                          </div>
-                        </form>      -->
+                      <div class="buttons-toolbar form-inline">
                       </div>
                       <div class="table-responsive">
-                      <table class="table table-hover" id="list"
-                        data-classes="table-no-bordered table-hover"
+                      <table class="table table-hover" id="statement"
                         data-toggle="table"
+                        data-classes="table-no-bordered table-hover"
                         data-side-pagination="server"
                         data-pagination="true"
                         data-show-refresh="true"
                         data-show-columns="true"
                         data-show-pagination-switch="true"
                         data-buttons-class=" btn-sm btn-secondary"
-                        data-url="forecore/dailyreport"
-                        data-toolbar=".buttons-toolbar"
-                        data-response-handler="formatRes"
-                        data-show-footer="true"
+                        data-url="forecore/admin/settlements"
                         data-query-params="queryParams"
-                       >
+                        data-toolbar=".buttons-toolbar"
+                        data-response-handler="handleResponse"
+                        data-show-footer="true">
                         <thead>
-                          <th data-field="dot" data-footer-formatter="Total">日期</th>
-                          <th data-field="orderCount" data-visible="true">
-                            订单数
-                          </th>
-                          <th data-field="succ" data-visible="true">
-                            成功数
-                          </th>
-                          <th data-field="paidmoney"  data-formatter="showDailyIn" data-footer-formatter="showTotalRevieved">下单金额</th>
-                          <th data-field="holding" data-footer-formatter="showTotalHolding">分成</th>
-                          <th data-field="currency" >
-                            currency
-                          </th>    
+                          <th data-field="_" data-sortable="true" data-formatter="showTime" data-footer-formatter="Total">时间</th>
+                          <th data-field="_" data-formatter="showDownLink" data-footer-formatter="showTotalCount">下载</th>
                         </thead>
                         <tbody id="list">
                         </tbody>
@@ -124,48 +112,33 @@
   <script src="js/base.js"></script>
   <script src="js/ejs.js"></script>
   <script src="js/admin.js"></script>
-  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.15.5/dist/extensions/group-by-v2/bootstrap-table-group-by.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
   <script src="js/FileSaver.min.js"></script>
-
   <!-- End custom js for this page-->
 </body>
 <script>
-  function currentTimezone() {
-    var tz=new Date().getTimezoneOffset(), hh=Math.floor(tz/60), mm=tz-hh*60;
-    if (hh>=0) return '-'+('00'+hh).slice(-2)+':'+('00'+mm).slice(-2);
-    else return '+'+('00'+(-hh)).slice(-2)+':'+('00'+mm).slice(-2);
-  }
   function queryParams(params) {
-    params.timezone=currentTimezone();
     return params;
   }
-  function showDailyIn(value, record) {
-    if (record.paidmoney && record.refund) return (record.paidmoney+record.refund).toFixed(2)+'(收 '+record.paidmoney+'退 '+(-record.refund)+')';
-    if (record.refund) return record.refund;
-    if (record.paidmoney) return record.paidmoney;
-    return 0;
+  function getlist() {
+    $('#statement').bootstrapTable('refresh');
   }
-  var response={};
-  function formatRes(res) {
-    if (res.err) {
-      alert(res.err);
-      return {}
-    }
-    res.rows && res.rows.forEach((record)=>{
-      record.dot=record.dot||'选中区间';
-    })
-    response=res;
-    return res;
+  function showTime(value, record) {
+    return timestring(Number(record));
   }
-  function num(x) {
-    if (isNaN(x)) return 0;
-    return Number(x);
+  function showDownLink(value, record) {
+    return `<a href="forecore/admin/downloadSettle?id=${record}">下载</a>`
   }
-  function showTotalRevieved() {
-    return num(response.total_recieved).toFixed(2);
+  var response;
+  function handleResponse(res) {
+      response=res;
+      return res;
   }
-  function showTotalHolding() {
-    return (num(response.total_holding)+num(response.total_refund)).toFixed(2);
+  function showTotalCount(data) {
+    return response?response.total:'';
   }
 </script>
 </html>

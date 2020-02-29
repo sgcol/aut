@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+<style>
+  .wrong {
+    border-bottom-color: red;
+  }
+</style>
+</head>
+<body>
+  <!-- dialog  -->
+    
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <%- include partials/_navbar.html %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <%- include partials/_sidebar2.html %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              对账
+            </h3>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">对账</a></li>
+                <li class="breadcrumb-item active" aria-current="page">日报表</li>
+              </ol>
+            </nav>
+          </div>
+          <div class="row">
+            <div class="col-12 grid-margin">
+              <div class="card">
+                <div class="card-body">
+                  <div class="buttons-toolbar">
+                    <form class="form-inline" id="params">
+                      <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-calendar-today"></i></span>
+                        </div>
+                        <input type="text" class="form-control mr-sm-2" name="dates" placeholder="日期">
+                      </div> 
+                      <div class="form-group">
+                        <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:querydata();"><i class="mdi mdi-magnify"></i></a>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="table-responsive">
+                    <table id="detail"
+                     class="table table-hover"
+                     data-classes="table-no-bordered table-hover"
+                     data-toggle="table"
+                     data-show-refresh="true"
+                     data-show-columns="true"
+                     data-show-pagination-switch="true"
+                     data-pagination="true" 
+                     data-page-size="30" 
+                     data-page-list="[10, 25, 50, 100, ALL]" 
+                     data-side-pagination="server" 
+                     data-url="admin/dailystat"
+                     data-query-params="getQueryParams" 
+                     data-buttons-class=" btn-sm btn-secondary"
+                     data-toolbar=".buttons-toolbar"
+                     data-show-footer="true"
+                     data-response-handler="handleData"
+                     data-sort-name="time"
+                     data-sort-order="desc">
+                      <thead>
+                        <th data-field="merchantOrderId" data-footer-formatter="showTotalText" data-sortable="true">商户单号</th>
+                        <th data-field="status" data-footer-formatter="showTotalNumber">状态</th>
+                        <th data-field="money" data-footer-formatter="showTotalMoney" data-sortable="true">毛收入</th>
+                        <th data-field="net" data-footer-formatter="showTotalNet" data-sortable="true">净收入</th>
+                        <th data-field="userid" data-visible="false" data-sortable="true">账号</th>
+                        <th data-field="_id" data-sortable="true">提供商单号</th>
+                        <th data-field="provider" data-sortable="true">提供商</th>
+                        <th data-field="time" data-sort-order="desc" data-formatter="timestring"  data-sortable="true">时间</th>
+                        <th data-formatter="showOp">操作</th>
+                      </thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <%- include partials/_footer.html %>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/base.js"></script>
+  <!-- End custom js for this page-->
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+  <!-- End custom js for this page-->
+</body>
+<script>
+  var data;
+  function handleData(res) {
+    data=res;
+    return res;
+  }
+  function showTotalText() {
+    return "Total";
+  }
+  function showTotalNumber() {
+      return (data?data.total:'-')+'条记录';
+  }
+  function showTotalMoney() {
+    return data?data.totalmoney:undefined;
+  }
+  function showTotalNet() {
+    return data?data.totalnet:undefined;
+  }
+  var urlparam=new URL(location.href).searchParams;
+  $(()=>{
+    var today=new Date();
+    $('input[name="dates"]').daterangepicker({startDate:today, endDate:today});
+  });
+  function querydata() {
+    // var allclear=true, querys={};
+    // $('#params input').each(function(idx, ele) {
+    //   var je=$(ele), jv=je.val();
+    //   if (ele.name=='dates') {
+    //     var drp=$('input[name="dates"]').data('daterangepicker');
+    //     querys.startTime=drp.startDate._d;
+    //     querys.endTime=drp.endDate._d;
+    //   }
+    //   else querys[ele.name]=jv.trim();
+    // });
+    // if (allclear) $('#detail').bootstrapTable('refresh', {query:querys});
+    $('#detail').bootstrapTable('refresh');
+  }
+  function sendNotify(orderid) {
+    accIntf('/admin/notifyMerchant', {orderid:orderid}, (err)=>{
+      if (err) return showerr(err);
+      querydata();
+    });
+  }
+
+  function showOp(v, o) {
+    var ret=`<button class="btn btn-outline-primary btn-icon-sm tooltipfy" title="重发通知" onclick="javascript:sendNotify('${o._id}')"><i class="mdi mdi-replay"></i></button>`;
+    if (me.acl=='admin'||me.acl=='manager') ret+=`<button style="margin-left:5px" class="btn btn-outline-danger btn-icon-sm tooltipfy" title="强制结单" onclick="javascript:forceconfirm('${o._id}')"><i class="mdi mdi-archive"></i></button>`;
+    return ret;
+  }
+  function getQueryParams(querys) {
+    $('#params input').each(function(idx, ele) {
+      var je=$(ele), jv=je.val();
+      if (ele.name=='dates') {
+        var drp=$('input[name="dates"]').data('daterangepicker');
+        if (drp) {
+            querys.startTime=drp.startDate._d;
+            querys.endTime=drp.endDate._d;
+        } else {
+            querys.startTime=moment().startOf('date').toDate();
+            querys.endTime=moment().endOf('date').toDate();
+        }
+      }
+      else querys[ele.name]=jv.trim();
+    });
+    return querys;
+  }
+</script>
+</html>

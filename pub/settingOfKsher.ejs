@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+<style>
+  .wrong {
+    border-bottom-color: red;
+  }
+</style>
+</head>
+<body>
+  <!-- dialogs  -->
+  <!-- edit&add alipay account  -->
+  <div class="modal fade" id="editAlipayAccount" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="editAlipayAccount" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
+        <div class="modal-header">
+          <h5 class="card-title" id="exampleModalLabel">设置</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form>
+          <div class="card-body">
+            <div class="form-group">
+              <label for="name">ksher账号</label>
+              <input type="text" class="form-control" id="name" placeholder="账号名">
+              <label for="privatekey">收款限额</label>
+              <input type="text" class="form-control" id="limitation" placeholder="不填使用ksher设置中的默认值">
+              <label for="fee">费率</label>
+              <input type="text" class="form-control" id="fee" placeholder="不填使用ksher设置中的默认值">
+              <label for="privatekey">ksher密码</label>
+              <input type="text" class="form-control" id="pwd" placeholder="密码">
+              <label for="privatekey">appid</label>
+              <input type="text" class="form-control" id="appId" placeholder="appID">
+              <label for="privatekey">私钥</label>
+              <textarea type="text" class="form-control" id="privateKey" placeholder=""></textarea>
+              <label for="ksherPublicKey">ksher公钥</label>
+              <textarea type="text" class="form-control" id="ksherPublicKey" placeholder="无需设置，我们不验证公钥"></textarea>
+            </div>
+            <a class="card-description form-group" href="http://merchant.ksher.net/big_business/it_integration" target="_blank">获取私钥(IT Integration)</a>
+            <div class="form-group">
+              <div class="form-check form-check">
+                <label class="form-check-label">
+                  <input type="checkbox" class="form-check-input" id="enable" for="enable" checked>可用<i class="input-helper"></i>
+                </label>
+              </div>
+              <button type="button" id="adjustAlipayAccount" class="btn btn-gradient-primary mr-2" data-dismiss="modal">Submit</button>
+              <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- edit alipay general settings  -->
+  <div class="modal fade" id="editAlipaySettings" tabindex="-1" role="dialog" data-backdrop="static"  aria-labelledby="editAlipaySettings" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
+        <div class="modal-header">
+          <h5 class="card-title">ksher通用设置</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form>
+          <div class="card-body">
+            <div class="form-group">
+              <label for="limitation">收款限额</label>
+              <input type="text" class="form-control" id="limitation" placeholder="默认5万">
+            </div>  
+            <div class="form-group">
+              <label for="fee">费率</label>
+              <input type="text" class="form-control" id="fee" placeholder="默认1.4%">
+            </div>    
+            <div class="form-group">
+              <button type="button" id="adjustAlipaySetting" class="btn btn-gradient-primary mr-2" data-dismiss="modal">Submit</button>
+              <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <%- include partials/_navbar.html %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <%- include partials/_sidebar.html %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              <span class="page-title-icon bg-gradient-primary text-white mr-2">
+                <i class="fab fa-alipay"></i>
+              </span>
+              ksher账号
+            </h3>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">ksher</a></li>
+                <li class="breadcrumb-item active" aria-current="page">账号管理</li>
+              </ol>
+            </nav>
+          </div>
+          <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="card-body">
+                      <h4 class="card-title">ksher商户</h4>
+                      <div class="buttons-toolbar">
+                        <button class="btn btn-sm btn-secondary" onclick="javascript:$('#editAlipayAccount').modal()"><i class="mdi mdi-account-plus"></i></button>
+                        <button class="btn btn-sm btn-secondary" onclick="javascript:$('#editAlipaySettings').modal()"><i class="mdi mdi-settings"></i></button>
+                      </div>
+                      <div class="table-responsive">
+                      <table class="table table-hover" id="accounts"
+                        data-classes="table-no-bordered table-hover"
+                        data-toggle="table"
+                        data-side-pagination="server"
+                        data-pagination="true"
+                        data-show-refresh="true"
+                        data-show-columns="true"
+                        data-show-pagination-switch="true"
+                        data-buttons-class=" btn-sm btn-secondary"
+                        data-url="pvd/ksher/listAccounts"
+                        data-toolbar=".buttons-toolbar"
+                        data-response-handler="formatRes">
+                        <thead>
+                            <th data-field="name" data-sortable="true">
+                              账号
+                            </th>
+                            <th data-field="_id" data-sortable="true" data-visible="false">
+                              appId
+                            </th>
+                            <th data-field="limitation" data-sortable="true" data-visible="false">
+                              限额
+                            </th>
+                            <th data-field="fee" data-sortable="true" data-visible="false">
+                              费率
+                            </th>  
+                            <th data-field="createTime" data-sortable="true" data-formatter="timestring" data-visible="false">
+                              创建时间
+                            </th>
+                            <th data-field="daily" data-sortable="true" data-formatter="showincoming">净收入(日/总)</th>
+                            <th data-field="gross.daily" data-sortable="true" data-formatter="showGrossIncoming">毛收入(日/总)</th>
+                            <th data-field="thb">泰铢</th>
+                            <th data-field="succrate" data-sortable="true">成功率</th>
+                            <th data-field="failstr"  data-sortable="true">失败情况</th>
+                            <th data-field="" data-formatter="showop" data-width="130px">
+                              操作
+                            </th>
+                        </thead>
+                        <tbody id="list">
+                        </tbody>
+                      </table>
+                    </div>
+                    </div>
+                  </div>
+                </div>
+          </div>
+          <div class="row">
+          </div>
+          <div class="row">
+          </div>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <%- include partials/_footer.html %>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/base.js"></script>
+  <script src="js/ejs.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <!-- End custom js for this page-->
+</body>
+<script>
+  function randstring(len) {
+    var s='', len=len||7;
+    while (s.length<len) {
+      s+=Math.random().toString(36).substring(2)
+    }
+    return s.substring(0, len);
+  }
+  function showAddacc() {
+    var f=$('#addacc input');
+    for (var i=0; i<f.length; i++) {
+      var item=f[i];
+      if (item.type!='hidden') item.value='';
+      $(item).removeClass('wrong');
+    }
+    $('#addAlipayAccount').toggle();
+  }
+  $('#editAlipaySettings').on('shown.bs.modal', function (e) {
+    accIntf('pvd/ksher/ksherSettings', (err, r)=>{
+      for (var key in r) {
+        $(`#editAlipaySettings #${key}`).val(r[key]);
+      } 
+    });
+    $('#adjustAlipaySetting').off('click').click(function(e) {
+      var params={};
+      $('#editAlipaySettings form input, textarea').each(function(idx, ele) {
+        var je=$(ele), jv=je.val();
+        if (jv=='') return true;
+        params[ele.id]=jv.trim();
+      });
+      accIntf('pvd/ksher/ksherSettings', params, err=>{
+        if (err) return showerr(err);
+      });
+    });
+  });
+  $('#editAlipayAccount').on('shown.bs.modal', function (e) {
+    $('#editAlipayAccount form input, textarea').val('');
+    var idx=$(e.relatedTarget).data('id');
+    if (idx==null) {
+      $('#editAlipayAccount #exampleModalLabel').text('新增');
+    } else $('#editAlipayAccount #exampleModalLabel').text('设置');
+    var alipayAccount=$('#accounts').bootstrapTable('getData', {useCurrentPage:true})[idx];
+    if (alipayAccount) {
+        for (var key in alipayAccount) {
+            if (key=='_id' || key=='enable') continue;
+            $('#'+key).val(alipayAccount[key]);
+        }
+        $('#enable').prop('checked', !alipayAccount.disable);
+    } else {
+        $('#enable').prop('checked', true);
+    }
+    $('#adjustAlipayAccount').off('click').click(function(e) {
+      var params={};
+      $('#editAlipayAccount form input, textarea').each(function(idx, ele) {
+        var je=$(ele), jv=je.val();
+        if (ele.id=='enable') {
+          params.disable=!ele.checked;
+        } else if (ele.id=='fee') {
+          var lastChar=jv.charAt(jv.length-1), v=parseFloat(jv);
+          if (lastChar=='%') params.fee=v/100;
+          if (lastChar=='‰') params.fee=v/1000;
+          params.fee=v;
+        } else{
+            if (jv=='') return true;
+            params[ele.id]=jv.trim();
+        }
+      });
+      accIntf('/pvd/ksher/updateAccount', params, err=>{
+        if (err) return showerr(err);
+        getlist();
+      });
+    })
+  });
+  function getlist() {
+    $('#accounts').bootstrapTable('refresh');
+  }
+  function showop(value, record, rowIndex) {
+    return `<button type="button" style="display:inline" class="btn btn-icon-sm btn-outline-primary" data-toggle="modal" data-target="#editAlipayAccount" data-id="${rowIndex}"><i class="mdi mdi-key-change"></i></button>
+            <button type="button" style="display:inline" class="btn btn-icon-sm btn-outline-secondary" onclick="javascript:remove('${record.appId}')"><i class="mdi mdi-delete-forever"></i></button>
+          `
+  }
+  function showincoming(value, record) {
+    return `${value||0}/${record.total||0}`;
+  }
+  function showGrossIncoming(value, record) {
+    return `${value||0}/${record.gross?(record.gross.total||0):0} `;
+  }
+  function formatRes(res) {
+    res.rows.forEach((record)=>{
+      record.appId=record._id;
+      record.log=record.log||{};
+      var fails=[];
+      for (var name in record.log) {
+          if (name='success') continue;
+          fails.push({name:name, v:record.log[name]});
+      }
+      var failstr='';
+      if (fails.length) {
+          fails.sort((a,b)=>{return a.v-b.v});
+          for (var i=0; i<fails.length; i++) {
+              failstr+=fails[i].name+':'+fails[i].v+' ';
+          }
+      }
+      record.failstr=failstr;
+    })
+    return res;
+  }
+  function remove(appId) {
+      accIntf('/pvd/ksher/removeAccount', {appId:appId}, err=>{
+          if (err) return alert(err);
+          getlist();
+      });
+  }
+</script>
+</html>

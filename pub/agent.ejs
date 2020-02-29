@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+<style>
+  .wrong {
+    border-bottom-color: red;
+  }
+</style>
+</head>
+<body>
+  <!-- dialog  -->
+  <div class="modal fade" id="editMerchant" tabindex="-1" role="dialog" data-backdrop="static"  aria-labelledby="editMerchant" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
+        <div class="modal-header">
+          <h5 class="card-title" id="exampleModalLabel">设置</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form>
+          <div class="card-body">
+            <p class="card-description">
+              以下所有内容不填不作修改
+            </p>
+            <div class="form-group">
+              <label for="password">重设密码</label>
+              <input type="text" class="form-control" id="password" placeholder="新密码">
+            </div>
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-prepend"><span for="fee" class="input-group-text">手续费</span></div>
+                <input type="text" class="form-control" id="fee" placeholder="1.5%">
+              </div>
+              <div class="input-group">
+                <div class="input-group-prepend"><span for="parent" class="input-group-text">上级</span></div>
+                <input type="text" class="form-control" id="parent" placeholder="上级代理id">
+              </div>
+              <div class="input-group">
+                <div class="input-group-prepend"><span for="subordinates" class="input-group-text">下级</span></div>
+                <input type="text" class="form-control" id="subordinates" placeholder="下级代理id" readonly>
+              </div>
+            </div>
+            <div class="form-group">
+              <!-- <p class="card-description">请勾选提供商(otc平台)</p>
+              <div class="form-group" id="providers">
+              </div> -->
+              <button type="button" id="adjustAgent" class="btn btn-gradient-primary mr-2" data-dismiss="modal">Submit</button>
+              <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+    
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <%- include partials/_navbar.html %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <%- include partials/_sidebar.html %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              代理
+            </h3>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">账号</a></li>
+                <li class="breadcrumb-item active" aria-current="page">代理账号</li>
+              </ol>
+            </nav>
+          </div>
+          <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="card-body">
+                      <h4 class="card-title">代理</h4>
+                      <div class="col-12 grid-margin" style="display:none" id="addUser">
+                          <div class="card">
+                            <div class="card-body">
+                              <form class="form-inline" id="addacc" action="#">
+                                <label class="sr-only" for="inlineFormInputName2">Name</label>
+                                <input type="text" class="form-control mb-2 mr-sm-2" id="inlineFormInputName2" name="name" placeholder="姓名">
+                                <label class="sr-only" for="inlineFormInputGroupUsername2">账号</label>
+                                <div class="input-group mb-2 mr-sm-2">
+                                  <div class="input-group-prepend">
+                                    <div class="input-group-text"><i class="mdi mdi-account-plus mdi-lg"></i></div>
+                                  </div>
+                                  <input type="text" class="form-control" id="inlineFormInputGroupUsername2" name="account" placeholder="账号">
+                                </div>
+                                <label class="sr-only" for="inlineFormInputName2">Password</label>
+                                <input type="text" class="form-control mb-2 mr-sm-2" id="inlineFormInputName2" name="password" placeholder="密码">
+                                <input type="hidden" name="identity" value="agent">
+                                <button class="btn btn-gradient-primary mb-2" type="submit">Submit</button>
+                                <button type="button" class="btn btn-light mb-2" style="margin-left:10px" onclick="javascript:$('#addUser').hide()">Cancel</button>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                      <div class="buttons-toolbar">
+                        <button class="btn btn-sm btn-secondary" onclick="showAddacc()"><i class="mdi mdi-account-plus"></i></button>
+                      </div>    
+                      <div class="table-responsive">
+                        <table id="accounts"
+                          class="table table-hover"
+                          data-classes="table-no-bordered table-hover"
+                          data-pagination="true"
+                          data-side-pagination="server"
+                          data-pagination="true"
+                          data-show-refresh="true"
+                          data-show-columns="true"
+                          data-show-pagination-switch="true"
+                          data-page-size="25"
+                          data-buttons-class=" btn-sm btn-secondary"
+                          data-ajax="queryAccounts"
+                          data-toolbar=".buttons-toolbar">
+                        <thead>
+                          <tr>
+                            <th data-field="name" data-sortable="true">
+                              显示名
+                            </th>
+                            <th data-field="_id" data-sortable="true">
+                              登录名
+                            </th>
+                            <th data-field="createTime" data-formatter="timestring" data-sortable="true">
+                              创建时间
+                            </th>
+                            <th data-field="acl" data-formatter="showAcl" data-visible="false">
+                              权限
+                            </th>
+                            <th data-field="daily" data-formatter="addAllFields">当日收入</th>
+                            <th data-field="in" data-formatter="addAllFields">收入</th>
+                            <th data-field="out" data-formatter="addAllFields" data-visible="false">提现</th>
+                            <th data-formatter="showOp">
+                              操作
+                            </th>
+                            </tr>
+                        </thead>
+                      </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+          </div>
+          <div class="row">
+          </div>
+          <div class="row">
+          </div>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <%- include partials/_footer.html %>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/base.js"></script>
+  <script src="js/ejs.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <!-- End custom js for this page-->
+</body>
+<script>
+  function randstring(len) {
+    var s='', len=len||7;
+    while (s.length<len) {
+      s+=Math.random().toString(36).substring(2)
+    }
+    return s.substring(0, len);
+  }
+  function showAddacc() {
+    var f=$('#addacc input');
+    for (var i=0; i<f.length; i++) {
+      var item=f[i];
+      if (item.type!='hidden') item.value='';
+      $(item).removeClass('wrong');
+    }
+    $('#addUser').toggle();
+  }
+  function showSub(sub) {
+    if (Array.isArray(sub)) return sub.join(',');
+    if (!sub) return '-';
+    return sub.toString();
+  }
+  $('#editMerchant').on('shown.bs.modal', function (e) {
+    $('#editMerchant input:not([type="hidden"])').val('');
+    var idx=$(e.relatedTarget).data('id');
+    var agent=$('#accounts').bootstrapTable('getData', {useCurrentPage:true})[idx];
+    if (agent) {
+      $('#fee').attr("placeholder", ''+((1-agent.share)*100).toFixed(2)+'%');
+      $('#parent').attr('placeholder', agent.parent);
+      $('#subordinates').attr('placeholder', showSub(agent.subordinates))
+    }
+    $('#adjustAgent').off('click').click(function(e) {
+      var params={};
+      $('#editMerchant form [id]').each(function(idx, ele) {
+        var je=$(ele), jv=je.val();
+        if (jv=='') return;
+        if (je[0].hasAttribute('readonly')) return;
+        if (ele.id=='fee') {
+          var s=jv.trim(), v=parseFloat(s);
+          if (isNaN(v)) return;
+          params.share=Number((1-(v/100)).toFixed(5));
+          // var s=$(ele).val().trim(), v=parseFloat(s);
+          // if (isNaN(v)) return;
+          // if (s[s.length-1]=='%') {
+          //   // this is a percentage
+          //   params.share=1-(v/100);
+          // } else params.share=1-v;
+        } else params[ele.id]=$(ele).val();
+      });
+      params.id=agent._id;
+      accIntf('/admin/updateAccount', params, (err)=>{
+        if (err) return alert(err);
+        $('#accounts').bootstrapTable('refresh');
+      });
+    })
+});
+
+window.initpage=()=>{
+  $('#accounts').bootstrapTable();
+}
+</script>
+</html>

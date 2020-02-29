@@ -41,17 +41,13 @@
 </body>
 <script>
     $(function() {
-        setTimeout(accIntf.bind(null, '/account/me', function(err, me) {
+        setTimeout(accIntf.bind(null, '/account/me', function(err) {
 			if (err) return alert(err);
-			if (me.acl=="merchant") {
-				
-					location.href="/fromuserlist.ae";
-				
-			} else { 
-				
-					location.href='/statementOfSnappay-base.html';
-				
-			}
+			<% if (!forecoreOnly) { %>
+			location.href='/dashboard.html';
+			<% } else { %>
+			location.href='/statementOfSnappay-base.html';
+			<% } %>
         }), 500);
     });
 </script>

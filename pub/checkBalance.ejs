@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+</head>
+<body>
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <%- include partials/_navbar.html %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <%- include partials/_sidebar.html %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              <span class="page-title-icon bg-gradient-primary text-white mr-2">
+                <i class="mdi mdi-currency-usd"></i>                 
+              </span>
+              对帐
+            </h3>
+            <nav aria-label="breadcrumb">
+              <ul class="breadcrumb">
+                <li class="breadcrumb-item active" aria-current="page">
+                  <span></span>Balance
+                  <i class="mdi mdi-currency-btc icon-sm text-primary align-middle"></i>
+                </li>
+              </ul>
+            </nav>
+          </div>
+          <div class="row">
+            <div class="col-12 grid-margin">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">商户账单</h4>
+                  <div class="buttons-toolbar">
+                    <form class="form-inline" id="params">
+                      <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-account-box"></i></span>
+                        </div>
+                        <input type="text" class="form-control mr-sm-2" placeholder="商户名称" name="name">
+                      </div>
+                      <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-calendar-today"></i></span>
+                        </div>
+                        <input type="text" class="form-control mr-sm-2" name="dates" placeholder="时间">
+                      </div> 
+                      <div class="form-group">
+                        <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:querydata();"><i class="mdi mdi-magnify"></i></a>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table" 
+                      data-classes="table-no-bordered table-hover" 
+                      data-toggle="table" 
+                      data-show-refresh="true"
+                      data-show-columns="true"
+                      data-show-pagination-switch="true"
+                      data-pagination="true" 
+                      data-page-size="30" 
+                      data-page-list="[10, 25, 50, 100, ALL]" 
+                      data-side-pagination="server" 
+                      data-locale="zh-CN" 
+                      data-url="/admin/listAccount"
+                      data-buttons-class=" btn-sm btn-secondary"
+                      data-toolbar=".buttons-toolbar"
+                      data-show-footer="true">
+                      <thead>
+                        <tr>
+                          <th data-field="name" data-footer-formatter="showTotalText">
+                            商户
+                          </th>
+                          <th data-field="withdraw">
+                            提现
+                          </th>
+                          <th data-field="left">
+                            余额
+                          </th>
+                          <th data-field="in" data-footer-formatter="showTotalIncoming">
+                            充值渠道
+                          </th>
+                          <th data-field="in" data-footer-formatter="showSystemProfit">
+                            渠道收入
+                          </th>
+                          <th data-field="t" data-formatter="timestring" data-footer-formatter="showAllProvidersNet">
+                            时间
+                          </th>                          
+                        </tr>
+                      </thead>
+                      <tbody>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+ 
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <%- include partials/_footer.html %>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/base.js"></script>
+  <!-- End custom js for this page-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+</body>
+<script>
+function timestring(t) {
+  return new Date(t).toLocaleDateString()+' '+ new Date(t).toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");;
+}
+function formatBigNumber(s) {
+  return (''+s).replace(/(?=(?!^)(?:\d{4})+(?:\.|$))(\d{4}(\.\d+$)?)/g,',$1');
+}
+
+  
+</script>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+</head>
+<body>
+  <!-- dialog  -->
+  <div class="modal fade" id="takeMoney" tabindex="-1" role="dialog" data-backdrop="static"  aria-labelledby="takeMoney" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
+        <div class="modal-header">
+          <h5 class="card-title">提现</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form>
+          <div class="card-body">
+            <div class="form-group">
+              <label for="password">账户余额</label>&nbsp;¥<span class="available">--</span>
+              
+              <label for="take">取出</label>
+              <div class="input-group">
+                <input type="text" class="form-control available" id="take">
+                <span for="take" class="input-group-append">
+                  <button class="btn btn-gradient-primary" type="button">全部</button>
+                </span>
+              </div>
+            </div>
+            <div class="form-group">
+              <button type="button" id="takeMoney" class="btn btn-gradient-primary mr-2" data-dismiss="modal" onclick="doTake();">Submit</button>
+              <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!------- dialog ends-------->
+
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <%- include partials/_navbar.html %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <%- include partials/_sidebar2.html %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              <span class="page-title-icon bg-gradient-primary text-white mr-2">
+                <i class="mdi mdi-home"></i>                 
+              </span>
+              总览
+            </h3>
+            <nav aria-label="breadcrumb">
+              <ul class="breadcrumb">
+                <li class="breadcrumb-item active" aria-current="page">
+                  <span></span>Overview
+                  <i class="mdi mdi-alert-circle-outline icon-sm text-primary align-middle"></i>
+                </li>
+              </ul>
+            </nav>
+          </div>
+          <div class="row">
+            <div class="col-md-6 stretch-card grid-margin">
+              <div class="card bg-gradient-danger card-img-holder text-white">
+                <div class="card-body">
+                  <img src="images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image"/>
+                  <h4 class="font-weight-normal mb-3">月流水
+                    <i class="mdi mdi-chart-line mdi-24px float-right"></i>
+                  </h4>
+                  <h2 class="mb-5">¥ <spna id='monthlyIncoming'>--</spna></h2>
+                  <h6 class="card-text"><span id='monthlyIncomingChanging'>--</span></h6>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 stretch-card grid-margin">
+              <div class="card bg-gradient-info card-img-holder text-white">
+                <div class="card-body">
+                  <img src="images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image"/>                  
+                  <h4 class="font-weight-normal mb-3">月订单
+                    <i class="mdi mdi-bookmark-outline mdi-24px float-right"></i>
+                  </h4>
+                  <h2 class="mb-5"><span id="monthlyOrders">--</span></h2>
+                  <h6 class="card-text"><span id="monthlyOrdersChanging">--</span></h6>
+                </div>
+              </div>
+            </div>
+            <!-- <div class="col-md-4 stretch-card grid-margin">
+              <div class="card bg-gradient-success card-img-holder text-white">
+                <div class="card-body">
+                  <img src="images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image"/>                                    
+                  <h4 class="font-weight-normal mb-3">已到账
+                    <i class="mdi mdi-diamond mdi-24px float-right"></i>
+                  </h4>
+                  <h2 class="mb-5"><span id="arrivaled">--</span></h2>
+                  <h6 class="card-text"><span id="merchantCountChanging">Increased by 5%</span></h6>
+                </div>
+              </div>
+            </div> -->
+          </div>
+          <div class="row">
+            <div class="col-md-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <div class="clearfix">
+                    <h4 class="card-title float-left">充值流水</h4>
+                    <div id="visit-sale-chart-legend" class="rounded-legend legend-horizontal legend-top-right float-right"></div>                                     
+                  </div>
+                  <canvas id="visit-sale-chart" class="mt-4"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+              <div class="col-12 grid-margin">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">充值订单</h4>
+                    <div class="table-responsive">
+                        <table id="orderlist" class="table table-hover"
+                        data-classes="table-no-bordered table-hover"
+                        data-pagination="false"
+                        data-ajax="queryRecentOrders"
+                        data-show-footer="true"
+                        data-footer-style="footerStyle">
+                         <thead>
+                           <tr>
+                             <th data-field="mername">
+                               商户
+                             </th>
+                             <th data-field="merchantOrderId">
+                               商户单号
+                             </th>
+                             <th data-field="provider" data-formatter="showProvider">
+                               提供商
+                             </th>
+                             <th data-field="providerOrderId" >
+                               提供商单号
+                             </th>
+                             <th data-field="money">
+                               金额
+                             </th>
+                             <th data-field="time" data-formatter="timestring">
+                               创建时间
+                             </th>
+                             <th data-field="status" data-formatter="statusHtmlfy">
+                               状态
+                             </th>
+                             <th data-field="lasttime" data-formatter="timestring">
+                               改变时间
+                             </th>
+                             <th data-formatter="showOp" data-footer-formatter="showMoreOrder">
+                               操作
+                             </th>
+                           </tr>
+                         </thead>
+                         <tbody>
+                         </tbody>
+                       </table>
+                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+  
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <%- include partials/_footer.html %>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/dashboard.js"></script>
+  <!-- -->
+  <script src="js/base.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <!-- End custom js for this page-->
+</body>
+<script>
+function timestring(t) {
+  return new Date(t).toLocaleDateString()+' '+ new Date(t).toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");;
+}
+function formatBigNumber(s) {
+  return (''+s).replace(/(?=(?!^)(?:\d{4})+(?:\.|$))(\d{4}(\.\d+$)?)/g,',$1');
+}
+function statusHtmlfy(s) {
+  if (s=='created') return `<label class="badge badge-gradient-info">创建</label>`;
+  if (s=='completed') return `<label class="badge badge-gradient-success">完成</label>`
+  if (s.indexOf('failed')>=0 ||s.indexOf('失败')>=0) return `<label class="badge badge-gradient-danger">${s}</label>`
+  return `<label class="badge badge-gradient-warning">${s}</label>`
+}
+function forceconfirm(orderid) {
+  accIntf('/admin/confirmOrder', {orderid:orderid}, (err)=>{
+    if (err) return showerr(err);
+    refreshOrderList()
+  });
+}
+function sendNotify(orderid) {
+  accIntf('/admin/notifyMerchant', {orderid:orderid}, (err)=>{
+    if (err) return showerr(err);
+    refreshOrderList()
+  });
+}
+function refreshOrderList() {
+  $('#orderlist').bootstrapTable('refresh');
+}
+function footerStyle() {
+  return {css: {'font-weight': 'normal'}};
+}
+function showMoreMerchant() {
+  return `<a style="margin-right:45px; float:right" href="merchant.html">more</a>`
+}
+function merchantStatus(isDebugging) {
+  if (isDebugging) return `<label class="badge badge-gradient-info">对接中</label>`;
+  return `<label class="badge badge-gradient-success">已完成</label>`;
+}
+function queryRecentMerchantAccounts(params) {
+  accIntf('/admin/listAccount', {identity:'merchant', offset:0, limit:4, sort:'createTime', order:'des'}, (err, r)=>{
+    if (err) return params.error(err);
+    params.success(r);
+  })
+}
+
+function showMoreOrder() {
+  return `<a style="margin-right:45px; float:right" href="fromuserlist.html">more</a>`
+}
+function showProvider(v) {
+  return v||'unknown';
+}
+function showProviderOrderId(v, record) {
+  return v||record.merchantOrderId;
+}
+function showOp(v, o) {
+  var ret=`<button class="btn btn-outline-primary btn-icon-sm tooltipfy" title="重发通知" onclick="javascript:sendNotify('${o._id}')"><i class="mdi mdi-replay"></i></button>`;
+  if (me.acl=='admin'||me.acl=='manager') ret+=`<button style="margin-left:5px" class="btn btn-outline-danger btn-icon-sm tooltipfy" title="强制结单" onclick="javascript:forceconfirm('${o._id}')"><i class="mdi mdi-archive"></i></button>`;
+  return ret;
+}
+function queryRecentOrders(params) {
+  accIntf('/admin/listOrders', {offset:0, limit:10, sort:'time', order:'des'}, (err, r)=>{
+    if (err) return params.error(err);
+    params.success(r);
+  })
+}
+window.initpage=()=>{
+  // refreshOrderList();
+  $('#orderlist').bootstrapTable();
+}
+
+function doTake() {
+  accIntf('/merchant/take', {take:Number($('#take').text())}, (err, data)=>{
+    if (err) return alert(err);
+    alert('已提交，请等待系统处理，17点之前提交当日到账');
+  })
+}
+</script>
+</html>
