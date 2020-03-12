@@ -317,7 +317,7 @@ function init(err, db) {
 		db.snappay_base_accounts.updateOne({_id:id}, {$set:upd,$setOnInsert:defaultValue}, {upsert:true, w:1}, (err, r)=>{
 			if (err) return callback(err);
 			if (r.upsertedCount) {
-				sysevents.emit('newSnapPayTollAccount', upd);
+				sysevents.emit('newSnapPayBaseAccount', upd);
 			}
 			callback();
 		});
@@ -880,7 +880,7 @@ function init(err, db) {
 			}
 		}
 		// for debug
-		var acc=await bestAccount(params.money, params.userid, params.mer_userid, params.currency, 'wx24234');
+		// var acc=await bestAccount(params.money, params.userid, params.mer_userid, params.currency, 'wx24234');
 		// build a wechat h5 page
 		callback(null, {
 			url:url.resolve(argv.wxhost, '/wechatpay/cc')+'?state='+params.orderId
