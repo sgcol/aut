@@ -810,8 +810,17 @@ function init(err, db) {
 			var cooldown_time=(user_risky.risky>(cooldown.length-1))?cooldown[cooldown.length-1]:cooldown[user_risky.risky];
 			if ((now-user_risky.lasttime)<cooldown_time) throw '暂时无法提供服务，请等待一段时间再试';
 		}
-		let [acc] =await db.snappay_base_accounts.find({disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}).sort({risky:1}).limit(1).toArray();
-		return acc;
+		let acc_arr =await db.snappay_base_accounts.find({disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}).sort({risky:1}).toArray();
+		if (acc_arr.length==0) return null;
+		if (acc_arr.length==1) return acc_arr[0];
+		let anticipates=[];
+		acc_arr.forEach((acc)=>{
+			for (var i=0; i<(11-(acc.risky||0)); i++) {
+				anticipates.push(acc);
+			}
+		})
+		if (anticipates.length==0) return null;
+		return anticipates[Math.floor(Math.random()*anticipates.length)];
 	}
 	function retreiveClientIp(req) {
 		return ip6addr.parse(req.headers['CF-Connecting-IP']||
@@ -864,19 +873,22 @@ function init(err, db) {
 			if (err) throw err;
 			else return r
 		});
-		var upd={status:'创建Url', lasttime:new Date()};
 		if (params.account) {
 			var acc=await db.snappay_base_accounts.findOne({_id:ObjectID(params.account)});
-			if (acc) upd.snappay_account=acc;
+			if (acc) {
+				await pify(updateOrder)(params.orderId, {snappay_account:acc});
+			}
 		}
+		// for debug
+		var acc=await bestAccount(params.money, params.userid, params.mer_userid, params.currency, 'wx24234');
 		// build a wechat h5 page
-		// updateOrder(params.orderId, upd); // any update will be overwritten by forecore.order
 		callback(null, {
 			url:url.resolve(argv.wxhost, '/wechatpay/cc')+'?state='+params.orderId
 			,pay_type:params.type
 		})
 	}
 	router.all('/wechat/cc', cookieParser(), async (req, res)=>{
+		var uo_data, ret, account;
 		try {
 			var params=Object.assign(req.query, req.body);
 			if (!params.code && !params.state) throw '请勿自行访问本页面';
@@ -895,13 +907,12 @@ function init(err, db) {
 			debugout('got openid', openid);
 			// get an account
 			var order=await db.bills.findOne({_id:ObjectID(params.state)});
-			var account;
 			if (order.snappay_account) account=order.snappay_account;
 			else account =await bestAccount(order.money, order.userid, order.mer_userid, order.currency, openid);
 			if (!account) throw '没有可用的收款账户';
 			debugout('use acc', account);
 			// preorder
-			var uo_data={
+			uo_data={
 				out_trade_no:params.state,
 				body:objPath.get(order, 'desc', 'Goods'),
 				notify_url: url.resolve(argv.wxhost, 'pvd/snappay_base/done'),
@@ -911,7 +922,7 @@ function init(err, db) {
 				total_fee : Math.floor(objPath.get(order, 'money', 0)*100),
 				openid:openid
 			};
-			var ret =await wx.payment.unifiedOrder(uo_data);
+			ret =await wx.payment.unifiedOrder(uo_data);
 			debugout('preorder', uo_data, ret);
 			ret=ret.responseData;
 			if (ret.return_code!='SUCCESS') throw ret.return_msg;
@@ -933,10 +944,17 @@ function init(err, db) {
 			db.snappay_base_accounts.updateOne({_id:account._id}, {$inc:{risky:1}, $set:{lasttime:now}});
 		}catch(e) {
 			debugout(e);
-			updateOrder(params.state, {status:'error', snappay_account:account, lasttime:new Date(), wechat_unifiedorder:ret, error:e});
+			var msg=objPath.get(e, 'return_msg', '');
+			if (account && msg.indexOf('特约子商户该产品权限已被冻结')>=0) {
+				db.snappay_base_accounts.updateOne({_id:account._id}, {$set:{disable:true, lasttime:new Date()}});
+			}
+			if (objPath.get(e, 'err_code_des')=='该订单已支付') return res.render('error', {err:'请勿重复支付'})
+			updateOrder(params.state, {status:'error', snappay_account:account, lasttime:new Date(), wechat_param:uo_data, wechat_unifiedorder:ret, error:e});
 			return res.render('error', {err:errstr(e)})
 		}
 	})
+	db.bills.find({'error.return_msg':'特约子商户该产品权限已被冻结，请前往商户平台>产品中心检查后重试', 'snappay_account.name':'Mias baby shop'}, {time:1, wechat_result:1, error:1}).sort({time:1}).limit(2)
+
 	function errstr(e) {
 		if (typeof e=='string') return e;
 		if (typeof e.message=='string') return e.message;
