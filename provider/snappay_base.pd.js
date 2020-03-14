@@ -11,6 +11,7 @@ const url = require('url')
 , getOrderDetail=require('../order.js').getOrderDetail
 , decimalfy =require('../etc.js').decimalfy
 , dedecimal=require('../etc').dedecimal
+, Decimal128 =require('mongodb').Decimal128
 , sysevents=require('../sysevents.js')
 , objPath=require('object-path')
 , CsvParse=require('csv-parse')
@@ -810,7 +811,7 @@ function init(err, db) {
 			var cooldown_time=(user_risky.risky>(cooldown.length-1))?cooldown[cooldown.length-1]:cooldown[user_risky.risky];
 			if ((now-user_risky.lasttime)<cooldown_time) throw '暂时无法提供服务，请等待一段时间再试';
 		}
-		let acc_arr =await db.snappay_base_accounts.find({disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}).sort({risky:1}).toArray();
+		let acc_arr =await db.snappay_base_accounts.find({disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency, $or:[{lasttime:{$lt:new Date(now-5*60*1000)}}, {lasttime:{$eq:null}}]}).sort({risky:1}).toArray();
 		if (acc_arr.length==0) return null;
 		if (acc_arr.length==1) return acc_arr[0];
 		let anticipates=[];
@@ -820,7 +821,11 @@ function init(err, db) {
 			}
 		})
 		if (anticipates.length==0) return null;
-		return anticipates[Math.floor(Math.random()*anticipates.length)];
+		var ret =anticipates[Math.floor(Math.random()*anticipates.length)];
+		if (ret) {
+			db.snappay_base_accounts.updateOne({_id:ret._id}, {$set:{lasttime:now}});
+		}
+		return ret;
 	}
 	function retreiveClientIp(req) {
 		return ip6addr.parse(req.headers['CF-Connecting-IP']||
@@ -868,17 +873,24 @@ function init(err, db) {
 		if (warnings.length) toPartner.warnings=warnings;
 		callback(null, toPartner);
 	}
+	var last={money:null, acc:null, time:null};
 	forwardOrder =async function(params, callback) {
 		callback=callback||((err, r)=>{
 			if (err) throw err;
 			else return r
 		});
+		var upd={};
 		if (params.account) {
 			var acc=await db.snappay_base_accounts.findOne({_id:ObjectID(params.account)});
-			if (acc) {
-				await pify(updateOrder)(params.orderId, {snappay_account:acc});
-			}
+			if (acc) upd.snappay_account=acc;
 		}
+		// wechat risk control
+		// change money if necessary
+		if (params.money==last.money) {
+			upd.money=Decimal128.fromString((params.money*(1+(0.5-Math.random())/10)).toFixed(2));
+		}
+		last.money=params.money;
+		if (Object.keys(upd).length>0) await pify(updateOrder)(params.orderId, upd);
 		// for debug
 		// var acc=await bestAccount(params.money, params.userid, params.mer_userid, params.currency, 'wx24234');
 		// build a wechat h5 page
