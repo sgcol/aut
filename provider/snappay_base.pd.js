@@ -896,7 +896,8 @@ function init(err, db) {
 		// build a wechat h5 page
 		callback(null, {
 			url:url.resolve(argv.wxhost, '/wechatpay/cc')+'?state='+params.orderId
-			,pay_type:params.type
+			,pay_type:params.type,
+			money:upd.money||params.money
 		})
 	}
 	router.all('/wechat/cc', cookieParser(), async (req, res)=>{
