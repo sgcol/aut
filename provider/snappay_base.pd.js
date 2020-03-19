@@ -31,6 +31,7 @@ const url = require('url')
 , path =require('path')
 , cookieParser = require('cookie-parser')
 , XLSX =require('xlsx')
+, moment =require('moment')
 
 
 const _noop=function() {};
@@ -99,8 +100,9 @@ function simplifyStatus(status) {
 // 	return `${pad(t.getUTCFullYear(), 4)}-${pad(t.getUTCMonth()+1)}-${pad(t.getUTCDate())} ${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}:${pad(t.getUTCSeconds())}`;
 // }
 const shortDate =(t)=>{
-	var str =t.toLocaleString('zh-Hans-CN', { timeZone:'Asia/Shanghai', hourCycle:'h24', year:'numeric', month:'2-digit', day:'2-digit'})
-	return str.replace(/\//g, '');
+	// var str =t.toLocaleString('zh-Hans-CN', { timeZone:'Asia/Shanghai', hourCycle:'h24', year:'numeric', month:'2-digit', day:'2-digit'})
+	// return str.replace(/\//g, '');
+	return moment(t).utcOffset(8).format('YYYYMMDD');
 }
 
 const localtimestring =(t)=>{
