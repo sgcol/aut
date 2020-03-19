@@ -415,7 +415,7 @@ function init(err, db) {
 				// var rec=await dbBills.find({checkout:checkoutTime}).sort({time:1}).toArray();
 				var stat=await db.bills.aggregate([
 					{$match:cond},
-					{$addFields:{holding:{$multiply:['$money', '$share']}}},
+					{$addFields:{holding:{$multiply:['$paidmoney', '$share']}}},
 					{$group:{
 						_id:{currency:'$currency', mchId:'$userid'}
 						, amount:{$sum:{$round:['$holding', 2]}}
@@ -467,7 +467,7 @@ function init(err, db) {
 					, ['Exchange Rate', 'wechat_result.rate_value']
 					, ['Time Zone', 'blank']
 				])
-				rec =rec.map((item)=>{
+				var renamed_rec =rec.map((item)=>{
 					var snappay_result=item.snappay_result;
 					item.snappay_result=undefined;
 					Object.assign(item, snappay_result);
@@ -476,7 +476,7 @@ function init(err, db) {
 					if (item.paidmoney>0) {
 						item.sp_fee=item.paidmoney*(item.sp_fee||snappayFee);
 						item.ap_fee=item.paidmoney*(item.ap_fee || 0.006);
-						item.net=Math.round((item.paidmoney-item.sp_fee-item.ap_fee)*100)/100;
+						item.net=Number((item.paidmoney*item.share).toFixed(2));
 						item.fee=(item.paidmoney-item.net);
 						// adjust sp_fee & ap_fee;
 						var t=item.sp_fee+item.ap_fee;
@@ -535,7 +535,7 @@ function init(err, db) {
 				// 	}
 				// )
 				var wb=XLSX.utils.book_new();
-				var ws=XLSX.utils.json_to_sheet(rec);
+				var ws=XLSX.utils.json_to_sheet(renamed_rec);
 				XLSX.utils.book_append_sheet(wb, ws, "SheetJS");
 				var content=XLSX.write(wb, {type:'buffer', bookType:'xlsx'})
 				zip.file('orders.xlsx', content);
@@ -546,11 +546,19 @@ function init(err, db) {
 				if (!testMode) {
 					await db.bills.updateMany(cond, {$set:{checkout:checkoutTime}});
 					BTFs.forEach((arr)=>{
-						db.settlements.insertMany(arr.map(v=>Object.assign({time:checkoutTime}, v, 
-						{
-							relative:rec.map((item)=>{
-							return {outOrderId:item.merchantOrderId||item.relative, orderId:item._id, type:item.money>0?'charge':'refund', orderMoney:item.money, recieved:item.paidmoney, settlement:(item.paidmoney-item.sp_fee-item.ap_fee-item.pc_fee).toFixed(2), time:item.time}
-						})})));
+						db.settlements.insertMany(
+							arr.map(v=>
+							Object.assign(
+								{time:checkoutTime}, 
+								v, 
+								{
+									relative:rec.map((item)=>{
+										if (item.userid!=v.mchId) return null;
+										return {outOrderId:item.merchantOrderId||item.relative, orderId:item._id, type:item.money>0?'charge':'refund', orderMoney:item.money, recieved:item.paidmoney, settlement:(item.net-item.pc_fee), time:item.time}
+									}).filter(item=>item)
+								}
+							))
+						);
 					})
 					files.forEach((fi)=>{
 						fs.outputFile(path.join(__dirname, '../fore/payments/', ''+checkoutTime.getTime(), fi.name), fi.content)
@@ -585,17 +593,47 @@ function init(err, db) {
 		} catch(e) {return callback(e)}
 	}))
 
-	router.all('/settings', verifyAuth, verifyManager, httpf({settings:'?object', callback:true}, function(settings, callback) {
-		if (!settings) return db.snappay_base_settings.findOne({_id:'setting'}, (err, r)=>{
-			if (err) return callback(err);
-			callback(null, r||{});
-		});
-		db.snappay_base_settings.updateOne({_id:'settings'}, {$set:settings}, {w:1, upsert:true}, (err, r)=>{
-			if (err) return callback(err);
+	async function getLastWxSettlement(est) {
+		var today=new Date();
+		if (est>today) est=today;
+		var from=new Date(est.getTime()-15*24*3600*1000), to=new Date(est.getTime()+15*24*3600*1000);
+		if (to>today) to=today;
+		var start=shortDate(from).replace(/-/g, ''), end=shortDate(to).replace(/-/g, ''), off=0, last;
+		while (true) {
+			var {responseData} =await wx.payment.querySettlement({sub_mch_id:'346992738', usetag:1, offset:off, limit:10, date_start:start, date_end:end});
+			var num=Number(responseData.record_num);
+			if (num==0) {
+				if (!last) throw '没有找到微信结算记录';
+				return new Date(last.date_end+' 24:00 GMT +0800');
+			}
+			last=responseData['setteinfo_'+(num-1)];
+			if (num<10) {
+				return new Date(last.date_end+' 24:00 GMT +0800');
+			}
+			off+=10;
+		}
+	}
+	router.all('/wxSettlementDate', verifyAuth, verifyManager, httpf({d:'date', callback:true}, async function(d, callback) {
+		try {
+			callback(null, {date:await getLastWxSettlement(d)});
+		} catch(e) {
+			callback(e);
+		}
+	}))
+	router.all('/settings', verifyAuth, verifyManager, httpf({settings:'?object', callback:true}, async function(settings, callback) {
+		try {
+			if (!settings) {
+				var r=await db.snappay_base_settings.findOne({_id:'setting'});
+				// r.wxSettlementTime=await getLastWxSettlement(r.lastExportTime||0);
+				return callback(null, r||{});
+			};
+			await db.snappay_base_settings.updateOne({_id:'settings'}, {$set:settings}, {w:1, upsert:true});
 			Object.assign(snappayGlobalSetting, setting);
 			if (settings.fee) snappayFee=normalizeFee(settings.fee);
 			callback();
-		});
+		} catch(e) {
+			callback(e);
+		}
 	}))
 	router.all('/statement', verifyAuth, verifyManager, httpf({name:'?string', from:'?date', to:'?date', timezone:'?string', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true},
 	async function(name, from, to, timezone, sort, order, limit, offset, callback) {
