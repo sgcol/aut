@@ -600,6 +600,7 @@ function init(err, db) {
 		if (to>today) to=today;
 		var start=shortDate(from).replace(/-/g, ''), end=shortDate(to).replace(/-/g, ''), off=0, last;
 		while (true) {
+			debugout('query wx settle', start, end, today);
 			var {responseData} =await wx.payment.querySettlement({sub_mch_id:'346992738', usetag:1, offset:off, limit:10, date_start:start, date_end:end});
 			var num=Number(responseData.record_num);
 			if (num==0) {
