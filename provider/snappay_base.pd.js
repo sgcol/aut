@@ -260,7 +260,7 @@ function renameKeys(o, map) {
 function makeBTF(currency, arr, testMode, setting, warning) {
 	setting=Object.assign(defaultBankData, setting)
 	var {clientNumber, RoyalBankProcessingCentre} =setting;
-	var year=String(new Date().getUTCFullYear()), doy=daysIntoYear(new Date()), dates=`${year.substring(year.length-3)}${doy.pad(3)}`;
+	var year=String(new Date().getUTCFullYear()), doy=daysIntoYear(new Date(new Date().toLocaleString('en-US', {timeZone:'America/Toronto', dateStyle:'short'}).split(',')[0])), dates=`${year.substring(year.length-3)}${doy.pad(3)}`;
 	if (testMode) {
 	  var uniqueTag='TEST';
 	} else {
