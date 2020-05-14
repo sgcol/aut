@@ -271,12 +271,11 @@ function showDetail(index, row) {
   var data=$('#orderlist').bootstrapTable('getData');
   data=data[index];
   if (data.type=='refund' && data.wechat_result) return `<p>${formatJson(data.wechat_result)}</p>`;
-  if (!data.snappay_account) return '<p>--</p>'
-  var ret=`<p>snappay_account:${getProp(data, 'snappay_account.name')} ${getProp(data, 'snappay_account.supportedCurrency')} ${Math.floor(getProp(data, 'snappay_account.succrate')*100)}% ${getProp(data, 'snappay_account.total')}</p>`
+  var ret='';
+  if (!data.snappay_account) ret+='<p>no account assigned</p>';
+  else ret=`<p>snappay_account:${getProp(data, 'snappay_account.name')} ${getProp(data, 'snappay_account.supportedCurrency')} ${Math.floor(getProp(data, 'snappay_account.succrate')*100)}% ${getProp(data, 'snappay_account.total')}</p>`
   if (data.error) ret+=`<pre>${JSON.stringify(data.error, null, 2)}</pre>`
-  else {
-    if (data.merchant_return) ret+=`<p>partner return ${JSON.stringify(data.merchant_return)}</p>`
-  }
+  if (data.merchant_return) ret+=`<p>partner return <pre>${JSON.stringify(data.merchant_return, null, 2)}</pre></p>`
   
   return ret;
 }

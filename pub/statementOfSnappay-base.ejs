@@ -39,7 +39,7 @@
         </div>
         <div class="card-body">
           <div class="form-group">
-            <label for="end">时间段</label>
+            <label for="end">微信最后一次结算日期(不要换算时区)</label>
             <input type="text" class="form-control" id="dates" placeholder="时间">
           </div>
           <div class="form-group">
@@ -211,32 +211,38 @@
     return params;
   }
   function exportBTF(testMode) {
-    var drp=$('#dates').data('daterangepicker');
-    if (!drp) return alert('请指定时间范围');
+    // var drp=$('#dates').data('daterangepicker');
+    // if (!drp) return alert('请指定时间范围');
+    var wxSettlementDate=$('#dates').val();
+    if (!wxSettlementDate) return alert('务必填写微信结算日期');
+    var wxd=new Date(wxSettlementDate+' 24:00 GMT +0800');
     var btn=testMode?$('#createTestFiles'):$('#createExportFiles'), btnOrgText=btn.text();
     btn.text('Working...');
-    // collect all data
-    var querys={from:drp.startDate._d, to:drp.endDate._d, testMode:testMode};
-    $('#exportBTFDlg input').each((idx, ele)=>{
-      var je=$(ele), jv=je.val().trim();
-      if (ele.id=='dates') return;
-      else if (jv) querys[ele.id]=jv;
-    })
+    accIntf('pvd/snappay_base/wxSettlementDate', {d:wxd}, (err, r)=>{
+      if (err) return alert(err);
+      // collect all data
+      var querys={to:r.date, testMode:testMode};
+      $('#exportBTFDlg input').each((idx, ele)=>{
+        var je=$(ele), jv=je.val().trim();
+        if (ele.id=='dates') return;
+        else if (jv) querys[ele.id]=jv;
+      })
 
-    accIntf('pvd/snappay_base/BTF', querys, (err, r)=>{
-      btn.text(btnOrgText);
-      if (err) {
-        return alert(err);
-      }
-      $('#exportBTFDlg').modal('hide');
-      const byteCharacters = atob(r.src);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      var blob = new Blob([byteArray], {type: "octet/stream"});
-      saveAs(blob, `${testMode?'TEST':'PROD'} ${moment(querys.from).format('YYYYMMDDHH')}-${moment(querys.to).format('YYYYMMDDHH')}.zip`);
+      accIntf('pvd/snappay_base/BTF', querys, (err, r)=>{
+        btn.text(btnOrgText);
+        if (err) {
+          return alert(err);
+        }
+        $('#exportBTFDlg').modal('hide');
+        const byteCharacters = atob(r.src);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        var blob = new Blob([byteArray], {type: "octet/stream"});
+        saveAs(blob, `${testMode?'TEST':'PROD'} ${moment(querys.from).format('YYYYMMDDHH')}-${moment(querys.to).format('YYYYMMDDHH')}.zip`);
+      })
     })
   }
   function randstring(len) {
@@ -252,13 +258,12 @@
       var newest=new Date();
       var from=r.lastExportTime?new Date(r.lastExportTime):undefined;
       $('#dates').daterangepicker({
-        startDate:from
-        , endDate:newest
+        singleDatePicker: true
         , maxDate: newest
-        , timePicker:true
+        , timePicker:false
         , timePickerIncrement:60
         , timePicker24Hour:true
-        , locale:{format:'MM/DD/YYYY HH:00'}
+        , locale:{format:'YYYY-MM-DD'}
       });
       for (var key in r) {
         $(`#exportBTFDlg #${key}`).attr('placeholder', r[key]);
