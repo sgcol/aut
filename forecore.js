@@ -68,7 +68,7 @@ function start(err, db) {
 		params.orderId=orderId.toHexString();
 		try {
 			var [ret] =await Promise.all([
-				provider.forwardOrder(params),
+				pify(provider.forwardOrder)(params),
 				db.bills.insertOne(decimalfy({
 					_id:orderId
 					, merchantOrderId:outOrderId
