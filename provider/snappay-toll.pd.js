@@ -597,16 +597,16 @@ function init(err, db) {
 			if (currency!='CAD') return null;
 			return {_id:'testAccount', merchant_no:'901800000116', app_id:'9f00cd9a873c511e', key:'7e2083699dd510575faa1c72f9e35d43', supportedCurrency:'CAD'}
 		}
-		if (merchantData.debugMode) {
-			var [acc]= await db.snappay_toll_accounts.find({name:'测试', supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
-		}
-		else {
+		// if (merchantData.debugMode) {
+		// 	var [acc]= await db.snappay_toll_accounts.find({name:'测试', supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
+		// }
+		// else {
 			var cond={disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}
 			if (merchantData._id=='maimai') {
 				cond.merchant_no={$in:['901951498144', '901951498835', '901951499128', '901951499202', '901951499532']};
 			}
 			var [acc]= await db.snappay_toll_accounts.find(cond).sort({used:1}).limit(1).toArray();
-		}
+		// }
 		return acc;
 	}
 	forwardOrder=async function(params, callback) {

@@ -123,8 +123,8 @@
                       <h4 class="card-title">商户</h4>
                       <div class="buttons-toolbar">
                         <form class="form-inline" id="params">
-                          <button class="btn btn-sm btn-secondary mr-2" onclick="javascript:$('#editSnapPayAccount').modal()"><i class="mdi mdi-account-plus"></i></button>
-                          <button class="btn btn-sm btn-secondary mr-2" onclick="javascript:$('#addMultiSnapPayAccounts').modal()"><i class="mdi mdi mdi-account-multiple-plus"></i></button>
+                          <button type="button" class="btn btn-sm btn-secondary mr-2" id="newOne"><i class="mdi mdi-account-plus"></i></a>
+                          <button class="btn btn-sm btn-secondary mr-2" id="uploadMultiple"><i class="mdi mdi mdi-account-multiple-plus"></i></button>
                           <div class="input-group input-group-sm">
                             <div class="input-group-prepend">
                               <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-account-box"></i></span>
@@ -217,6 +217,16 @@
   <!-- End custom js for this page-->
 </body>
 <script>
+  $('#newOne').click((e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    $('#editSnapPayAccount').modal();
+  })
+  $('#uploadMultiple').click((e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    $('#addMultiSnapPayAccounts').modal();
+  })
   $('#editSnapPayAccount').on('shown.bs.modal', function (e) {
     $('#editSnapPayAccount form input, textarea').val('');
     var idx=$(e.relatedTarget).data('id');
