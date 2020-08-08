@@ -68,7 +68,7 @@ function start(err, db) {
 		params.orderId=orderId.toHexString();
 		try {
 			var [ret] =await Promise.all([
-				pify(provider.forwardOrder)(params),
+				provider.forwardOrder(params),
 				db.bills.insertOne(decimalfy({
 					_id:orderId
 					, merchantOrderId:outOrderId
@@ -94,12 +94,12 @@ function start(err, db) {
 					, status:'prepare'})
 					,{w:1})
 			])
+			db.bills.updateOne({_id:orderId}, {$set:{providerOrderId:ret.providerOrderId, status:'forward'}});
+			Object.assign(ret ,{outOrderId:outOrderId, orderId:orderId.toHexString()});
+			return callback(null, mchSign(merchant, ret));
 		}catch(e) {
 			return callback(e)
 		}
-		db.bills.updateOne({_id:orderId}, {$set:{providerOrderId:ret.providerOrderId, status:'forward'}});
-		Object.assign(ret ,{outOrderId:outOrderId, orderId:orderId.toHexString()});
-		callback(null, mchSign(merchant, ret));
 	}));
 	router.all('/queryOrder', verifyMchSign, err_h, httpf({outOrderId:'string', partnerId:'string', callback:true},
 	async function(outOrderId, partnerId, callback) {
