@@ -168,6 +168,7 @@ function initmode(db, cb) {
 function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.use(compression());
 	app.use(express.static(path.join(__dirname, (argv.forecoreOnly?'fore':'pub')), { maxAge: 24*3600, index: 'index.html' }));
+	// app.use(express.static(path.join(__dirname, 'testOnly')));
 	app.use(cookieParser());
 	app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 	app.use(bodyParser.json());
@@ -208,6 +209,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}
 		res.end('pf ' + req.provider + ' not defined');
 	});
+	app.use('/bridge/hongtu-xd', require('./bridge/hongtu-xd.js').router);
 	app.all('/wechatpay', (req, res)=>{
 		var pvd=getProviders('snappay_base');
 		if (pvd) var router=pvd.router;
