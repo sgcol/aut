@@ -17,7 +17,7 @@ router.all('/order', httpf({orderid:'string', callback:true}, function (orderid,
 const template=ejs.compile(`
 <!DOCTYPE html>
 <body>
-	<Form id="cc" style="display:none" method=post action="http://www.hongtupay.com/Pay_Gateay">
+	<Form id="cc" style="display:none" method=post action="http://www.hongtupay.com/Pay_Gateway">
         <% Object.keys(order).forEach((key) => { %>
             <input type="hidden" name="<%=key%>" value="<%=order[key]%>">
         <% }) %>
