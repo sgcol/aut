@@ -254,18 +254,31 @@
     </li> -->
     
     <li class="nav-item">
-      <a class="nav-link" data-toggle="collapse" href="#ui-snappay" aria-expanded="false" aria-controls="ui-details">
-        <span class="menu-title">四方平台</span>
+      <a class="nav-link" data-toggle="collapse" href="#ui-snappay" aria-expanded="false" aria-controls="ui-forecore">
+        <span class="menu-title">Snappay</span>
         <i class="menu-arrow"></i>
-        <i class="fab fa-alipay menu-icon"></i>
       </a>
       <div class="collapse" id="ui-snappay">
         <ul class="nav flex-column sub-menu">
-          <li class="nav-item"> <a class="nav-link" href="statementOfSnappay-base.html">SnapPay</a></li>
-          <li class="nav-item"> <a class="nav-link" href="accountsOfSnappay-base.html">SnapPay商户管理</a></li>
+          <li class="nav-item"> <a class="nav-link" href="statementOfSnappay-toll.html">SnapPay</a></li>
+          <li class="nav-item"> <a class="nav-link" href="settlementsHistory.html">出款记录</a></li>
+          <li class="nav-item"> <a class="nav-link" href="accountsOfSnappay-toll.html">SnapPay商户管理</a></li>      
         </ul>
       </div>
-    </li> 
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="collapse" href="#ui-hongtu" aria-expanded="false" aria-controls="ui-forecore">
+        <span class="menu-title">鸿途</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="ui-hongtu">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="statementOfHongtu.html">日报表</a></li>
+          <li class="nav-item"> <a class="nav-link" href="settlementsHistory.html">出款申请</a></li>
+          <li class="nav-item"> <a class="nav-link" href="accountsOfSnappay-toll.html">账号管理</a></li>      
+        </ul>
+      </div>
+    </li>
     <!-- <li class="nav-item">
       <a class="nav-link" href="forecore.html">
         <span class="menu-title">四方平台</span>
@@ -307,8 +320,8 @@
                       <h4 class="card-title">商户</h4>
                       <div class="buttons-toolbar">
                         <form class="form-inline" id="params">
-                          <button class="btn btn-sm btn-secondary mr-2" onclick="javascript:$('#editSnapPayAccount').modal()"><i class="mdi mdi-account-plus"></i></button>
-                          <button class="btn btn-sm btn-secondary mr-2" onclick="javascript:$('#addMultiSnapPayAccounts').modal()"><i class="mdi mdi mdi-account-multiple-plus"></i></button>
+                          <button type="button" class="btn btn-sm btn-secondary mr-2" id="newOne"><i class="mdi mdi-account-plus"></i></a>
+                          <button class="btn btn-sm btn-secondary mr-2" id="uploadMultiple"><i class="mdi mdi mdi-account-multiple-plus"></i></button>
                           <div class="input-group input-group-sm">
                             <div class="input-group-prepend">
                               <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-account-box"></i></span>
@@ -406,6 +419,16 @@
   <!-- End custom js for this page-->
 </body>
 <script>
+  $('#newOne').click((e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    $('#editSnapPayAccount').modal();
+  })
+  $('#uploadMultiple').click((e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    $('#addMultiSnapPayAccounts').modal();
+  })
   $('#editSnapPayAccount').on('shown.bs.modal', function (e) {
     $('#editSnapPayAccount form input, textarea').val('');
     var idx=$(e.relatedTarget).data('id');

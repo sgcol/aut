@@ -69,19 +69,11 @@
                           <input type="text" class="form-control mr-sm-2" placeholder="商户/代理名字" name="name">
                         </div>
                         <% } %>
-                        <div class="input-group input-group-sm">
-                          <div class="input-group-prepend">
-                            <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-calendar-today"></i></span>
-                          </div>
-                          <input type="text" class="form-control mr-sm-2" name="dates" placeholder="时间">
-                        </div> 
-                        <div class="form-group">
-                          <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:querydata();"><i class="mdi mdi-magnify"></i></a>
-                        </div>
                       </form>
                     </div>
                     <div class="table-responsive">
                       <table class="table"
+                      id="detail"
                       data-classes="table-no-bordered table-hover" 
                       data-toggle="table" 
                       data-show-refresh="true"
@@ -96,13 +88,15 @@
                       data-buttons-class=" btn-sm btn-secondary"
                       data-toolbar=".buttons-toolbar"
                       data-show-footer="true"
-                      data-response-handler="handleData">
+                      data-response-handler="handleData"
+                      data-sort-order="desc"
+                      data-sort-name="_t">
                         <thead>
                           <tr>
                             <th data-field="name" data-sortable="true" data-footer-formatter="Total">
                               商户
                             </th>
-                            <th data-field="_t" data-sortable="true" data-formatter="timestring">
+                            <th data-field="_t" data-sortable="true" data-formatter="timestring" >
                               时间
                             </th>
                             <th data-field="money" data-sortable="true" data-footer-formatter="showTotalOutgoing">
@@ -174,11 +168,20 @@
   }
   <% if (acl=='admin' || acl=='manager') {  %>
   function showOp(v, o, idx) {
+    if (o.canceld) return '退单';
     if (o.done) return '已付';
-    return `<button class="btn btn-outline-primary btn-sm tooltipfy" title="已支付" onclick="javascript:sendNotify('${o.involved}')">支付完成</button>`;
+    return `
+    <button class="btn btn-outline-primary btn-sm tooltipfy" title="已支付" onclick="javascript:sendNotify('${o.involved||o._id}')">支付完成</button>
+    `;
   }
   function sendNotify(arr) {
     accIntf('admin/confirmOutgoing', {outids:arr}, function(err) {
+      if (err) return alert(err);
+      querydata();
+    })
+  }
+  function sendCancel(arr) {
+    accIntf('admin/confirmOutgoing', {outids:arr, cancel:true}, function(err) {
       if (err) return alert(err);
       querydata();
     })
@@ -195,9 +198,9 @@
   }
   function querydata() {
     var querys={};
-    var drp=$('input[name="dates"]').data('daterangepicker');
-    querys.startTime=drp.startDate._d;
-    querys.endTime=drp.endDate._d;
+    // var drp=$('input[name="dates"]').data('daterangepicker');
+    // querys.startTime=drp.startDate._d;
+    // querys.endTime=drp.endDate._d;
     $('#detail').bootstrapTable('refresh', {query:querys});
   }  
 </script>

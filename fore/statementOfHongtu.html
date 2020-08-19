@@ -9,8 +9,8 @@
 <link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
 <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
 <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
-<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.15.5/dist/extensions/group-by-v2/bootstrap-table-group-by.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.css" rel="stylesheet">
 <link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
@@ -26,8 +26,34 @@
 </style>
 </head>
 <body>
-  <!-- dialog  -->
-    
+  <!-- dialogs  -->
+  <!-- export bank transfer files  -->
+  <!-- edit alipay general settings  -->
+  <div class="modal fade" id="editHongtuSettings" tabindex="-1" role="dialog" data-backdrop="static"  aria-labelledby="editHongtuSettings" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card" style="background-color:#fff; border-radius:0.3125rem">
+        <div class="modal-header">
+          <h5 class="card-title">鸿途通用设置</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form>
+          <div class="card-body">
+            <div class="form-group">
+              <label for="fee">费率</label>
+              <input type="text" class="form-control" id="fee" placeholder="默认3.5%">
+            </div>    
+            <div class="form-group">
+              <button type="button" id="adjustHongtuSetting" class="btn btn-gradient-primary mr-2" data-dismiss="modal">Submit</button>
+              <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
   <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
     <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
@@ -237,70 +263,70 @@
         <div class="content-wrapper">
           <div class="page-header">
             <h3 class="page-title">
-              流水
+              <span class="page-title-icon bg-gradient-primary text-white mr-2">
+                <i class="fab fa-alipay"></i>
+              </span>
+              鸿途报表
             </h3>
             <nav aria-label="breadcrumb">
               <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">ksher</a></li>
-                <li class="breadcrumb-item active" aria-current="page">流水</li>
+                <li class="breadcrumb-item"><a href="#">Overview</a></li>
               </ol>
             </nav>
           </div>
           <div class="row">
-            <div class="col-12 grid-margin">
-              <div class="card">
-                <div class="card-body">
-                  <div class="buttons-toolbar">
-                    <form class="form-inline" id="params">
-                      <div class="input-group input-group-sm">
-                        <div class="input-group-prepend">
-                          <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-account-box"></i></span>
-                        </div>
-                        <input type="text" class="form-control mr-sm-2" placeholder="ksher账号" name="account">
+              <div class="col-lg-12 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="buttons-toolbar form-inline">
+                        <button class="btn btn-sm btn-secondary mr-1" onclick="javascript:$('#editHongtuSettings').modal()"><i class="mdi mdi-settings"></i></button> 
+                        <span class="input-group-append">
+                          <button class="btn btn-sm btn-secondary" onclick="getlist()"><i class="mdi mdi-magnify"></i></button>
+                        </span>
                       </div>
-                      <div class="input-group input-group-sm">
-                        <div class="input-group-prepend">
-                          <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-calendar-today"></i></span>
-                        </div>
-                        <input type="text" class="form-control mr-sm-2" name="dates" placeholder="时间">
-                      </div> 
-                      <div class="form-group">
-                        <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:querydata();"><i class="mdi mdi-magnify"></i></a>
-                      </div>
-                    </form>
-                  </div>
-                  <div class="table-responsive">
-                    <table id="detail"
-                     class="table table-hover"
-                     data-classes="table-no-bordered table-hover"
-                     data-toggle="table"
-                     data-show-refresh="true"
-                     data-show-columns="true"
-                     data-show-pagination-switch="true"
-                     data-pagination="true" 
-                     data-page-size="30" 
-                     data-page-list="[10, 25, 50, 100, ALL]" 
-                     data-side-pagination="server" 
-                     data-url="pvd/ksher/statements"
-                     data-buttons-class=" btn-sm btn-secondary"
-                     data-toolbar=".buttons-toolbar"
-                     data-show-footer="true"
-                     data-response-handler="handleData"
-                     data-sort-name="time"
-                     data-sort-order="desc">
-                      <thead>
-                        <th data-field="_id" data-footer-formatter="showTotalText" data-sortable="true">订单号</th>
-                        <th data-field="ksher_account.name" data-visible="false" data-sortable="true">账号</th>
-                        <th data-field="paidmoney" data-footer-formatter="showTotalMoney" data-sortable="true">毛收入</th>
-                        <th data-field="net" data-footer-formatter="showTotalNet" data-sortable="true">净收入</th>
-                        <th data-field="time" data-sort-order="desc" data-formatter="timestring"  data-sortable="true">时间</th>
-                      </thead>
-                      <tbody></tbody>
-                    </table>
+                      <div class="table-responsive">
+                      <table class="table table-hover" id="statement"
+                        data-toggle="table"
+                        data-classes="table-no-bordered table-hover"
+                        data-side-pagination="server"
+                        data-pagination="true"
+                        data-show-refresh="true"
+                        data-show-columns="true"
+                        data-show-pagination-switch="true"
+                        data-buttons-class=" btn-sm btn-secondary"
+                        data-url="pvd/hongtu/statement"
+                        data-query-params="queryParams"
+                        data-toolbar=".buttons-toolbar"
+                        data-response-handler="formatRes"
+                        data-show-footer="true">
+                        <thead>
+                          <th data-field="dot" data-footer-formatter="Total">时间</th>
+                          <th data-field="merchantName" data-sortable="true">
+                            合作商
+                          </th>
+                          <th data-field="count" data-sortable="true" data-visible="true" data-footer-formatter="showTotalCount">
+                            订单数
+                          </th>
+                          <th data-field="succrate" data-sortable="true" data-visible="true">
+                            成功率
+                          </th>
+                          <th data-field="share" data-sortable="true" data-visible="false">
+                            费率
+                          </th>  
+                          <th data-field="amount" data-sortable="true" data-footer-formatter="showTotalAmount" data-formatter="showDailyIn">日流水</th>
+                          <th data-field="profit" data-sortable="true" data-footer-formatter="showTotalProfit">日利润</th>
+                        </thead>
+                        <tbody id="list">
+                        </tbody>
+                      </table>
+                    </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
+          </div>
+          <div class="row">
+          </div>
+          <div class="row">
           </div>
         <!-- content-wrapper ends -->
         <!-- partial:partials/_footer.html -->
@@ -330,75 +356,100 @@
   <!-- endinject -->
   <!-- Custom js for this page-->
   <script src="js/base.js"></script>
-  <!-- End custom js for this page-->
-  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <script src="js/ejs.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.15.5/dist/extensions/group-by-v2/bootstrap-table-group-by.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+  <script src="js/FileSaver.min.js"></script>
   <!-- End custom js for this page-->
 </body>
 <script>
-  var data;
-  function handleData(res) {
-    data=res;
+  function currentTimezone() {
+    var tz=new Date().getTimezoneOffset(), hh=Math.floor(tz/60), mm=tz-hh*60;
+    if (hh>=0) return '-'+('00'+hh).slice(-2)+':'+('00'+mm).slice(-2);
+    else return '+'+('00'+(-hh)).slice(-2)+':'+('00'+mm).slice(-2);
+  }
+  function queryParams(params) {
+    params.timezone=$('.buttons-toolbar select').val()||currentTimezone();
+    return params;
+  }
+  function randstring(len) {
+    var s='', len=len||7;
+    while (s.length<len) {
+      s+=Math.random().toString(36).substring(2)
+    }
+    return s.substring(0, len);
+  }
+  $('#editHongtuSettings').on('shown.bs.modal', function(e) {
+    accIntf('/pvd/hongtu/settings', (err, settings)=>{
+      if (err) return;
+      Object.keys(settings).forEach((key)=>{
+        var ele=$('#'+key);
+        if (ele.length) ele.val(settings[key]);
+      })
+    })
+  })
+  $('#adjustHongtuSetting').click((e)=>{
+    var querys={};
+    $('#editHongtuSettings input').each((idx, ele)=>{
+      var je=$(ele), jv=je.val().trim();
+      if (jv) querys[ele.id]=jv;
+    })
+    accIntf('/pvd/hongtu/settings', {settings:querys}, (err)=>{
+      if (err) return alert(err);
+      alert('设置已更新');
+    })
+  });
+  function getlist() {
+    $('#statement').bootstrapTable('refresh');
+  }
+  function showincoming(value, record) {
+    return `${value||0}/${record.total||0}`;
+  }
+  function showGrossIncoming(value, record) {
+    return `${value||0}/${record.gross?(record.gross.total||0):0} `;
+  }
+  function showDailyIn(value, record) {
+    if (record.amount && record.refund) return (record.amount+record.refund).toFixed(2)+'(收 '+record.amount+'退 '+(-record.refund)+')';
+    if (record.refund) return record.refund;
+    if (record.amount) return record.amount;
+    return 0;
+  }
+  var response;
+  function formatRes(res) {
+    if (res.err) return alert(res.err);
+    res.rows && res.rows.forEach((record)=>{
+      var _id=record._id;
+      record._id=undefined;
+      Object.assign(record, _id);
+      record.dot=record.dot||'选中区间';
+      record.profit=record.profit.toFixed(2);
+      record.merchantName=record.merchantName[0];
+      record.share=record.share[0];
+      record.succOrder=record.succOrder[0]||0;
+      record.orderCount=record.orderCount[0]||0;
+      if (record.orderCount) record.succrate=''+(Math.round(record.succOrder/record.orderCount*10000)/100)+'%'
+    })
+    res.total_amount=Number((res.total_amount||0).toFixed(2));
+    res.total_profit=Number((res.total_profit||0).toFixed(2));
+    res.total_refund=Number((res.total_refund||0).toFixed(2));
+    res.settlements=Number((res.settlements||0).toFixed(2));
+    res.unpaid=Number((res.unpaid||0).toFixed(2));
+    response=res;
     return res;
   }
-  // function requestData(params) {
-  //   if (!params.data.account) return alert('必须指定ksher账号才能查询');
-  //   accIntf('pvd/ksher/statements', params.data, (err, r)=>{
-  //     params.success(r);
-  //   });
-  // }
-  function showTotalText() {
-    return "Total";
+  function showTotalAmount(data) {
+    return response?
+      (response.total_amount+response.total_refund).toFixed(2)//+'(未结算 '+response.unpaid+')'
+      :'';
   }
-  function showTotalMoney() {
-    return data?data.totalmoney:undefined;
+  function showTotalProfit(data) {
+    return response?response.total_profit:'';
   }
-  function showTotalNet() {
-    return data?data.totalnet:undefined;
-  }
-  var urlparam=new URL(location.href).searchParams;
-  $(()=>{
-    $('input[name="account"]').val(urlparam.get('account'));
-    var p_start=urlparam.get('start'), p_end=urlparam.get('end');
-    var start, end;
-    if (p_start) {  
-      start=new Date(p_start);
-      if (start=='Invalid Date') start=undefined;
-    }
-    if (p_end) {
-      end=new Date(p_end);
-      if (end=='Invalid Date') end=undefined;
-    }
-    $('input[name="dates"]').daterangepicker({startDate:start, endDate:end});
-  });
-  function querydata() {
-    var allclear=true, querys={};
-    $('#params input').each(function(idx, ele) {
-      var je=$(ele), jv=je.val();
-      if (jv=='') {
-        if (ele.name!='account') return true;
-        jv=urlparam.get('account');
-        if (!jv) {
-          alert('必须指定ksher账号才能查询');
-          allclear=false;
-          return false;
-        }
-      }
-      if (ele.name=='dates') {
-        var drp=$('input[name="dates"]').data('daterangepicker');
-        querys.startTime=drp.startDate._d;
-        querys.endTime=drp.endDate._d;
-      }
-      else querys[ele.name]=jv.trim();
-    });
-    if (allclear) $('#detail').bootstrapTable('refresh', {query:querys});
-  }
-  function remove(appId) {
-      accIntf('/pvd/ksher/removeAccount', {appId:appId}, err=>{
-          if (err) return alert(err);
-          getlist();
-      });
+  function showTotalCount(data) {
+    return response?response.total_count:'';
   }
 </script>
 </html>

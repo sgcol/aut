@@ -39,6 +39,8 @@ var q=async.queue(function (extern_callback, queue_callback) {
         {notify:{capped:true, size:100*1024, max:1000000, index:'read'}},
         'forbidden',
         {risky:{index:[{openid:1, risky:1}]}},
+        'settings',
+        {'hongtu_accounts':{index:['disable', {key:{mch_id:1}, name:'uni_mch_id', unique:true}]}},
         ]}, 
         function(err, db) {
           if (err) return cb(err);

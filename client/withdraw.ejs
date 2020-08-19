@@ -19,105 +19,149 @@
 </head>
 <body>
   <div class="container-scroller">
-    <!-- partial:partials/_navbar.html -->
-    <%- include partials/_navbar.html %>
-    <!-- partial -->
-    <div class="container-fluid page-body-wrapper">
-      <!-- partial:partials/_sidebar.html -->
-      <%- include partials/_sidebar2.html %>
-      <!-- partial -->
-      <div class="main-panel">
-        <div class="content-wrapper">
-            <div class="page-header">
-            <h3 class="page-title">
-                <span class="page-title-icon bg-gradient-primary text-white mr-2">
-                <i class="mdi mdi-bank"></i>                 
-                </span>
-                提款
-            </h3>
-            <nav aria-label="breadcrumb">
-                <ul class="breadcrumb">
-                <li class="breadcrumb-item active" aria-current="page">
-                    <span>余额 </span>
-                    <i class="mdi mdi-coin icon-sm text-primary align-middle"></i>
-                </li>
-                </ul>
-            </nav>
-            </div>
-            <div class="row">
-                <div class="col-12 grid-margin stretch-card">
-                    <div class="card">
-                        <div class="card-body">
-                        <form class="forms-take">
-                            <div class="form-group">
-                            <label>提取</label>
-                            <input type="file" name="take" class="file-upload-default">
-                            <div class="input-group col-xs-12">
-                                <input type="text" class="form-control" id="take" placeholder="全部">
-                                <span class="input-group-append">
-                                <button class="btn btn-gradient-primary apply" type="button">Submit</button>
-                                </span>
-                            </div>
-                            </div>
-                        </form>
-                        </div>
-                    </div>
-                </div>
-            <div class="col-md-6 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                    <h4 class="card-title">银行卡</h4>
-                    <p class="card-description">
-                        优先使用银行卡信息
-                    </p>
-                    <form class="forms-extra">
-                        <div class="form-group">
-                        <label for="bankbenefit">户名</label>
-                        <input type="text" class="form-control" id="bank_account" placeholder="收款人户名">
-                        </div>
-                        <div class="form-group">
-                        <label for="bankaccount">账号</label>
-                        <input type="text" class="form-control" id="bank_no" placeholder="收款人账号">
-                        </div>
-                        <div class="form-group">
-                        <label for="bank">银行</label>
-                        <input type="text" class="form-control" id="bank_name" placeholder="选择银行">
-                        </div>
-                    </form>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                    <h4 class="card-title">支付宝</h4>
-                    <p class="card-description">
-                        暂不支持支付宝账号
-                    </p>
-                    <form class="forms-extra">
-                        <div class="form-group">
-                        <label for="alipayAccount">收款账户</label>
-                        <input type="text" class="form-control" id="alipay_account" placeholder="支付宝账户/手机号码" readonly>
-                        </div>
-                    </form>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12">
-                <button type="submit" class="btn btn-gradient-primary mr-2 apply">Submit</button>
-                <button class="btn btn-light">Cancel</button>        
-            </div>
-        </div>
-        </div>
+	<!-- partial:partials/_navbar.html -->
+	<%- include partials/_navbar.html %>
+	<!-- partial -->
+	<div class="container-fluid page-body-wrapper">
+	  <!-- partial:partials/_sidebar.html -->
+	  <%- include partials/_sidebar2.html %>
+	  <!-- partial -->
+	  <div class="main-panel">
+		<div class="content-wrapper">
+			<div class="page-header">
+			<h3 class="page-title">
+				<span class="page-title-icon bg-gradient-primary text-white mr-2">
+				<i class="mdi mdi-bank"></i>                 
+				</span>
+				提款
+			</h3>
+			<nav aria-label="breadcrumb">
+				<ul class="breadcrumb">
+				<li class="breadcrumb-item active" aria-current="page">
+					<span>余额 </span>
+					<i class="mdi mdi-coin icon-sm text-primary align-middle"></i>
+				</li>
+				</ul>
+			</nav>
+			</div>
+			<div class="row">
+				<div class="col-12 grid-margin stretch-card">
+					<div class="card">
+						<div class="card-body">
+						<form class="forms-take">
+							<div class="form-group">
+							<label>提取</label>
+							<input type="file" name="take" class="file-upload-default">
+							<input type="text" class="form-control" id="take" placeholder="全部">
+							</div>
+							<div class="form-group mt-2 forms-extra">
+								<label for="bankbenefit">户名</label>
+								<input type="text" class="form-control" id="bank_account" placeholder="收款人户名">
+								<label for="bankaccount">账号</label>
+								<input type="text" class="form-control" id="bank_no" placeholder="收款人账号">
+								<label for="bank">银行</label>
+								<input type="text" class="form-control" id="bank_name" placeholder="选择银行">
+							</div>
+							<button type="submit" class="btn btn-gradient-primary mr-2 apply">Submit</button>
+							<!-- <button class="btn btn-light">Cancel</button>        					 -->
+						</form>
+						</div>
+					</div>
+				</div>
+			<!-- <div class="col-md-6 grid-margin stretch-card">
+				<div class="card">
+					<div class="card-body">
+					<h4 class="card-title">银行卡</h4>
+					<p class="card-description">
+						优先使用银行卡信息
+					</p>
+					<form class="forms-extra">
+						<div class="form-group">
+						<label for="bankbenefit">户名</label>
+						<input type="text" class="form-control" id="bank_account" placeholder="收款人户名">
+						</div>
+						<div class="form-group">
+						<label for="bankaccount">账号</label>
+						<input type="text" class="form-control" id="bank_no" placeholder="收款人账号">
+						</div>
+						<div class="form-group">
+						<label for="bank">银行</label>
+						<input type="text" class="form-control" id="bank_name" placeholder="选择银行">
+						</div>
+					</form>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6 grid-margin stretch-card">
+				<div class="card">
+					<div class="card-body">
+					<h4 class="card-title">支付宝</h4>
+					<p class="card-description">
+						暂不支持支付宝账号
+					</p>
+					<form class="forms-extra">
+						<div class="form-group">
+						<label for="alipayAccount">收款账户</label>
+						<input type="text" class="form-control" id="alipay_account" placeholder="支付宝账户/手机号码" readonly>
+						</div>
+					</form>
+					</div>
+				</div>
+			</div> -->
+			<!-- <div class="col-12 grid-margin">
+				<button type="submit" class="btn btn-gradient-primary mr-2 apply">Submit</button>
+				<button class="btn btn-light">Cancel</button>        
+			</div> -->
+			<div class="col-12 grid-margin stretch-card">
+				<div class="card">
+					<div class="card-body">
+						<h4 class="card-title">取款记录</h4>
+						<div class="table-responsive">
+							<table class="table table-hover" id="list"
+								data-classes="table-no-bordered table-hover"
+								data-toggle="table"
+								data-side-pagination="server"
+								data-pagination="true"
+								data-show-refresh="true"
+								data-show-columns="true"
+								data-show-pagination-switch="true"
+								data-buttons-class=" btn-sm btn-secondary"
+								data-url="/admin/listOutgoingOrders"
+								data-sort-name="_t"
+								data-sort-order="desc"
+							>
+								<thead>
+									<th data-field="_t" data-formatter="timestring" data-sortable="true">
+									提单时间
+									</th>
+									<th data-field="money" data-sortable="true" data-visible="true">
+									结算金额
+									</th>
+									<th data-field="bank"  data-formatter="showBankInfo" data-sortable="true">
+									结算银行
+									</th>    
+									<th data-field="done" data-sortable="false" data-formatter="showWithdrawResult"> 
+									结算回执
+									</th>
+								</thead>
+								<tbody id="list">
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		</div>
   
-        <!-- content-wrapper ends -->
-        <!-- partial:partials/_footer.html -->
-        <%- include partials/_footer.html %>
-        <!-- partial -->
-      </div>
-      <!-- main-panel ends -->
-    </div>
-    <!-- page-body-wrapper ends -->
+		<!-- content-wrapper ends -->
+		<!-- partial:partials/_footer.html -->
+		<%- include partials/_footer.html %>
+		<!-- partial -->
+	  </div>
+	  <!-- main-panel ends -->
+	</div>
+	<!-- page-body-wrapper ends -->
   </div>
   <!-- container-scroller -->
 
@@ -139,42 +183,58 @@
 <script>
 var availble;
 window.initpage=()=>{
-    availble=fix2(me.profit);
-    $('#take').val(availble);
-    $('.breadcrumb-item span').text('余额'+availble);
+	availble=fix2(me.profit);
+	$('#take').val(availble);
+	$('.breadcrumb-item span').text('余额'+availble);
 
-    if (me.bank) {
-        $('#bank_account').attr('placeholder',me.bank.account);
-        $('#bank_no').attr('placeholder', me.bank.no);
-        $('#bank_name').attr('placeholder', me.bank.name);
-    }
-    if (me.alipay) {
-        $('#alipay_account').attr('placeholder', me.alipay.account);
-    }    
+	if (me.bank) {
+		$('#bank_account').attr('placeholder',me.bank.account);
+		$('#bank_no').attr('placeholder', me.bank.no);
+		$('#bank_name').attr('placeholder', me.bank.name);
+	}
+	if (me.minWithdraw) {
+		$('#take').attr('placeholder', `最低提款${me.minWithdraw}`)
+	}
 };
-
-function setparam(o, path, v) {
-    var n=o;
-    for (var i=0; i<path.length-1; i++) {
-        var d=path[i];
-        if (!n[d]) n[d]={};
-        n=n[d];
-    }
-    n[path[path.length-1]]=v;
-    return o;
+function showBankInfo(v, o) {
+	o.bank=o.bank||{};
+	return o.bank.name;
 }
-$('.apply').click(function() {
-    var params={};
-    $('.forms-extra [id]').each(function(idx, ele) {
-        if ($(ele).val()) params[ele.id.split('_').join('.')]=$(ele).val();
-    });
-    if (Object.keys(params).length) accIntf('user/setextradata', params);
-    var take=$('#take').val();
-    if (take && take!="0") accIntf('user/take', {take:take}, (err)=>{
-        if (err) return alert(err);
-        queryMe(window.initpage);
-        alert('提交成功，一般在第二天会到账')
-    });
+function showSettlement(v, r) {
+	return v.toFixed(2);
+}
+function showWithdrawResult(v,r) {
+	return v?'已支付':'待支付';
+}
+function setparam(o, path, v) {
+	var n=o;
+	for (var i=0; i<path.length-1; i++) {
+		var d=path[i];
+		if (!n[d]) n[d]={};
+		n=n[d];
+	}
+	n[path[path.length-1]]=v;
+	return o;
+}
+$('.apply').click(function(e) {
+	e.preventDefault();
+	var params={};
+	$('.forms-extra [id]').each(function(idx, ele) {
+		if ($(ele).val()) params[ele.id.split('_').join('.')]=$(ele).val();
+	});
+	if (Object.keys(params).length) accIntf('user/setextradata', params);
+	else {
+		if (me.bank==null || me.bank.name==null || me.bank.account==null || me.bank.no==null) return alert('请输入收款人信息');
+	}
+	var take=Number($('#take').val());
+	if (take && take!=0) {
+		if (me.minWithdraw && take<me.minWithdraw) return alert('最低取款金额'+me.minWithdraw);
+		accIntf('user/take', {take:take}, (err)=>{
+			if (err) return alert(err);
+			queryMe(window.initpage);
+			alert('提交成功，一般在20分钟之内到账')
+		});
+	} 
 });
 </script>
 </html>

@@ -33,8 +33,8 @@ const template=ejs.compile(`
 router.get('/launch', httpf({orderid:'string', no_return:true}, function(orderid) {
     var req=this.req, res=this.res;
     var o=orders.get(orderid);
-    orders.delete(orderid);
     if (!o) return res.send('没有这个订单');
+    orders.delete(orderid);
     res.send(template({order:o.params}));
 }))
 

@@ -326,83 +326,113 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			})
 		}catch(e) {callback(e)}
 	}))
+	// a backup for listOutgoingOrders
+	// app.all('/admin/listOutgoingOrders', verifyAuth, httpf({name:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, async function(name, from, to, sort, order, count, offset, callback) {
+	// 	try {
+	// 		var op=[],query={money:{$gt:0}};
+	// 		if (this.req.auth.acl=='agent' || this.req.auth.acl=='merchant') {
+	// 			name=this.req.auth.name;
+	// 		} else {
+	// 			query.done={$ne:true};
+	// 		}
+	// 		if (name) query.name=name;
+	// 		if (from ||to) {
+	// 			var times={};
+	// 			if (from) times.$gte=from;
+	// 			if (to) times.$lte=to;
+	// 			query.time=times;
+	// 			// query.done={$ne:true};
+	// 		}
+	// 		var results =await Promise.all([
+	// 			db.withdrawals.aggregate([
+	// 				{$match:query},
+	// 				{$group:{
+	// 					_id:0,
+	// 					total:{$sum:'$money'}
+	// 				}}]
+	// 			).toArray(),
+	// 			(async function() {
+	// 				if (name) {
+	// 					var cursor=db.withdrawals.find(query);
+	// 					var so={};
+	// 					so[sort]=(order=='asc'?1:-1);
+	// 					cursor=cursor.sort(so);
+	// 					if (offset) {
+	// 						cursor=cursor.skip(offset);
+	// 					}
+	// 					if (count) cursor=cursor.limit(count);
+	// 					return await Promise.all([
+	// 						new Promise((resolve, reject)=>{
+	// 							cursor.toArray().then((r)=>{
+	// 								r.forEach((item)=>{
+	// 									item._id=item.userid;
+	// 								})
+	// 								resolve(r);
+	// 							}).catch(e=>reject(e));
+	// 						})
+	// 						, cursor.count()
+	// 					])
+	// 				} else {
+	// 					var cursor=db.withdrawals.aggregate([{$match:query}, {$group:{_id:'$userid', money:{$sum:'$money'}, name:{$last:'$name'}, _t:{$last:'$_t'}, involved:{$addToSet:{$convert:{input:'$_id', to:"string"}}} }}]);
+	// 					var cur2=cursor.clone();
+	// 					if (sort) {
+	// 						var so={};
+	// 						so[sort]=(order=='asc'?1:-1);
+	// 						cursor.sort(so);
+	// 					}
+	// 					if (offset) {
+	// 						cursor.skip(offset);
+	// 					}
+	// 					if (count) {
+	// 						cursor.limit(count);
+	// 					}
+	// 					return Promise.all([cursor.toArray(), cur2.group({_id:null, c:{$sum:1}}).project({_id:0}).toArray()]);
+	// 				}		
+	// 			})(),
+	// 			db.withdrawals.find(query, {projection:{_id:1}}).toArray()
+	// 		])
+	// 		var r=objPath.get(results, [1, 0])||{};
+	// 		var c=objPath.get(results, [1, 0, 0, 'c'])||objPath.get(results, [1, 1, 0, 'c'])||0;
+	// 		var payments=await db.users.find({_id:{$in:r.map(it=>it._id)}}, {projection:{alipay:1, bank:1}}).toArray();
+	// 		var paymaps={};
+	// 		payments.forEach(p=>{
+	// 			paymaps[p._id]=p;
+	// 		});
+	// 		r.forEach(it=>{
+	// 			var p=paymaps[it._id];
+	// 			if (p) Object.assign(it, p);
+	// 		})
+	// 		callback(null, {total:c, rows:r, sum:Number(objPath.get(results, [0,0,'total'], 0)).toFixed(2)});
+	// 	} catch (e) {
+	// 		callback(e);
+	// 	}
+	// }))
 	app.all('/admin/listOutgoingOrders', verifyAuth, httpf({name:'?string', from:'?date', to:'?date', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true}, async function(name, from, to, sort, order, count, offset, callback) {
 		try {
 			var op=[],query={money:{$gt:0}};
 			if (this.req.auth.acl=='agent' || this.req.auth.acl=='merchant') {
 				name=this.req.auth.name;
 			} else {
-				query.done={$ne:true};
-			}
-			if (name) query.name=name;
-			if (from ||to) {
-				var times={};
-				if (from) times.$gte=from;
-				if (to) times.$lte=to;
-				query.time=times;
 				// query.done={$ne:true};
 			}
-			var results =await Promise.all([
-				db.withdrawals.aggregate([
-					{$match:query},
-					{$group:{
-						_id:0,
-						total:{$sum:'$money'}
-					}}]
-				).toArray(),
-				(async function() {
-					if (name) {
-						var cursor=db.withdrawals.find(query);
-						var so={};
-						so[sort]=(order=='asc'?1:-1);
-						cursor=cursor.sort(so);
-						if (offset) {
-							cursor=cursor.skip(offset);
-						}
-						if (count) cursor=cursor.limit(count);
-						return await Promise.all([
-							new Promise((resolve, reject)=>{
-								cursor.toArray().then((r)=>{
-									r.forEach((item)=>{
-										item._id=item.userid;
-									})
-									resolve(r);
-								}).catch(e=>reject(e));
-							})
-							, cursor.count()
-						])
-					} else {
-						var cursor=db.withdrawals.aggregate([{$match:query}, {$group:{_id:'$userid', money:{$sum:'$money'}, name:{$last:'$name'}, _t:{$last:'$_t'}, involved:{$addToSet:{$convert:{input:'$_id', to:"string"}}} }}]);
-						var cur2=cursor.clone();
-						if (sort) {
-							var so={};
-							so[sort]=(order=='asc'?1:-1);
-							cursor.sort(so);
-						}
-						if (offset) {
-							cursor.skip(offset);
-						}
-						if (count) {
-							cursor.limit(count);
-						}
-						return Promise.all([cursor.toArray(), cur2.group({_id:null, c:{$sum:1}}).project({_id:0}).toArray()]);
-					}		
-				})(),
-				db.withdrawals.find(query, {projection:{_id:1}}).toArray()
-			])
-			var r=objPath.get(results, [1, 0])||{};
-			var c=objPath.get(results, [1, 0, 0, 'c'])||objPath.get(results, [1, 1, 0, 'c'])||0;
-			var payments=await db.users.find({_id:{$in:r.map(it=>it._id)}}, {projection:{alipay:1, bank:1}}).toArray();
-			var paymaps={};
-			payments.forEach(p=>{
-				paymaps[p._id]=p;
-			});
-			r.forEach(it=>{
-				var p=paymaps[it._id];
-				if (p) Object.assign(it, p);
-			})
-			callback(null, {total:c, rows:r, sum:Number(objPath.get(results, [0,0,'total'], 0)).toFixed(2)});
-		} catch (e) {
+			if (name) query.name=name;
+			var cursor=db.withdrawals.find(query);
+
+			var so={done:1};
+			if (sort) {
+				so[sort]=(order=='asc'?1:-1);
+			}
+			cursor.sort(so);
+
+			if (offset) {
+				cursor.skip(offset);
+			}
+			if (count) {
+				cursor.limit(count);
+			}
+			var total=await cursor.count(), rows=await cursor.toArray()
+			callback(null, {total, rows});
+		} catch(e) {
 			callback(e);
 		}
 	}))
@@ -1041,7 +1071,9 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}
 		else userid=this.req.auth._id;
 		var user=this.req.auth;
-		if (process.env.NODE_ENV!='debugmode' && want<5000) return callback('最少提取5000元');
+		if (process.env.NODE_ENV!='debugmode') {
+			if (want<10000) return callback('最少提取10000元');
+		} 
 		db.users.findOneAndUpdate({_id:userid, profit:{$gte:Decimal128.fromString(''+want)}}, {$inc:{profit:Decimal128.fromString(''+(-want))}}, {w:'majority'}, (err, r)=>{
 			if (err) return callback(err);
 			if (!r.value) {
@@ -1072,7 +1104,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 				var d=Math.min(lefts[i],want);
 				var chg={};
 				chg[i]=d;
-				takesop.push({userid:userid, name:r.value.name, _t:now, money:d, change:chg, snap:{in:usrdata.in, out:usrdata.out}, provider:i, done:false});
+				takesop.push({userid:userid, name:r.value.name, _t:now, money:d, change:chg, snap:{in:usrdata.in, out:usrdata.out}, provider:i, bank:usrdata.bank, done:false});
 				inc['out.'+i]=Decimal128.fromString(''+d);
 				if (d==want) break;
 				want-=d;

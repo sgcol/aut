@@ -39,7 +39,7 @@
         </div>
         <div class="card-body">
           <div class="form-group">
-            <label for="end">时间段</label>
+            <label for="end">微信最后一次结算日期(不要换算时区)</label>
             <input type="text" class="form-control" id="dates" placeholder="时间">
           </div>
           <div class="form-group">
@@ -270,9 +270,9 @@
       </a>
       <div class="collapse" id="ui-hongtu">
         <ul class="nav flex-column sub-menu">
-          <li class="nav-item"> <a class="nav-link" href="statementOfHongtu.html">日报表</a></li>
-          <li class="nav-item"> <a class="nav-link" href="tomerchantlist.ae">出款申请</a></li>
-          <li class="nav-item"> <a class="nav-link" href="accountsOfHongtu.html">账号管理</a></li>      
+          <li class="nav-item"> <a class="nav-link" href="statementOfSnappay-toll.html">日报表</a></li>
+          <li class="nav-item"> <a class="nav-link" href="settlementsHistory.html">出款申请</a></li>
+          <li class="nav-item"> <a class="nav-link" href="accountsOfSnappay-toll.html">账号管理</a></li>      
         </ul>
       </div>
     </li>
@@ -331,7 +331,7 @@
                         data-show-columns="true"
                         data-show-pagination-switch="true"
                         data-buttons-class=" btn-sm btn-secondary"
-                        data-url="pvd/snappay-toll/statement"
+                        data-url="pvd/snappay_base/statement"
                         data-query-params="queryParams"
                         data-toolbar=".buttons-toolbar"
                         data-response-handler="formatRes"
@@ -350,7 +350,7 @@
                           <th data-field="share" data-sortable="true" data-visible="false">
                             费率
                           </th>  
-                          <th data-field="amount" data-sortable="true" data-footer-formatter="showTotalAmount">日流水</th>
+                          <th data-field="amount" data-sortable="true" data-footer-formatter="showTotalAmount" data-formatter="showDailyIn">日流水</th>
                           <th data-field="profit" data-sortable="true" data-footer-formatter="showTotalProfit">日利润</th>
                         </thead>
                         <tbody id="list">
@@ -413,32 +413,38 @@
     return params;
   }
   function exportBTF(testMode) {
-    var drp=$('#dates').data('daterangepicker');
-    if (!drp) return alert('请指定时间范围');
+    // var drp=$('#dates').data('daterangepicker');
+    // if (!drp) return alert('请指定时间范围');
+    var wxSettlementDate=$('#dates').val();
+    if (!wxSettlementDate) return alert('务必填写微信结算日期');
+    var wxd=new Date(wxSettlementDate+' 24:00 GMT +0800');
     var btn=testMode?$('#createTestFiles'):$('#createExportFiles'), btnOrgText=btn.text();
     btn.text('Working...');
-    // collect all data
-    var querys={from:drp.startDate._d, to:drp.endDate._d, testMode:testMode};
-    $('#exportBTFDlg input').each((idx, ele)=>{
-      var je=$(ele), jv=je.val().trim();
-      if (ele.id=='dates') return;
-      else if (jv) querys[ele.id]=jv;
-    })
+    accIntf('pvd/snappay_base/wxSettlementDate', {d:wxd}, (err, r)=>{
+      if (err) return alert(err);
+      // collect all data
+      var querys={to:r.date, testMode:testMode};
+      $('#exportBTFDlg input').each((idx, ele)=>{
+        var je=$(ele), jv=je.val().trim();
+        if (ele.id=='dates') return;
+        else if (jv) querys[ele.id]=jv;
+      })
 
-    accIntf('pvd/snappay-toll/BTF', querys, (err, r)=>{
-      btn.text(btnOrgText);
-      if (err) {
-        return alert(err);
-      }
-      $('#exportBTFDlg').modal('hide');
-      const byteCharacters = atob(r.src);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      var blob = new Blob([byteArray], {type: "octet/stream"});
-      saveAs(blob, `${testMode?'TEST':'PROD'} ${moment(querys.from).format('YYYYMMDDHH')}-${moment(querys.to).format('YYYYMMDDHH')}.zip`);
+      accIntf('pvd/snappay_base/BTF', querys, (err, r)=>{
+        btn.text(btnOrgText);
+        if (err) {
+          return alert(err);
+        }
+        $('#exportBTFDlg').modal('hide');
+        const byteCharacters = atob(r.src);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        var blob = new Blob([byteArray], {type: "octet/stream"});
+        saveAs(blob, `${testMode?'TEST':'PROD'} ${moment(querys.from).format('YYYYMMDDHH')}-${moment(querys.to).format('YYYYMMDDHH')}.zip`);
+      })
     })
   }
   function randstring(len) {
@@ -449,18 +455,17 @@
     return s.substring(0, len);
   }
   $('#exportBTFDlg').on('shown.bs.modal', function (e) {
-    accIntf('pvd/snappay-toll/settings', (err, r)=>{
+    accIntf('pvd/snappay_base/settings', (err, r)=>{
       if (err) r={};
-      var newest=new Date(Math.floor(Date.now()/(3600*1000))*(3600*1000));
+      var newest=new Date();
       var from=r.lastExportTime?new Date(r.lastExportTime):undefined;
       $('#dates').daterangepicker({
-        startDate:from
-        , endDate:newest
+        singleDatePicker: true
         , maxDate: newest
-        , timePicker:true
+        , timePicker:false
         , timePickerIncrement:60
         , timePicker24Hour:true
-        , locale:{format:'MM/DD/YYYY HH:00'}
+        , locale:{format:'YYYY-MM-DD'}
       });
       for (var key in r) {
         $(`#exportBTFDlg #${key}`).attr('placeholder', r[key]);
@@ -473,7 +478,7 @@
       var je=$(ele), jv=je.val().trim();
       if (jv) querys[ele.id]=jv;
     })
-    accIntf('/pvd/snappay-toll/settings', querys, (err)=>{
+    accIntf('/pvd/snappay_base/settings', querys, (err)=>{
       if (err) return alert(err);
       alert('设置已更新');
     })
@@ -486,6 +491,12 @@
   }
   function showGrossIncoming(value, record) {
     return `${value||0}/${record.gross?(record.gross.total||0):0} `;
+  }
+  function showDailyIn(value, record) {
+    if (record.amount && record.refund) return (record.amount+record.refund).toFixed(2)+'(收 '+record.amount+'退 '+(-record.refund)+')';
+    if (record.refund) return record.refund;
+    if (record.amount) return record.amount;
+    return 0;
   }
   var response;
   function formatRes(res) {
@@ -502,13 +513,18 @@
       record.orderCount=record.orderCount[0]||0;
       if (record.orderCount) record.succrate=''+(Math.round(record.succOrder/record.orderCount*10000)/100)+'%'
     })
-    res.total_amount=(res.total_amount||0).toFixed(2);
-    res.total_profit=(res.total_profit||0).toFixed(2);
+    res.total_amount=Number((res.total_amount||0).toFixed(2));
+    res.total_profit=Number((res.total_profit||0).toFixed(2));
+    res.total_refund=Number((res.total_refund||0).toFixed(2));
+    res.settlements=Number((res.settlements||0).toFixed(2));
+    res.unpaid=Number((res.unpaid||0).toFixed(2));
     response=res;
     return res;
   }
   function showTotalAmount(data) {
-    return response?response.total_amount:'';
+    return response?
+      (response.total_amount+response.total_refund).toFixed(2)+'(未结算 '+response.unpaid+')'
+      :'';
   }
   function showTotalProfit(data) {
     return response?response.total_profit:'';
