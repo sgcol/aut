@@ -342,11 +342,11 @@ function init(err, db) {
 		callback=callback||function(){};
 		db.bills.findOne({_id:ObjectID(orderid)},function(err, orderData) {
 			if (err) callback('no such order');
-			var net, succrate, total_amount=Number(data.amount), fee;
-			db.users.updateOne({_id:orderData.userid}, {$inc:{succOrder:1, balance:total_amount}});
+			var net, succrate, total_amount=Number(data.amount||orderData.money), fee;
+			db.users.updateOne({_id:orderData.userid}, {$inc:{succOrder:1}});
 			confirmOrder(orderid, total_amount, net, (err)=>{
 				if (!err) {
-					updateOrder(orderid, {wechat_result:data, providerOrderId:data.transaction_id});
+					updateOrder(orderid, {wechat_result:data, providerOrderId:data.transaction_id||orderData._id.toHexString()});
 				}
 				if (err && err!='used order') return callback(err);
 				callback(null);
