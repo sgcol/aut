@@ -92,6 +92,13 @@
                       <input type="" class="form-control" id="money" placeholder="">
                     </div>
                     <div class="form-group">
+                      <label for="type">类型</label>
+                      <select type="" class="form-control" id="type">
+                        <option value="WECHATPAYH5">WECHATPAYH5</option>
+                        <option value="ALIPAYH5">ALIPAYH5</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
                       <label for="account">收款账号</label>
                       <select class="form-control" id="account">
                         <option selected>自动选择</option>
@@ -242,6 +249,7 @@ $(()=>{
         partnerId:$('#merchantid').val(),
         return_url:location.href,
         time:now.getTime(),
+        type:$('#type').val()||'',
         userId:$('#userid').val(),
     };
     if (!params.userId || !params.money) return alert('请正确填写参数');
