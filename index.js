@@ -261,8 +261,8 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			break;
 		}
 	});
-	app.all('/admin/confirmOrder', verifyAuth, verifyManager, httpf({orderid:'string', callback:true}, function(orderid, callback) {
-		confirmOrder(orderid, callback);
+	app.all('/admin/confirmOrder', verifyAuth, verifyManager, httpf({orderid:'string', testMode:'?string', callback:true}, function(orderid, testMode, callback) {
+		confirmOrder(orderid, testMode, callback);
 	}));
 	app.all('/admin/clearBalance', verifyAuth, verifyManager, httpf({merchantid:'?string', callback:true}, function(merchantid, callback) {
 		require('./sellOrder.js').checkPlatformBalance(merchantid, callback);

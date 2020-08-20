@@ -214,7 +214,7 @@ function init(err, db) {
 	router.all('/statement', verifyAuth, verifyManager, httpf({name:'?string', from:'?date', to:'?date', timezone:'?string', sort:'?string', order:'?string', limit:'?number', offset:'?number', callback:true},
 	async function(name, from, to, timezone, sort, order, limit, offset, callback) {
 	try {
-		var cond={};
+		var cond={testOrder:{$ne:true}};
 		if (name) cond.name={'$regex':name}
 		if (from) cond.time={$gte:from}
 		if (to) {
@@ -330,7 +330,7 @@ function init(err, db) {
 		var params={...req.query, ...req.body};
 		try {
 			params=makeSign(params, await bestAccount());
-			if (params.pay_md5sign!=params.sign) return res.send({err:'sign error', wanted:params.pay_md5sign});
+			if (params.pay_md5sign!=params.sign) return res.send({err:'sign error'});
 			await pify(makeItDone)(params.orderid, params);
 			return res.send('OK');
 		} catch(e) {
@@ -341,12 +341,12 @@ function init(err, db) {
 	function makeItDone(orderid, data, callback) {
 		callback=callback||function(){};
 		db.bills.findOne({_id:ObjectID(orderid)},function(err, orderData) {
-			if (err) callback('no such order');
+			if (err || !orderData) callback('no such order');
 			var net, succrate, total_amount=Number(data.amount||orderData.money), fee;
 			db.users.updateOne({_id:orderData.userid}, {$inc:{succOrder:1}});
 			confirmOrder(orderid, total_amount, net, (err)=>{
 				if (!err) {
-					updateOrder(orderid, {wechat_result:data, providerOrderId:data.transaction_id||orderData._id.toHexString()});
+					updateOrder(orderid, {provider_result:data, providerOrderId:data.transaction_id||orderData._id.toHexString()});
 				}
 				if (err && err!='used order') return callback(err);
 				callback(null);

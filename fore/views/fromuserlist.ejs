@@ -103,6 +103,9 @@
                              <th data-field="merchantOrderId" data-formatter="showOrderId">
                                商户单号
                              </th>
+                             <th data-field="_id">
+                               APay单号
+                             </th>
                              <th data-field="provider" data-formatter="showProvider">
                                提供商
                              </th>
@@ -174,8 +177,8 @@ function statusHtmlfy(s) {
   return `<label class="badge badge-gradient-warning">${s}</label>`
 }
 <% if (acl=='admin') {%>
-function forceconfirm(orderid) {
-  accIntf('/admin/confirmOrder', {orderid:orderid}, (err)=>{
+function forceconfirm(orderid, testMode) {
+  accIntf('/admin/confirmOrder', {orderid:orderid, testMode}, (err)=>{
     if (err) return showerr(err);
     refreshOrderList()
   });
@@ -221,14 +224,15 @@ function showOrderId(v, r) {
 }
 function showOp(v, o) {
   if (o.type=='refund') return; // no op if this was a refund order
-  var ret=`<form class="form-inline"><button class="btn resend btn-outline-primary btn-icon-sm tooltipfy mr-sm-2" title="重发通知""><i class="mdi mdi-replay"></i></button>`;
+  var ret=`<div class="btn-group"><button class="btn resend btn-outline-primary btn-icon-sm tooltipfy mr-sm-2" title="重发通知""><i class="mdi mdi-replay"></i></button>`;
   <% if (forecoreOnly) { %>
       ret+=`<button class="btn refund btn-outline-warning btn-icon-sm tooltipfy mr-sm-2" title="退单"><i class="mdi mdi-send"></i></button>`
   <% } %>
   <% if (acl=='admin') { %>
+    ret+=`<button class="btn test-confirm btn-outline-info btn-icon-sm tooltipfy mr-sm-2" title="模拟结单"><i class="mdi mdi-archive"></i></button>`;
     ret+=`<button class="btn confirm btn-outline-danger btn-icon-sm tooltipfy mr-sm-2" title="强制结单"><i class="mdi mdi-archive"></i></button>`;
   <% } %>
-    ret+='</form>'
+    ret+='</div>'
   return ret;
 }
 window.ops={
@@ -243,6 +247,11 @@ window.ops={
     refund(r._id);
   },
   <% if (acl=='admin') {%>
+  'click .test-confirm':(e, v, r, idx)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    forceconfirm(r._id, 'testMode');
+  },
   'click .confirm':(e, v, r, idx)=>{
     e.preventDefault();
     e.stopPropagation();

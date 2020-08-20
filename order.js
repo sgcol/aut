@@ -96,10 +96,15 @@ function cancelOrder(orderid, callback) {
     });
 }
 function confirmOrder(orderid, money, net, callback) {
+    var testMode=false;
     if (typeof money=='function') {
         callback=money;
         money=null;
         net=null;
+    }
+    if (isNaN(Number(money))) {
+        testMode=true;
+        money=null;
     }
     if (typeof net=='function') {
         callback=net;
@@ -124,6 +129,14 @@ function confirmOrder(orderid, money, net, callback) {
                 var provider=r.provider||'unknown';
                 sysevents.emit('orderConfirmed', r);
                 callback();
+                if (testMode) {
+                    var upd={testOrder:true, status:'已测试', paidmoney:money, net:net, lasttime:new Date()};
+                    return db.bills.update({_id:ObjectID(orderid)}, {$set:decimalfy(upd)}, {w:1}, function(_e) {
+                        if (_e || err) return console.error(_e||err);
+                        notifyMerchant(r);
+                        // callback();
+                    })
+                }
                 var shares=[];
                 // shares.push((money*(r[0].share||0.985)).toFixed(2));
                 function getParent(user, cb) {
@@ -186,6 +199,7 @@ function confirmOrder(orderid, money, net, callback) {
                 .catch((e)=>{
                     console.log(e);
                 });
+
                 // async.parallel([
                 //     db.users.update.bind(db.users, {merchantid:r[0].merchantid}, {$inc:{total:delta}}, {w:1}),
                 //     db.stat.update.bind(db.stat, {_id:r[0].merchantid}, {$inc:{incoming:r[0].paidmoney, profit:r[0].paidmoney-delta}, $set:{provider:r.provider}}, {upsert:true, w:1})
@@ -194,7 +208,7 @@ function confirmOrder(orderid, money, net, callback) {
                 // })    
                 var upd={status:'已支付', paidmoney:money, net:net, lasttime:new Date()};
                 db.bills.update({_id:ObjectID(orderid)}, {$set:decimalfy(upd)}, {w:1}, function(_e) {
-                    if (_e || err) return callback(_e||err);
+                    if (_e || err) return console.error(_e||err);
                     notifyMerchant(r);
                     // callback();
                 })
