@@ -58,6 +58,7 @@
     "gulp-ejs": "^3.2.0",
     "instascan": "^1.0.0",
     "jquery-mask-plugin": "^1.14.16",
+    "marked": "^1.1.1",
     "phonegap": "^8.2.2",
     "qr-scanner": "^1.1.1",
     "qrcode": "^1.4.4",

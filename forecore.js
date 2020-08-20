@@ -86,6 +86,7 @@ function start(err, db) {
 					, money:money
 					, paidmoney:-1
 					, currency: currency
+					, type: params.type
 					, time:new Date()
 					, lasttime:new Date()
 					, lasterr:''
