@@ -350,7 +350,7 @@ function start(err, db) {
 	})
 	router.all('/dailyreport', verifyAuth, httpf({partnerId:'?string', from:'?date', to:'?date', timezone:'?string', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, async function(partnerId, from, to, timezone, sort, order, offset, limit, callback) {
 		try {
-			var cond={};
+			var cond={testOrder:{$ne:true}};
 			if (this.req.auth.acl=='merchant') cond.userid=this.req.auth._id;
 			else if (partnerId) cond.userid=partnerId;
 			if (from) cond.time={$gte:from};

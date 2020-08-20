@@ -450,8 +450,10 @@
     $('#accounts').bootstrapTable('refresh', {query:querys});
   }
   function showop(value, record, rowIndex) {
-    return `<button type="button" style="display:inline" class="btn btn-icon-sm btn-outline-primary" data-toggle="modal" data-target="#editHongtuAccount" data-id="${rowIndex}"><i class="mdi mdi-key-change"></i></button>
-            <button type="button" style="display:inline" class="btn btn-icon-sm btn-outline-secondary" onclick="javascript:remove('${record._id}')"><i class="mdi mdi-delete-forever"></i></button>
+    return `<div class="btn-group">
+            <button type="button" class="btn btn-icon-sm btn-outline-primary" data-toggle="modal" data-target="#editHongtuAccount" data-id="${rowIndex}"><i class="mdi mdi-key-change"></i></button>
+            <button type="button" class="btn btn-icon-sm btn-outline-secondary" onclick="javascript:remove('${record._id}')"><i class="mdi mdi-delete-forever"></i></button>
+            </div>
           `
   }
   function showincoming(value, record) {
