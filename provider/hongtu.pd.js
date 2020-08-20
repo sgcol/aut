@@ -412,7 +412,7 @@ function init(err, db) {
 				pay_memberid:account.memberid,
 				pay_orderid:id,
 				pay_applydate :localtimestring(new Date()),
-				pay_bankcode: {'WECHATH5':'901', "ALIPAYH5":'904'}[order.type||'WECHATH5'],
+				pay_bankcode: ({'WECHATPAYH5':'901', "ALIPAYH5":'904'}[order.type])||'901',
 				pay_notifyurl: url.resolve(basepath, 'hongtu/done'),
 				pay_callbackurl: order.return_url||url.resolve(basepath, 'hongtu/return'),
 				pay_amount: order.money,
