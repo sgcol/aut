@@ -455,7 +455,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		}
 		if (this.req.auth.acl!='admin' && this.req.auth.acl!='manager') {
 			query.merchantid=this.req.auth.merchantid;
-			Object.assign(prj, {lasterr:1, lasttime:1, used:1, mer_userid:1, merchantOrderId:1, merchant_return:1, merchantid:1, mername:1, money:1, share:1, provider:1, providerOrderId:1, status:1, time:1});
+			Object.assign(prj, {type:1, lasterr:1, lasttime:1, used:1, mer_userid:1, merchantOrderId:1, merchant_return:1, merchantid:1, mername:1, money:1, share:1, provider:1, providerOrderId:1, status:1, time:1});
 		}
 		if (testOrderOnly) {
 			query.merchantOrderId=/TESTORDER/;
