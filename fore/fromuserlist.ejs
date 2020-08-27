@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<link href="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+<style>
+  .wrong {
+    border-bottom-color: red;
+  }
+</style>
+</head>
+<body>
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <%- include partials/_navbar.html %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <% if (acl=="admin"||acl=="manager") { %>
+        <%- include partials/_sidebar.html %>
+      <% } else { %>
+        <%- include partials/_sidebar2.html %>
+      <% } %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              充值订单
+            </h3>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">明细</a></li>
+                <li class="breadcrumb-item active" aria-current="page">充值订单</li>
+              </ol>
+            </nav>
+          </div>
+          <div class="row">
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">充值订单</h4>
+                    <div class="buttons-toolbar">
+                      <form class="form-inline" id="params">
+                        <div class="input-group input-group-sm">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-account-box"></i></span>
+                          </div>
+                          <input type="text" class="form-control mr-sm-2" placeholder="商户订单号" name="outOrderId">
+                        </div>
+                        <div class="input-group input-group-sm">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-calendar-today"></i></span>
+                          </div>
+                          <input type="text" class="form-control mr-sm-2" name="dates" placeholder="时间">
+                        </div> 
+                        <div class="form-group">
+                          <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:refreshOrderList();"><i class="mdi mdi-magnify"></i></a>
+                        </div>
+                      </form> 
+                    </div>
+                    <div class="table-responsive">
+                      <table id="orderlist"
+                        class="table table-hover"
+                        data-classes="table-no-bordered table-hover"
+                        data-pagination="true"
+                        data-side-pagination="server"
+                        data-pagination="true"
+                        data-show-refresh="true"
+                        data-show-columns="true"
+                        data-show-pagination-switch="true"
+                        data-page-size="25"
+                        data-buttons-class=" btn-sm btn-secondary"
+                        data-url="admin/listOrders"
+                        data-toolbar=".buttons-toolbar"
+                        data-sort-order="desc"
+                        data-sort-name="time"
+                        <% if (acl=='admin'||acl=='manager') { %> 
+                        data-detail-view="true"
+                        data-detail-formatter="showDetail"
+                        <% } %>
+                        >
+                         <thead>
+                           <tr>
+                             <th data-field="mername">
+                               商户
+                             </th>
+                             <th data-field="merchantOrderId" data-formatter="showOrderId">
+                               商户单号
+                             </th>
+                             <th data-field="_id">
+                               APay单号
+                             </th>
+                             <th data-field="provider" data-formatter="showProvider">
+                               提供商
+                             </th>
+                             <th data-field="providerOrderId">
+                               提供商单号
+                             </th>
+                             <th data-field='type'>
+                               类型
+                             </th>
+                             <th data-field="money">
+                               金额
+                             </th>
+                             <th data-field="time" data-formatter="timestring" data-sort-order="desc" data-sortable="true">
+                               创建时间
+                             </th>
+                             <th data-field="status" data-formatter="statusHtmlfy">
+                               状态
+                             </th>
+                             <th data-field="lasttime" data-formatter="timestring">
+                               改变时间
+                             </th>
+                             <th data-formatter="showOp" data-events="ops">
+                               操作
+                             </th>
+                           </tr>
+                         </thead>
+                       </table>
+                    </div>  
+                  </div>
+                </div>
+              </div>
+          </div>
+          <div class="row"></div>
+          <div class="row"></div>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <%- include partials/_footer.html %>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/base.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+  <!-- End custom js for this page-->
+</body>
+<script>
+
+function statusHtmlfy(s) {
+  if (s=='created') return `<label class="badge badge-gradient-info">创建</label>`;
+  if (s=='completed') return `<label class="badge badge-gradient-success">完成</label>`
+  if (s.indexOf('failed')>=0 ||s.indexOf('失败')>=0) return `<label class="badge badge-gradient-danger">${s}</label>`
+  return `<label class="badge badge-gradient-warning">${s}</label>`
+}
+<% if (acl=='admin') {%>
+function forceconfirm(orderid, testMode) {
+  accIntf('/admin/confirmOrder', {orderid:orderid, testMode}, (err)=>{
+    if (err) return showerr(err);
+    refreshOrderList()
+  });
+}
+<% } %>
+
+function refund(orderid) {
+  accIntf('/forecore/admin/refund', {orderid:orderid}, (err)=>{
+    if (err) return showerr(err);
+    refreshOrderList();
+  })
+}
+function sendNotify(orderid) {
+  accIntf('/admin/notifyMerchant', {orderid:orderid}, (err)=>{
+    if (err) return showerr(err);
+    refreshOrderList()
+  });
+}
+function refreshOrderList() {
+  var allclear=true, querys={};
+  $('#params input').each(function(idx, ele) {
+    var je=$(ele), jv=je.val();
+    if (ele.name=='dates') {
+      if ($('input[name="dates"]').val()) {
+        var drp=$('input[name="dates"]').data('daterangepicker');
+        querys.from=drp.startDate._d;
+        querys.to=drp.endDate._d;
+      }
+    }
+    else querys[ele.name]=jv.trim();
+  });
+  if (allclear) $('#orderlist').bootstrapTable('refresh', {query:querys});
+}
+function showProvider(v) {
+  return v||'unknown';
+}
+function showProviderOrderId(v, record) {
+  return v||record.merchantOrderId;
+}
+function showOrderId(v, r) {
+  if (r.type=='refund') return r.relative;
+  return v;
+}
+function showOp(v, o) {
+  if (o.type=='refund') return; // no op if this was a refund order
+  var ret=`<div class="btn-group"><button class="btn resend btn-outline-primary btn-icon-sm tooltipfy mr-sm-2" title="重发通知""><i class="mdi mdi-replay"></i></button>`;
+  <% if (forecoreOnly) { %>
+      ret+=`<button class="btn refund btn-outline-warning btn-icon-sm tooltipfy mr-sm-2" title="退单"><i class="mdi mdi-send"></i></button>`
+  <% } %>
+  <% if (acl=='admin') { %>
+    ret+=`<button class="btn test-confirm btn-outline-info btn-icon-sm tooltipfy mr-sm-2" title="模拟结单"><i class="mdi mdi-archive"></i></button>`;
+    ret+=`<button class="btn confirm btn-outline-danger btn-icon-sm tooltipfy mr-sm-2" title="强制结单"><i class="mdi mdi-archive"></i></button>`;
+  <% } %>
+    ret+='</div>'
+  return ret;
+}
+window.ops={
+  'click .resend':(e, v, r, idx)=> {
+    e.preventDefault();
+    e.stopPropagation();
+    sendNotify(r._id);
+  },
+  'click .refund':(e, v, r, idx)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    refund(r._id);
+  },
+  <% if (acl=='admin') {%>
+  'click .test-confirm':(e, v, r, idx)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    forceconfirm(r._id, 'testMode');
+  },
+  'click .confirm':(e, v, r, idx)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    forceconfirm(r._id);
+  }
+  <% } %>
+}
+function getProp(o, path) {
+  if (typeof path=='string') {
+    path=path.split('.');
+  }
+  var out=o;
+  for (var i=0; i<path.length; i++) {
+    var p=path[i];
+    if (out[p]) out=out[p];
+    else return null; 
+  }
+  return out;
+}
+<% if (acl=='admin'||acl=='manager') { %>
+function formatJson(o) {
+  if (!o) return null;
+  return JSON.stringify(o, null, ' ');
+}
+function showDetail(index, row) {
+  var data=$('#orderlist').bootstrapTable('getData');
+  data=data[index];
+  if (data.type=='refund' && data.wechat_result) return `<p>${formatJson(data.wechat_result)}</p>`;
+  var ret='';
+  if (!data.snappay_account) ret+='<p>no account assigned</p>';
+  else ret=`<p>snappay_account:${getProp(data, 'snappay_account.name')} ${getProp(data, 'snappay_account.supportedCurrency')} ${Math.floor(getProp(data, 'snappay_account.succrate')*100)}% ${getProp(data, 'snappay_account.total')}</p>`
+  if (data.error) ret+=`<pre>${JSON.stringify(data.error, null, 2)}</pre>`
+  if (data.merchant_return) ret+=`<p>partner return <pre>${JSON.stringify(data.merchant_return, null, 2)}</pre></p>`
+  
+  return ret;
+}
+<% } %>
+
+window.initpage=()=>{
+  $('#orderlist').bootstrapTable();
+  $('input[name="dates"]').daterangepicker(
+  {
+      autoUpdateInput: false,
+      locale: {
+          cancelLabel: 'Clear'
+      }
+  });
+  $('input[name="dates"]').on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+  });
+
+  $('input[name="dates"]').on('cancel.daterangepicker', function(ev, picker) {
+      $(this).val('');
+  });
+
+};
+  
+</script>
+</html>

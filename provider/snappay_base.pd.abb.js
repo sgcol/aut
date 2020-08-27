@@ -140,6 +140,13 @@ function normalizeFee(f) {
 
 const request_url = 'https://open.snappay.ca/api/gateway';
 
+exports.menus=[
+	{
+		name:'结算清单',
+		url:'settlements.ae'
+	}
+]
+
 exports.order=function() {
 	order.apply(null, arguments);
 };

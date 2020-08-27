@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+<style>
+  .wrong {
+    border-bottom-color: red;
+  }
+</style>
+</head>
+<body>
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <%- include partials/_navbar.html %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <% if (acl=="admin"||acl=="manager") { %>
+        <%- include partials/_sidebar.html %>
+      <% } else { %>
+        <%- include partials/_sidebar2.html %>
+      <% } %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              清帐订单
+            </h3>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">明细</a></li>
+                <li class="breadcrumb-item active" aria-current="page">清帐订单</li>
+                <% if (acl=='admin' || acl=='manager') { %>
+                  <li class="breadcrumb-item active"><a href="#">手动清帐</a></li>
+                <% } %>
+              </ol>
+            </nav>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">清帐订单</h4>
+                    <div class="buttons-toolbar">
+                      <form class="form-inline" id="params">
+                        <% if (acl=='admin' || acl=='manager') {  %>
+                        <div class="input-group input-group-sm">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text bg-secondary text-white"><i class="mdi mdi-account-box"></i></span>
+                          </div>
+                          <input type="text" class="form-control mr-sm-2" placeholder="商户/代理名字" name="name">
+                        </div>
+                        <% } %>
+                      </form>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table"
+                      id="detail"
+                      data-classes="table-no-bordered table-hover" 
+                      data-toggle="table" 
+                      data-show-refresh="true"
+                      data-show-columns="true"
+                      data-show-pagination-switch="true"
+                      data-pagination="true" 
+                      data-page-size="30" 
+                      data-page-list="[10, 25, 50, 100, ALL]" 
+                      data-side-pagination="server" 
+                      data-locale="zh-CN" 
+                      data-url="/admin/listOutgoingOrders"
+                      data-buttons-class=" btn-sm btn-secondary"
+                      data-toolbar=".buttons-toolbar"
+                      data-show-footer="true"
+                      data-response-handler="handleData"
+                      data-sort-order="desc"
+                      data-sort-name="_t">
+                        <thead>
+                          <tr>
+                            <th data-field="name" data-sortable="true" data-footer-formatter="Total">
+                              商户
+                            </th>
+                            <th data-field="_t" data-sortable="true" data-formatter="timestring" >
+                              时间
+                            </th>
+                            <th data-field="money" data-sortable="true" data-footer-formatter="showTotalOutgoing">
+                              金额
+                            </th>
+                            <th data-field="bank" data-formatter="showBankInfo">提款账户</th>
+                            <% if (acl=='admin' || acl=='manager') {  %>
+                            <th data-formatter="showOp">操作</th>
+                            <% } else { %>
+                            <th data-field="done" data-formatter="showStatus">状态</th>
+                            <% } %>
+                          </tr>
+                        </thead> 
+                        <tbody>
+                        </tbody>
+                      </table>
+                    </div>  
+                  </div>
+                </div>
+              </div>
+          </div>
+          <div class="row"></div>
+          <div class="row"></div>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <%- include partials/_footer.html %>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/base.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>  
+  <!-- End custom js for this page-->
+</body>
+<script>
+  var data;
+  function handleData(res) {
+    data=res;
+    return res;
+  }
+  // function requestData(params) {
+  //   if (!params.data.account) return alert('必须指定支付宝账号才能查询');
+  //   accIntf('pvd/alipay/statements', params.data, (err, r)=>{
+  //     params.success(r);
+  //   });
+  // }
+  function showTotalText() {  
+    return "Total";
+  }
+  function showTotalOutgoing() {
+    return data?data.sum:undefined;
+  }
+  <% if (acl=='admin' || acl=='manager') {  %>
+  function showOp(v, o, idx) {
+    if (o.canceld) return '退单';
+    if (o.done) return '已付';
+    return `
+    <button class="btn btn-outline-primary btn-sm tooltipfy" title="已支付" onclick="javascript:sendNotify('${o.involved||o._id}')">支付完成</button>
+    `;
+  }
+  function sendNotify(arr) {
+    accIntf('admin/confirmOutgoing', {outids:arr}, function(err) {
+      if (err) return alert(err);
+      querydata();
+    })
+  }
+  function sendCancel(arr) {
+    accIntf('admin/confirmOutgoing', {outids:arr, cancel:true}, function(err) {
+      if (err) return alert(err);
+      querydata();
+    })
+  }
+  <% } else { %>
+  function showStatus(v, o, idx) {
+    if (!v) return "处理中";
+    else return '已下发 '+timestring(o.lasttime);
+  }
+  <% } %>
+  function showBankInfo(v, o) {
+    o.bank=o.bank||{};
+    return `<ul><li>${o.bank.name}<li>${o.bank.no}<li>${o.bank.account}</ul>  `
+  }
+  function querydata() {
+    var querys={};
+    // var drp=$('input[name="dates"]').data('daterangepicker');
+    // querys.startTime=drp.startDate._d;
+    // querys.endTime=drp.endDate._d;
+    $('#detail').bootstrapTable('refresh', {query:querys});
+  }  
+</script>
+</html>

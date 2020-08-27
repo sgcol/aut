@@ -11,6 +11,9 @@ const etc={
     'admin.html':{identity:["manager", "admin"], badge:'badge-danger'},
     'merchant.html':{identity:"merchant", badge:'badge-success'},
     'agent.html':{identity:"agent", badge:'badge-warning'},
+    'admin.ae':{identity:["manager", "admin"], badge:'badge-danger'},
+    'merchant.ae':{identity:"merchant", badge:'badge-success'},
+    'agent.ae':{identity:"agent", badge:'badge-warning'},
 }
 const data=etc[filename]||{identity:'', badge:''};
 function queryAccounts(params) {

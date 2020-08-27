@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>APay</title>
+<!-- plugins:css -->
+<link rel="stylesheet" href="vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+
+<!-- endinject -->
+<!-- inject:css -->
+<link rel="stylesheet" href="css/style.css">
+<!-- endinject -->
+<link rel="shortcut icon" href="images/favicon.png" />
+</head>
+<body>
+  <!-- dialogs  -->
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <%- include partials/_navbar.html %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <%- include partials/_sidebar2.html %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="page-header">
+            <h3 class="page-title">
+              <span class="page-title-icon bg-gradient-primary text-white mr-2">
+                <i class="fab fa-alipay"></i>
+              </span>
+              日报
+            </h3>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item active" aria-current="page">日报</li>
+              </ol>
+            </nav>
+          </div>
+          <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="buttons-toolbar">
+                        <!-- <form class="form-inline" id="params">
+                          <div class="input-group input-group-sm">
+                          </div>
+                          <div class="form-group">
+                            <a class="btn btn-sm btn-secondary" style="width:80px" href="javascript:getlist();"><i class="mdi mdi-magnify"></i></a>
+                          </div>
+                        </form>      -->
+                      </div>
+                      <div class="table-responsive">
+                      <table class="table table-hover" id="list"
+                        data-classes="table-no-bordered table-hover"
+                        data-toggle="table"
+                        data-side-pagination="server"
+                        data-pagination="true"
+                        data-show-refresh="true"
+                        data-show-columns="true"
+                        data-show-pagination-switch="true"
+                        data-buttons-class=" btn-sm btn-secondary"
+                        data-url="forecore/dailyreport"
+                        data-toolbar=".buttons-toolbar"
+                        data-response-handler="formatRes"
+                        data-show-footer="true"
+                        data-query-params="queryParams"
+                       >
+                        <thead>
+                          <th data-field="dot" data-footer-formatter="Total">日期</th>
+                          <th data-field="orderCount" data-visible="true">
+                            订单数
+                          </th>
+                          <th data-field="succ" data-visible="true">
+                            成功数
+                          </th>
+                          <th data-field="paidmoney"  data-formatter="showDailyIn" data-footer-formatter="showTotalRevieved">下单金额</th>
+                          <th data-field="holding" data-footer-formatter="showTotalHolding">分成</th>
+                          <th data-field="currency" >
+                            currency
+                          </th>    
+                        </thead>
+                        <tbody id="list">
+                        </tbody>
+                      </table>
+                    </div>
+                    </div>
+                  </div>
+                </div>
+          </div>
+          <div class="row">
+          </div>
+          <div class="row">
+          </div>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <%- include partials/_footer.html %>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="vendors/js/vendor.bundle.base.js"></script>
+  <script src="vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="js/off-canvas.js"></script>
+  <script src="js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="js/base.js"></script>
+  <script src="js/ejs.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+  <script src="js/FileSaver.min.js"></script>
+
+  <!-- End custom js for this page-->
+</body>
+<script>
+  function currentTimezone() {
+    var tz=new Date().getTimezoneOffset(), hh=Math.floor(tz/60), mm=tz-hh*60;
+    if (hh>=0) return '-'+('00'+hh).slice(-2)+':'+('00'+mm).slice(-2);
+    else return '+'+('00'+(-hh)).slice(-2)+':'+('00'+mm).slice(-2);
+  }
+  function queryParams(params) {
+    params.timezone=currentTimezone();
+    return params;
+  }
+  function showDailyIn(value, record) {
+    if (record.paidmoney && record.refund) return (record.paidmoney+record.refund).toFixed(2)+'(收 '+record.paidmoney+'退 '+(-record.refund)+')';
+    if (record.refund) return record.refund;
+    if (record.paidmoney) return record.paidmoney;
+    return 0;
+  }
+  var response={};
+  function formatRes(res) {
+    if (res.err) {
+      alert(res.err);
+      return {}
+    }
+    res.rows && res.rows.forEach((record)=>{
+      record.dot=record.dot||'选中区间';
+    })
+    response=res;
+    return res;
+  }
+  function num(x) {
+    if (isNaN(x)) return 0;
+    return Number(x);
+  }
+  function showTotalRevieved() {
+    return num(response.total_recieved).toFixed(2);
+  }
+  function showTotalHolding() {
+    return (num(response.total_holding)+num(response.total_refund)).toFixed(2);
+  }
+</script>
+</html>

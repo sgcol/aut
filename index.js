@@ -172,7 +172,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 	app.use(cookieParser());
 	app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 	app.use(bodyParser.json());
-	app.set('views', path.join(__dirname, (argv.forecoreOnly?'fore':'pub'), 'views'));
+	app.set('views', path.join(__dirname, (argv.forecoreOnly?'fore':'pub')));
 	app.set('view engine', 'ejs');
 
 	var db=dbp[0];
@@ -613,10 +613,17 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 			});
 		});		
 	})
-	app.all('/admin/listAccount', verifyAuth, verifyManager, httpf({identity:'any', search:'?string', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, function(identity, search, sort, order, offset, limit, callback) {
-		if (!identity) identity=['merchant', 'agent'];
-		if (Array.isArray(identity)) identity={$in:identity};
-		var cur=db.users.find({acl:identity}, {projection:{password:0, salt:0}});
+	app.all('/admin/listAccount', verifyAuth, httpf({identity:'any', search:'?string', sort:'?string', order:'?string', offset:'?number', limit:'?number', callback:true}, function(identity, search, sort, order, offset, limit, callback) {
+		var cond={};
+		if (!aclgt(this.req.auth.acl, 'manager')) {
+			cond._id=this.req.auth._id;
+		}
+		else {
+			if (!identity) identity=['merchant', 'agent'];
+			if (Array.isArray(identity)) identity={$in:identity};
+			cond.acl=identity;
+		}
+		var cur=db.users.find(cond, {projection:{password:0, salt:0}});
 		if (sort) {
 			var so={};
 			so[sort]=(order=='asc'?1:-1);
@@ -707,14 +714,24 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 					o.out[k]=dec2num(o.out[k]);
 				}
 			}
+			var sys_pvds=getProviders();
+			var pvd_menus=[];
+			for (var pid in sys_pvds) {
+				var p=sys_pvds[pid];
+				if (p.menus && !objPath.get(o, ['providers', pid, 'disabled'], false)) {
+					pvd_menus=pvd_menus.concat(p.menus);
+				}
+			}
+			o.pvdMenu=pvd_menus;
+
 			res.cookie('a',rstr);
 			if (argv.forecoreOnly) {
-				if (o.acl=='admin' || o.acl=='mamanger') return callback(null, {to:'/statementOfSnappay-toll.html', token:rstr});
+				if (o.acl=='admin' || o.acl=='mamanger') return callback(null, {to:'/statementOfSnappay-toll.ae', token:rstr});
 				if (o.acl=='merchant') return callback(null, {to:'/fromuserlist.ae', token:rstr});
 			} else {
-				if (o.acl=='admin'||o.acl=='manager') return callback(null, {to:'/dashboard.html', token:rstr});
-				if (o.acl=='merchant') return callback(null, {to:'/merentry.html', token:rstr});
-				return callback(null, {to:'/agententry.html', token:rstr});
+				if (o.acl=='admin'||o.acl=='manager') return callback(null, {to:'/dashboard.ae', token:rstr});
+				if (o.acl=='merchant') return callback(null, {to:'/merentry.ae', token:rstr});
+				return callback(null, {to:'/agententry.ae', token:rstr});
 			}
 		})
 	}));
@@ -1178,7 +1195,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		return next(err);
 	}
 	app.all('/*.ae', verifyAuth, err_h, (req, res) =>{
-		res.render(path.basename(req.path, '.ae'), Object.assign(argv, {acl:req.auth.acl}));
+		res.render(path.basename(req.path, '.ae'), Object.assign(argv, {acl:req.auth.acl, pvdMenu:req.auth.pvdMenu}));
 	})
 	// app.all('/tomerchantlist.html', verifyAuth, err_h, (req, res)=>{
 	// 	res.render('tomerchantlist', {acl:req.auth.acl});

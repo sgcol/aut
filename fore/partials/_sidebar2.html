@@ -15,20 +15,14 @@
     </li>
     <% if (!forecoreOnly) { %>
     <li class="nav-item">
-      <a class="nav-link" href="merentry.html">
+      <a class="nav-link" href="merentry.ae">
         <span class="menu-title">总览</span>
         <i class="mdi mdi-home menu-icon"></i>
       </a>
     </li>
     <% } %>
     <li class="nav-item">
-      <a class="nav-link" href="withdraw.html">
-        <span class="menu-title">提款</span>
-        <i class="mdi mdi-cash menu-icon"></i>
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="extrainfo.html">
+      <a class="nav-link" href="extrainfo.ae">
         <span class="menu-title">联系人</span>
         <i class="mdi mdi-contact-mail menu-icon"></i>
       </a>
@@ -42,14 +36,14 @@
       </a>
       <div class="collapse" id="ui-details">
         <ul class="nav flex-column sub-menu">
-          <li class="nav-item"> <a class="nav-link" href="dailyreport.html">日报表</a></li>
+          <li class="nav-item"> <a class="nav-link" href="dailyreport.ae">日报表</a></li>
           <li class="nav-item"> <a class="nav-link" href="fromuserlist.ae">充值订单</a></li>
           <li class="nav-item"> <a class="nav-link" href="tomerchantlist.ae">清帐订单</a></li>
         </ul>
       </div>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="adapter.html">
+      <a class="nav-link" href="adapter.ae">
         <span class="menu-title">对接</span>
         <i class="mdi mdi-human-greeting menu-icon"></i>
       </a>
@@ -62,23 +56,34 @@
       </a>
     </li> 
     <li class="nav-item">
-      <a class="nav-link" href="merchant_daily_report.html">
+      <a class="nav-link" href="merchant_daily_report.ae">
         <span class="menu-title">每日流水</span>
         <i class="mdi mdi-view-list menu-icon"></i>
       </a>
     </li> 
     <!-- <li class="nav-item">
-      <a class="nav-link" href="settlements.html">
+      <a class="nav-link" href="settlements.ae">
         <span class="menu-title">结算清单</span>
         <i class="mdi mdi-playlist-check menu-icon"></i>
       </a>
     </li>  -->
     <% } %>
     <li class="nav-item">
-      <a class="nav-link" href="changepassword.html">
+      <a class="nav-link" href="changepassword.ae">
         <span class="menu-title">修改密码</span>
         <i class="mdi mdi-alert-octagon menu-icon"></i>
       </a>
     </li>
+    <% if (locals.pvdMenu) { %>
+      <% pvdMenu.forEach(function(item) { %>
+        <% if (item.for!='merchant') return %>
+        <li class="nav-item">
+          <a class="nav-link" href="<%=item.url%>">
+            <span class="menu-title"><%=item.name%></span>
+            <i class="mdi mdi-book-open-variant menu-icon"></i>
+          </a>
+        </li>
+      <% }) %>
+    <% } %>
   </ul>
 </nav>

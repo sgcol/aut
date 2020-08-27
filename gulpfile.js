@@ -20,12 +20,14 @@ gulp.task('watch', function() {
 })
 
 gulp.task('forecore', () =>{
-     gulp.src(['client/**/*.ejs', '!client/views/**'])//gulp.src中存放要编译的文件
-        .pipe(ejs({forecoreOnly:true},{}, {ext: '.html'}))//设置生成的文件后缀名为html
-        .pipe(gulp.dest('fore'));//gulp.dest中存放编译后的文件的存放地址
-    gulp.src('client/**/!(*.ejs)')
+//      gulp.src(['client/**/*.ejs', '!client/views/**'])//gulp.src中存放要编译的文件
+//         .pipe(ejs({forecoreOnly:true},{}, {ext: '.html'}))//设置生成的文件后缀名为html
+//         .pipe(gulp.dest('fore'));//gulp.dest中存放编译后的文件的存放地址
+    // gulp.src('client/**/!(*.ejs)')
+    //     .pipe(gulp.dest('fore'));
+    gulp.src('client/**/*')
         .pipe(gulp.dest('fore'));
-    gulp.src('client/views/*.*').pipe(gulp.dest('fore/views'));
+    gulp.src('client/views/*.*').pipe(gulp.dest('fore'));
 })
 
 gulp.task('wf', ()=>{

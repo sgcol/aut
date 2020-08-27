@@ -27,14 +27,14 @@
 <body>
   <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
-    <%- include ../partials/_navbar.html %>
+    <%- include partials/_navbar.html %>
     <!-- partial -->
     <div class="container-fluid page-body-wrapper">
       <!-- partial:partials/_sidebar.html -->
       <% if (acl=="admin"||acl=="manager") { %>
-        <%- include ../partials/_sidebar.html %>
+        <%- include partials/_sidebar.html %>
       <% } else { %>
-        <%- include ../partials/_sidebar2.html %>
+        <%- include partials/_sidebar2.html %>
       <% } %>
       <!-- partial -->
       <div class="main-panel">
@@ -142,7 +142,7 @@
           <div class="row"></div>
         <!-- content-wrapper ends -->
         <!-- partial:partials/_footer.html -->
-        <%- include ../partials/_footer.html %>
+        <%- include partials/_footer.html %>
         <!-- partial -->
       </div>
       <!-- main-panel ends -->

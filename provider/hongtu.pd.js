@@ -77,6 +77,13 @@ function normalizeFee(f) {
 
 const request_url = 'https://open.snappay.ca/api/gateway';
 
+exports.menus=[
+	{
+		name:'提款',
+		url: 'withdraw.ae',
+		for: 'merchant'
+	}
+];
 exports.order=function() {
 	order.apply(null, arguments);
 };
