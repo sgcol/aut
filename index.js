@@ -285,7 +285,7 @@ function main(err, broadcastNeighbors, dbp, adminAccountExists) {
 		if (orderid) {
 			query.merchantOrderId=orderid;
 		}
-		var cursor=db.bills.find(query, {projection:{merchantOrderId:1, merchantid:1, providerOrderId:1, status:1, lasterr:1, paidmoney:1}});
+		var cursor=db.bills.find(query, {projection:{type:1, merchantOrderId:1, merchantid:1, providerOrderId:1, status:1, lasterr:1, paidmoney:1}});
 		if (sort) {
 			var so={};
 			so[sort]=(order=='asc'?1:-1);
