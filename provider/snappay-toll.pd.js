@@ -263,15 +263,16 @@ function init(err, db) {
 	if (err) return console.log('启动snappay-toll.pd失败', err);
 	router.all('/updateAccount', verifyAuth, verifyManager, httpf({_id:'?string', app_id:'?string', key:'?string', merchant_no:'?string', name:'?string', supportedCurrency:'?string', disable:'?boolean', callback:true}, 
 	function(id, app_id, key, merchant_no, name, supportedCurrency, disable, callback) {
-		var upd={}
-		app_id && (upd.app_id=app_id);
-		key &&(upd.key=key);
-		merchant_no &&(upd.merchant_no=merchant_no);
-		name && (upd.name=name);
-		supportedCurrency &&(upd.supportedCurrency=supportedCurrency);
-		disable!=null && (upd.disable=disable);
+		var upd={...this.req.query, ...this.req.body};
+		// app_id && (upd.app_id=app_id);
+		// key &&(upd.key=key);
+		// merchant_no &&(upd.merchant_no=merchant_no);
+		// name && (upd.name=name);
+		// supportedCurrency &&(upd.supportedCurrency=supportedCurrency);
+		// disable!=null && (upd.disable=disable);
 		var defaultValue={createTime:new Date()};
-		id=id?ObjectID(id):new ObjectID();
+		id=upd._id?ObjectID(upd._id):new ObjectID();
+		delete upd._id;
 		db.snappay_toll_accounts.updateOne({_id:id}, {$set:upd,$setOnInsert:defaultValue}, {upsert:true, w:1}, (err, r)=>{
 			if (err) return callback(err);
 			if (r.upsertedCount) {
