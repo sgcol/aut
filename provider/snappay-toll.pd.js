@@ -23,7 +23,7 @@ const url = require('url')
 
 
 const _noop=function() {};
-const supportedType={'WECHATPAYH5':{type:'WECHATPAY', method:'pay.h5pay'}, 'ALIPAYH5':{type:'ALIPAY', method:'pay.h5pay'}}
+const supportedType={'WECHATPAYH5':{type:'WECHATPAY', method:'pay.h5pay'}, 'ALIPAYH5':{type:'ALIPAY', method:'pay.webpay'}}
 , supportedCurrency=['CAD', 'USD'];
 const testAccount={_id:'testAccount', merchant_no:'901800000116', app_id:'9f00cd9a873c511e', key:'7e2083699dd510575faa1c72f9e35d43', supportedCurrency:'CAD'};
 const request_post=pify(request.post, {multiArgs:true});
@@ -606,11 +606,11 @@ function init(err, db) {
 			var [acc]= await db.snappay_toll_accounts.find({name:'测试', supportedCurrency:currency}).sort({daily:1}).limit(1).toArray();
 		}
 		else {
-			var cond={disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency}
+			var cond={disable:{$ne:true}, name:{$ne:'测试'}, supportedCurrency:currency, belongs:{$in:[merchantData.name, null]}}
 			if (merchantData._id=='maimai') {
 				cond.merchant_no={$in:['901951498144', '901951498835', '901951499128', '901951499202', '901951499532']};
 			}
-			var [acc]= await db.snappay_toll_accounts.find(cond).sort({used:1}).limit(1).toArray();
+			var [acc]= await db.snappay_toll_accounts.find(cond).sort({belongs:-1, used:1}).limit(1).toArray();
 		}
 		return acc;
 	}
