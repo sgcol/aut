@@ -49,7 +49,7 @@
     "bootstrap": "^3.4.1",
     "debugout": "^1.0.0",
     "file-saver": "^2.0.2",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.2",
     "gulp-ejs": "^3.2.0",
     "instascan": "^1.0.0",
     "ip6addr": "^0.2.3",
